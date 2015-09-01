@@ -9,6 +9,26 @@ from PySide import QtCore, QtGui
 from common import Common, widgetWithMenu
 from editor import Editor
 
+class AbcHighlighter(QtGui.QSyntaxHighlighter):
+        def highlightBlock(self, text):
+            lineNumber = self.currentBlock().blockNumber()
+            print (self.parent(), lineNumber, Common.blockNumber, text)
+            if lineNumber == Common.blockNumber:
+                self.setFormat(0, len(text), QtCore.Qt.red)
+"""             
+    QTextCharFormat myClassFormat;
+     myClassFormat.setFontWeight(QFont.Bold);
+     myClassFormat.setForeground(Qt.darkMagenta);
+     QString pattern = "\\bMy[A-Za-z]+\\b";
+
+     QRegExp expression(pattern);
+     int index = text.indexOf(expression);
+     while (index >= 0) {
+         int length = expression.matchedLength();
+         setFormat(index, length, myClassFormat);
+         index = text.indexOf(expression, index + length);
+ """
+ 
 class AbcEditor(widgetWithMenu, Editor):
     loadFileArgs= ("Load an existing ABC file", '', '*.abc')
     saveFileArgs= ("Save ABC source to file as", '', '*.abc')
@@ -33,7 +53,8 @@ class AbcEditor(widgetWithMenu, Editor):
         self.cursorPositionChanged.connect(
             self.handleCursorMove)
         self.originalText = None
-
+        #self.abcHighlighter = AbcHighlighter(self.document())
+    
     def menuItems(self):
         return [
                     ('&New',           'Ctrl+N', self.newFile,),
@@ -58,13 +79,15 @@ class AbcEditor(widgetWithMenu, Editor):
         
     def handleCursorMove(self):
         tc = self.textCursor()
-        row = tc.blockNumber()
+        blockNumber = tc.blockNumber()
+        Common.blockNumber = blockNumber
         col = tc.positionInBlock()
-        print ('AbcEdito.handleCursorMove: row =', row, 'col =', col)
+        print ('AbcEditor.handleCursorMove: row =', blockNumber,
+                                           'col =', col)
         if Common.score:
-            Common.score.showAtRowAndCol(row, col)
+            Common.score.showAtRowAndCol(blockNumber, col)
 
-    def moveToRowCol(self, row, col):
+    def moveToRowCol(self, row=0, col=0):
         block = self.document().findBlockByLineNumber (row)
         desiredPosition = block.position() + col
         print ('AbcEditor.moveToRowCol', row, col,
@@ -99,7 +122,7 @@ class AbcEditor(widgetWithMenu, Editor):
         print ("loadAnyFile 2", fileName)
         self.loadFile(fileName)
 
-    def loadFile(self, fileName):
+    def loadFile(self, fileName, row=0, col=0):
         print ("AbcEditor.loadFile", fileName)
         f = QtCore.QFile(fileName)
 
@@ -107,7 +130,8 @@ class AbcEditor(widgetWithMenu, Editor):
             self.readAll(f)
             f.close()
             print ("Loaded %s" % fileName)
-            self.setFileName(fileName)            
+            self.setFileName(fileName)
+            self.moveToRowCol(row, col)  # primarily to gain focus!
 
     def setFileName(self, fileName=None):
         if fileName is not None:

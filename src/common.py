@@ -14,6 +14,7 @@ class Common:  # yes, shades of FORTRAN; sorry!
     abcEditor = None
     score = None
     abcraft = None
+    blockNumber = -2
 
 def myQAction(menuText, shortcut=None, triggered=None, enabled=None, checkable=None, checked=None):
     """ Factory function to emulate older version of QAction.

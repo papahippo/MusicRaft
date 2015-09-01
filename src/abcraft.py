@@ -5,128 +5,7 @@ from PySide import QtCore, QtGui
 from abceditor import AbcEditor
 from score import Score
 from common import Common, myQAction, widgetWithMenu
-
-
-class ExternalCommand(object):
-
-    cmd = None
-    extIn  = '.in'
-    extOut = '.out'
-    exe = None
-    outFileName = None
-    errOnOut = False
-    FileToRead = QtCore.Signal(str)
-    
-    def __init__(self):
-        print ("ExternalCommand __init__", self.extIn, self.extOut)
-        if Common.stdBook is None:
-            print ("what? no Common.stdBook")
-            self.stdTab = None
-        else:
-            self.stdTab = StdTab()
-            Common.stdBook.widget.addTab(self.stdTab,
-                                         self.__class__.__name__)
-
-    def process(self, inFileName, **kw):
-        print ("ExternalCommand", self.cmd, kw, "run on", inFileName)
-        if not inFileName.endswith(self.extIn):
-            raise TypeError, ("%s cannot handle this filetype: %s" %
-                             (self.__class__.__name__,     inFileName))
-        baseName = inFileName[:-len(self.extIn)]
-        self.outFileName = baseName+self.extOut
-        if self.cmd is not None:
-            cmd1 = self.cmd(inFileName, self.outFileName, **kw)
-            print (cmd1)
-            if self.errOnOut:
-                stderr = subprocess.STDOUT
-            else:
-                stderr = subprocess.PIPE
-            process = subprocess.Popen(cmd1, stdout=subprocess.PIPE,
-                                             stderr=stderr,
-                                             shell=True)
-            output, error = process.communicate()
-            _retcode = process.poll()
-            if _retcode:
-                pass
-            #    raise subprocess.CalledProcessError(retcode,
-            #                                        cmd1, output=output)
-            
-            if self.errOnOut:
-                self.postProcess(output)
-                return None
-            else:
-                self.postProcess(error)
-                return output
-
-    def postProcess(self, error):
-        if self.stdTab is None:
-            print ("self.stdTab is None!")
-        else:
-            self.stdTab.setPlainText(error)
-                
-class Abcm2ps(ExternalCommand):
-    
-    extIn  = '.abc'
-    extOut = '.ps'
-    exe = 'abcm2ps'
-    #exe = '/home/larry/musicprogs/abcm2ps-6.4.1/abcm2ps'
-
-    def cmd(self, inF, outF, **kw):
-        return ('%s -O %s %s'
-            %(self.exe, outF, inF) )
-
-
-class Abcm2svg(ExternalCommand):
-    
-    extIn  = '.abc'
-    extOut = '_page_.svg'
-    exe = '/usr/local/bin/abcm2ps'
-
-    def __init__(self):
-        ExternalCommand.__init__(self)
-        self.outFile_CRE = re.compile("Output written on\s+(\S.*)\s\(.*")
-
-    def cmd(self, inF, outF, **kw):
-        return ('%s -v -A -O %s %s'
-            %(self.exe, outF, inF) )
-
-    def postProcess(self, error):
-        ExternalCommand.postProcess(self, error)
-        svgList = []
-        for line in error.split('\n'):
-            match = self.outFile_CRE.match(line)
-            if match:
-                svgList.append(match.group(1))
-        print (svgList)
-        if svgList and Common.score:
-            Common.score.useFiles(svgList)
-            # Common.score.showWhichPage(0)
-
-
-class Abc2midi(ExternalCommand):
-
-    extIn  = '.abc'
-    extOut = '.midi'
-    exe = '/usr/local/bin/abc2midi'
-    errOnOut = True
-    
-    def cmd(self, inF, outF, **kw):
-        return ('%s %s -EA -o %s'
-            %(self.exe, inF, outF) )
-
-
-class Abc2abc(ExternalCommand):
-    
-    extIn  = '.abc'
-    extOut = '_t.abc'
-    exe = '/usr/local/bin/abc2abc'
-
-    def cmd(self, inF, outF, transpose=None, **kw):
-        flags = ''
-        if transpose is not None:
-            flags += '-t %d' % transpose
-        return ('%s %s -OCC -r %s'
-            %(self.exe, inF, flags) )
+from external import Abc2midi, Abcm2svg, Abc2abc 
 
 
 class StdBook(widgetWithMenu,  QtGui.QTabWidget):
@@ -148,9 +27,6 @@ class Dock(QtGui.QDockWidget):
         self.widget.menu.addAction(self.toggleViewAction())
 
     
-class StdTab(QtGui.QPlainTextEdit):
-    pass
-
 class AbcCraft(QtGui.QMainWindow):
 
     midiPlayerExe = 'timidity'
@@ -231,7 +107,7 @@ class AbcCraft(QtGui.QMainWindow):
         self.menuBar().addMenu(self.helpMenu)
 
 
-if __name__ == '__main__':
+def main():
     app = QtGui.QApplication(sys.argv)
     abcCraft = AbcCraft()
     abcCraft.show()
@@ -239,3 +115,6 @@ if __name__ == '__main__':
         sys.exit(app.exec_())
     except:
         pass
+
+if __name__ == '__main__':
+    main()

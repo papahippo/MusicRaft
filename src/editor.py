@@ -27,24 +27,6 @@ class Editor(QtGui.QPlainTextEdit):
         }'''
         self.setStyleSheet(css)
 
-        self.highlight_current_line()
-        
-    def highlight_current_line(self):
-        extraSelections = []
-
-        if not self.isReadOnly():
-            selection = QtGui.QTextEdit.ExtraSelection()
-            lineColor = QtGui.QColor(QtCore.Qt.darkCyan)
-            lineColor.setAlpha(20)
-
-            selection.format.setBackground(lineColor)
-            selection.format.setProperty(QtGui.QTextFormat.FullWidthSelection,
-                                         True)
-            selection.cursor = self.textCursor()
-            selection.cursor.clearSelection()
-            extraSelections.append(selection)
-        self.setExtraSelections(extraSelections)
-
     def resizeEvent(self,e):
         self.lineNumberArea.setFixedHeight(self.height())
         QtGui.QPlainTextEdit.resizeEvent(self,e)
@@ -104,17 +86,21 @@ class Editor(QtGui.QPlainTextEdit):
  
                 # We want the line number for the selected line to be bold.
                 bold = False
+                x = self.width() - font_metrics.width(str(line_count)) - 3
+                y = round(position.y()) + font_metrics.ascent()+font_metrics.descent()-1
                 if block == current_block:
                     bold = True
                     font = painter.font()
                     font.setBold(True)
                     painter.setFont(font)
- 
+                    pen = painter.pen()
+                    painter.setPen(QtCore.Qt.red)
+                    painter.drawRect(0, y-14, self.width()-2, 20)
+                    painter.setPen(pen)
+                    
                 # Draw the line number right justified at the y position of the
                 # line. 3 is a magic padding number. drawText(x, y, text).
-                painter.drawText(self.width() - font_metrics.width(str(line_count)) - 3,
-                    round(position.y()) + font_metrics.ascent()+font_metrics.descent()-1,
-                    str(line_count))
+                painter.drawText(x, y, str(line_count))
  
                 # Remove the bold style if it was set previously.
                 if bold:
