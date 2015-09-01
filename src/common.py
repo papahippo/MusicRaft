@@ -2,6 +2,10 @@
 from __future__ import print_function
 from PySide import QtCore, QtGui
 
+dbg_print = lambda *pp, **kw: None
+# replace (or overrule in certain modules) above to show debug printout by...
+# dbg_print = print
+# ... or use soemething more pythonically correct like the logging module!
 
 class Common:  # yes, shades of FORTRAN; sorry!
     timer = None
@@ -14,7 +18,6 @@ class Common:  # yes, shades of FORTRAN; sorry!
     abcEditor = None
     score = None
     abcraft = None
-    blockNumber = -2
 
 def myQAction(menuText, shortcut=None, triggered=None, enabled=None, checkable=None, checked=None):
     """ Factory function to emulate older version of QAction.

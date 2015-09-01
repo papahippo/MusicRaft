@@ -10,12 +10,18 @@ from common import Common, widgetWithMenu
 from editor import Editor
 
 class AbcHighlighter(QtGui.QSyntaxHighlighter):
-        def highlightBlock(self, text):
-            lineNumber = self.currentBlock().blockNumber()
-            print (self.parent(), lineNumber, Common.blockNumber, text)
-            if lineNumber == Common.blockNumber:
-                self.setFormat(0, len(text), QtCore.Qt.red)
-"""             
+    """
+This method of highlighting current line in red was flawed. To get this to
+work, I would need to force redraw of old and new current line. For now,
+I'm sticking with just highlighting the current line namber (see editor.py).    
+    """
+    def highlightBlock(self, text):
+        lineNumber = self.currentBlock().blockNumber()
+        print (self.parent(), lineNumber, Common.blockNumber, text)
+        if lineNumber == Common.blockNumber:
+            self.setFormat(0, len(text), QtCore.Qt.red)
+"""
+// C code snippet for reference if I re-open this battle!
     QTextCharFormat myClassFormat;
      myClassFormat.setFontWeight(QFont.Bold);
      myClassFormat.setForeground(Qt.darkMagenta);
@@ -53,7 +59,9 @@ class AbcEditor(widgetWithMenu, Editor):
         self.cursorPositionChanged.connect(
             self.handleCursorMove)
         self.originalText = None
-        #self.abcHighlighter = AbcHighlighter(self.document())
+        
+        # disabled (see comments in 'AbcHighlighter' above)
+        # self.abcHighlighter = AbcHighlighter(self.document())
     
     def menuItems(self):
         return [
@@ -101,7 +109,9 @@ class AbcEditor(widgetWithMenu, Editor):
         self.counted = self.latency  # reset the 'countdown until quite'
         # print ('textChanged', self.counted)
 
-    def countDown(self):
+    def countDown(self, force=None):
+        if force:
+            self.counted = force
         if self.counted==0:
             return
         self.counted -=1
@@ -111,9 +121,9 @@ class AbcEditor(widgetWithMenu, Editor):
         print ("autoSave")
         self.saveFile(fileName='./autosaved.abc')
 
-    def newFile(self):
+    def newFile(self, fileName='new.abc'):
         self.clear()
-        self.setFileName('new.abc')
+        self.setFileName(fileName)
 
     def loadAnyFile(self):
         fileName = QtGui.QFileDialog.getOpenFileName(self,
@@ -166,7 +176,6 @@ class AbcEditor(widgetWithMenu, Editor):
             Common.abc2midi.process(fileName)
 
     def transpose(self):
-        fileName = self.fileName
         if not Common.abc2abc:
             return
         semitones, ok = QtGui.QInputDialog.getInteger(self,
@@ -174,10 +183,13 @@ class AbcEditor(widgetWithMenu, Editor):
                 "semitones (+/- for up/down:)", 0, -24, 24, 1)
         if not ok:
             return
-
+        fileName = 'original.abc'
+        self.originalText = self.toPlainText()
+        self.setFileName(fileName)
+        self.saveFile(fileName=fileName)
         transposedText = Common.abc2abc.process(fileName,
                                                 transpose=semitones)
-        self.originalText = self.toPlainText()
+        self.newFile('transposed.abc')
         self.setPlainText(transposedText)
         
     def undoTranspose(self):
@@ -194,14 +206,16 @@ class AbcEditor(widgetWithMenu, Editor):
         print ("ReloadFile", self.fileName)
         self.loadFile(self.fileName)
 
-    def saveFileAs(self, fileName=False):
+    def saveFileAs(self, fileName=None):
         """
         save the current panel contents to a new file.
         """
-        files = QtGui.QFileDialog.getSaveFileName(self,
-            *self.saveFileArgs)
-        if not files:
-            return
-        self.setFileName(files[0])
+        if fileName is None:
+            files = QtGui.QFileDialog.getSaveFileName(self,
+                *self.saveFileArgs)
+            if not files:
+                return
+            fileName = files[0]
+        self.setFileName(fileName)
         self.saveFile()
  
