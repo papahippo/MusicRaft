@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """
+Copyright 2015 Hippos Technical Systems BV.
 Created on Sun Aug 30 18:18:56 2015
 
 @author: larry

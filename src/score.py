@@ -1,6 +1,11 @@
 #!/usr/bin/env python
 from __future__ import print_function
-"""PyQt4 port of the painting/svgviewer example from Qt v4.x"""
+"""
+Copyright 2015 Hippos Technical Systems BV.
+(but borrows somme code from the painting/svgviewer example of PyQt v4.x)
+
+@author: larry
+"""
 
 import sys
 import lxml.etree

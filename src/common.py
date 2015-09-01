@@ -1,4 +1,9 @@
 #!/usr/bin/python
+"""
+Copyright 2015 Hippos Technical Systems BV.
+
+@author: larry
+"""
 from __future__ import print_function
 from PySide import QtCore, QtGui
 

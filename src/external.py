@@ -1,5 +1,6 @@
 #!/usr/bin/python
 """
+Copyright 2015 Hippos Technical Systems BV.
 Module 'external' within package 'abcraft' relates to the various
 command processors (abc2midi etc.) which are executed by abccraft, and to
 their assocated widgets and methods.
