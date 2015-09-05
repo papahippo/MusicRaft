@@ -14,7 +14,7 @@ import numpy as np
 # from PyQt4 import QtCore, QtGui, QtSvg
 from PySide import QtCore, QtGui, QtSvg
 
-from common import Common, myQAction, widgetWithMenu
+from common import Common, dbg_print, widgetWithMenu
 
 
 class MyScene(QtGui.QGraphicsScene):
@@ -23,7 +23,7 @@ class MyScene(QtGui.QGraphicsScene):
         scP = event.scenePos()
         x = scP.x()
         y = scP.y()
-        print ("MyScene.mousePressEvent",
+        dbg_print ("MyScene.mousePressEvent",
                #event.pos(), event.scenePos(), event.screenPos()
                'scenePos x,y =', x, y, 'button =', event.button(),
                'scene width =', self.width(), 'scene height =', self.height(),
@@ -66,8 +66,8 @@ class SvgDigest:
         """
         fileName = str(self.svg_file.fileName())
         if self.svg_tree is None:
-            # print("building 'quick dictionary' from '%s'" % fileName)
-            # print('self.eltCursor =', self.eltCursor)
+            # dbg_print("building 'quick dictionary' from '%s'" % fileName)
+            # dbg_print('self.eltCursor =', self.eltCursor)
             for attr, func, dtype in self.attrTab:
                 self.quickDic[attr] = np.array([], dtype=dtype)
             self.svg_tree = lxml.etree.parse(fileName)
@@ -81,12 +81,12 @@ class SvgDigest:
         justHadAbc = False
         latest = {}
         for i,elt in enumerate(self.svg_tree.iter()):
-            # print (i, elt.tag, type(elt.tag), str(elt.tag))
+            # dbg_print (i, elt.tag, type(elt.tag), str(elt.tag))
             if callable(elt.tag):
                 continue
             if elt.tag.endswith('abc'):
                 justHadAbc = True
-                # print ("got abc tag!")
+                # dbg_print ("got abc tag!")
                 for attr, func, dtype in self.attrTab:
                     latest[attr] = func(elt.get(attr))
                     self.quickDic[attr] = np.append(self.quickDic[attr],
@@ -96,37 +96,37 @@ class SvgDigest:
                     latest['type'] == 'N' and
                     latest['row'] == (row+1) and
                     latest['col'] == col):
-                    print (i, 'put cursor around notehead here')
+                    dbg_print (i, 'put cursor around notehead here')
                     self.abcEltAtCursor = elt
                 else:
-                    pass # print (i, "not this abc statement")
+                    pass # dbg_print (i, "not this abc statement")
             elif justHadAbc and elt.tag.endswith('use'):
                 justHadAbc = False
                 if ((self.abcEltAtCursor is not None) and
                            (useEltAtCursor is None)):
                     useEltAtCursor = elt
-                    # print ("found 'use' right after cursor abc" )
+                    # dbg_print ("found 'use' right after cursor abc" )
                 for attr in ('x', 'y'):
                     try:
-                        # print ("adjusting", attr)
+                        # dbg_print ("adjusting", attr)
                         headCoord =  elt.get(attr)
                         if useEltAtCursor is elt:
-                            print ("adjusting eltCursor", 'c'+attr)
+                            dbg_print ("adjusting eltCursor", 'c'+attr)
                             eltCursor.set('c' + attr, headCoord)
                         self.quickDic[attr][-1] = self.scaledFloat(headCoord)
                     except TypeError:
-                        print ("failed to adjust", attr)
+                        dbg_print ("failed to adjust", attr)
                         break
         if self.abcEltAtCursor is None:
-            print ("can't find cursor position!")
+            dbg_print ("can't find cursor position!")
         else:
             self.cursorsDad = self.abcEltAtCursor.getparent()
-            # print (dad)
+            # dbg_print (dad)
             # self.removeCursor()
             self.cursorsDad.insert(0, eltCursor)
             # test only: self.cursorsDad.remove(eltCursor)
             outFile = open(fileName, 'w')
-            print ('written', fileName)
+            dbg_print ('written', fileName)
             self.svg_tree.write(outFile)
             self.eltCursor = eltCursor
         return self.abcEltAtCursor
@@ -139,16 +139,16 @@ class SvgDigest:
     def rowColAtXY(self, x, y):
         if not self.quickDic:
             self.buildQuickDic()
-        # print('x,y', x, y, [(a, self.quickDic[a][:8])
+        # dbg_print('x,y', x, y, [(a, self.quickDic[a][:8])
         #     for a in self.quickDic.keys()])
         x_dist = x/self.scale - self.quickDic['x']
         y_dist = y/self.scale - self.quickDic['y']
         a_dist = x_dist*x_dist + y_dist*y_dist
-        # print('a_dist', a_dist[:8])
+        # dbg_print('a_dist', a_dist[:8])
         am = np.argmin(a_dist)
         row = self.quickDic['row'][am] - 1
         col = self.quickDic['col'][am]
-        print(am, row, col, self.quickDic['x'][am], self.quickDic['y'][am], )
+        dbg_print(am, row, col, self.quickDic['x'][am], self.quickDic['y'][am], )
         return row, col
         
 class Score(QtGui.QGraphicsView, widgetWithMenu):
@@ -196,7 +196,7 @@ class Score(QtGui.QGraphicsView, widgetWithMenu):
         self.showWhichPage(self.which, force=True)
 
     def showAtRowAndCol(self, row, col):
-        print ('showAtRowAndCol', row, col)
+        dbg_print ('showAtRowAndCol', row, col)
         l = len(self.svgDigests)        
         for i in range(l):
             j = (i +self.which) % l
@@ -204,27 +204,27 @@ class Score(QtGui.QGraphicsView, widgetWithMenu):
             if abcEltAtCursor is not None:
                 break
         else:
-            print ("can't find svg graphics correspond to row : col...",
+            dbg_print ("can't find svg graphics correspond to row : col...",
                    row, ':', col)
             return
         self.showWhichPage(j, force=True)
 
     def locateXY(self, x, y):
         row, col = self.svgDigests[self.which].rowColAtXY(x, y)
-        print ("locateXY(", x, y, " > row,co", row, col)
+        dbg_print ("locateXY(", x, y, " > row,co", row, col)
         if Common.abcEditor:
             Common.abcEditor.widget.moveToRowCol(row, col)
 
     def showNextPage(self):
-        print ('showNextPage')
+        dbg_print ('showNextPage')
         return self.showWhichPage(self.which + 1)
 
     def showPreviousPage(self):
-        print ('showPreviousPage')
+        dbg_print ('showPreviousPage')
         return self.showWhichPage(self.which - 1)
 
     def showWhichPage(self, which=0, force=False):
-        print ('----- showWhichPage', which)
+        dbg_print ('----- showWhichPage', which)
         which %= len(self.svgDigests)
         if (not force) and (which==self.which):
             return
@@ -260,7 +260,7 @@ class Score(QtGui.QGraphicsView, widgetWithMenu):
         s.addItem(self.outlineItem)
 
         rect = self.outlineItem.boundingRect()
-        # print (rect)
+        # dbg_print (rect)
         s.setSceneRect(rect) # .adjusted(-10, -10, 10, 10))
 
         self.setViewport(QtGui.QWidget())
@@ -290,7 +290,7 @@ class Score(QtGui.QGraphicsView, widgetWithMenu):
         factor = 1.2**( event.delta() / 120.0)
         self.scale(factor, factor)
         # self.mustApplyTransform = self.transform()
-        print ("Score.wheelEvent, delta = ", event.delta())
+        dbg_print ("Score.wheelEvent, delta = ", event.delta())
         event.accept()
 
 

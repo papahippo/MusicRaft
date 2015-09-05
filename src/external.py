@@ -20,6 +20,7 @@ tabs (Abcm2svg etc.) within the subprocess output notebook.
     def __init__(self, commander=None):
         QtGui.QPlainTextEdit.__init__(self)
         self.creMsg = re.compile(commander.reMsg)
+        self.rowColOrigin = commander.rowColOrigin
         self.quiet = False
         self.cursorPositionChanged.connect(self.handleCursorMove)
 
@@ -29,7 +30,10 @@ tabs (Abcm2svg etc.) within the subprocess output notebook.
         match = self.creMsg.match(self.textCursor().block().text())
         if match is None:
             return
-        location = map(lambda s: int(s)-1, match.groups())
+        location = [o1+o2 for (o1, o2) in zip(
+                        map(lambda s: int(s), match.groups()),
+                       self.rowColOrigin)]
+
         print ("Autolocating error in ABC", location )
         
         Common.abcEditor.widget.moveToRowCol(*location)
@@ -51,6 +55,7 @@ within abcraft.
     outFileName = None
     errOnOut = False
     reMsg = r'$^'  # default = don't match any lines.
+    rowColOrigin = (-1, -1)
 
     def __init__(self):
         dbg_print ("External __init__", self.fmtNameIn, self.fmtNameOut)
@@ -122,6 +127,7 @@ class Abcm2svg(External):
     fmtNameOut = '%s_page_.svg'
     exe = '/usr/local/bin/abcm2ps'
     reMsg = r'.*in\s+line\s(\d+)\.(\d+).*'
+    rowColOrigin = (-1, 0)
 
     def __init__(self):
         External.__init__(self)
@@ -151,9 +157,10 @@ class Abc2midi(External):
     exe = '/usr/local/bin/abc2midi'
     errOnOut = True
     reMsg = r'.*in\s+line\s(\d+)\s\:.*'
+    rowColOrigin = (-1, 0)
     
     def cmd(self, inF, outF, **kw):
-        return ('%s %s -EA -o %s'
+        return ('%s %s -v -EA -o %s'
             %(self.exe, inF, outF) )
 
 

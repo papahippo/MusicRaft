@@ -13,7 +13,6 @@ class Editor(QtGui.QPlainTextEdit):
         self.lineNumberArea = self.LineNumberArea(self)
         self.viewport().installEventFilter(self)
         
-        ##LMY: self.highlighter = PythonHighlighter(self.document())
         self.newDocument = True
         self.path = ''
         css = '''
@@ -43,7 +42,6 @@ class Editor(QtGui.QPlainTextEdit):
         ctrl = event.modifiers() & QtCore.Qt.ControlModifier
         shift = event.modifiers() & QtCore.Qt.ShiftModifier
         if key == QtCore.Qt.Key_Insert and not shift and not ctrl:
-            print ("hurrah!")
             self.setOverwriteMode(not self.overwriteMode())
         else:
             QtGui.QPlainTextEdit.keyPressEvent(self, event)
@@ -72,7 +70,6 @@ class Editor(QtGui.QPlainTextEdit):
             QtGui.QWidget.update(self, *args)
  
         def paintEvent(self, event):
-            contents_y = 0
             page_bottom = self.edit.viewport().height()
             font_metrics = QtGui.QFontMetrics(
                 self.edit.document().defaultFont())

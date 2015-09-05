@@ -7,35 +7,9 @@ Created on Sun Aug 30 18:18:56 2015
 """
 import os
 from PySide import QtCore, QtGui
-from common import Common, widgetWithMenu, myQAction
+from common import Common, widgetWithMenu, dbg_print
 from editor import Editor
 
-class AbcHighlighter(QtGui.QSyntaxHighlighter):
-    """
-This method of highlighting current line in red was flawed. To get this to
-work, I would need to force redraw of old and new current line. For now,
-I'm sticking with just highlighting the current line namber (see editor.py).    
-    """
-    def highlightBlock(self, text):
-        lineNumber = self.currentBlock().blockNumber()
-        print (self.parent(), lineNumber, Common.blockNumber, text)
-        if lineNumber == Common.blockNumber:
-            self.setFormat(0, len(text), QtCore.Qt.red)
-"""
-// C code snippet for reference if I re-open this battle!
-    QTextCharFormat myClassFormat;
-     myClassFormat.setFontWeight(QFont.Bold);
-     myClassFormat.setForeground(Qt.darkMagenta);
-     QString pattern = "\\bMy[A-Za-z]+\\b";
-
-     QRegExp expression(pattern);
-     int index = text.indexOf(expression);
-     while (index >= 0) {
-         int length = expression.matchedLength();
-         setFormat(index, length, myClassFormat);
-         index = text.indexOf(expression, index + length);
- """
- 
 class AbcEditor(widgetWithMenu, Editor):
     loadFileArgs= ("Load an existing ABC file", '', '*.abc')
     saveFileArgs= ("Save ABC source to file as", '', '*.abc')
@@ -43,6 +17,7 @@ class AbcEditor(widgetWithMenu, Editor):
     menuTag = '&ABC'
     minimumWidth = 480
     minimumHeight = None
+    latency = 30
 
     def __init__(self, dock=None):
         widgetWithMenu.__init__(self)
@@ -51,7 +26,7 @@ class AbcEditor(widgetWithMenu, Editor):
         font = self.font()
         font.setPointSize(10)
         self.setFont(font)
-        self.setCursorWidth(4)
+        self.setCursorWidth(2)
         self.setWindowTitle('title')
         self.textChanged.connect(self.handleTextChanged)
         self.setLineWrapMode(QtGui.QPlainTextEdit.NoWrap)
@@ -60,9 +35,6 @@ class AbcEditor(widgetWithMenu, Editor):
         self.cursorPositionChanged.connect(
             self.handleCursorMove)
         self.originalText = None
-
-        # disabled (see comments in 'AbcHighlighter' above)
-        # self.abcHighlighter = AbcHighlighter(self.document())
     
     def menuItems(self):
         return [
@@ -90,16 +62,19 @@ class AbcEditor(widgetWithMenu, Editor):
         tc = self.textCursor()
         blockNumber = tc.blockNumber()
         Common.blockNumber = blockNumber
-        col = tc.positionInBlock()
-        print ('AbcEditor.handleCursorMove: row =', blockNumber,
-                                           'col =', col)
+        col0 =  col = tc.positionInBlock()
+        blockText = tc.block().text()
+        while col and not blockText[col].isalpha():
+            col -= 1
+        dbg_print ('AbcEditor.handleCursorMove: row =', blockNumber,
+                                           'col =', col, col0)
         if Common.score:
             Common.score.showAtRowAndCol(blockNumber, col)
 
     def moveToRowCol(self, row=0, col=0):
         block = self.document().findBlockByLineNumber (row)
         desiredPosition = block.position() + col
-        print ('AbcEditor.moveToRowCol', row, col,
+        dbg_print ('AbcEditor.moveToRowCol', row, col,
                'desiredPosition', desiredPosition)
         tc = self.textCursor()
         tc.setPosition(desiredPosition)
@@ -108,7 +83,7 @@ class AbcEditor(widgetWithMenu, Editor):
 
     def handleTextChanged(self):
         self.counted = self.latency  # reset the 'countdown until quite'
-        # print ('textChanged', self.counted)
+        dbg_print ('textChanged', self.counted)
 
     def countDown(self, force=None):
         if force:
@@ -116,10 +91,10 @@ class AbcEditor(widgetWithMenu, Editor):
         if self.counted==0:
             return
         self.counted -=1
-        #(print 'countDown', self.counted)
+#        (dbg_print 'countDown', self.counted)
         if self.counted:
             return
-        print ("autoSave")
+        dbg_print ("autoSave")
         self.saveFile(fileName='./autosaved.abc')
 
     def newFile(self, fileName='new.abc'):
@@ -130,17 +105,17 @@ class AbcEditor(widgetWithMenu, Editor):
         fileName = QtGui.QFileDialog.getOpenFileName(self,
                                                          "Choose a data file",
                                                          '', '*.abc')[0]
-        print ("loadAnyFile 2", fileName)
+        dbg_print ("loadAnyFile 2", fileName)
         self.loadFile(fileName)
 
     def loadFile(self, fileName, row=0, col=0):
-        print ("AbcEditor.loadFile", fileName)
+        dbg_print ("AbcEditor.loadFile", fileName)
         f = QtCore.QFile(fileName)
 
         if f.open(QtCore.QFile.ReadOnly | QtCore.QFile.Text):
             self.readAll(f)
             f.close()
-            print ("Loaded %s" % fileName)
+            dbg_print ("Loaded %s" % fileName)
             self.setFileName(fileName)
             self.moveToRowCol(row, col)  # primarily to gain focus!
 
@@ -148,12 +123,12 @@ class AbcEditor(widgetWithMenu, Editor):
         if fileName is not None:
             self.fileName = fileName
         title = "%s - %s" % (self.headerText, os.path.abspath(self.fileName))
-        print (title)
+        dbg_print (title)
         if self.dock:
             self.dock.setWindowTitle(title)
 
     def readAll(self, f):
-        print ('readAll', self, f)
+        dbg_print ('readAll', self, f)
         stream = QtCore.QTextStream(f)
         text = stream.readAll()
         self.setPlainText(text)
@@ -169,7 +144,7 @@ class AbcEditor(widgetWithMenu, Editor):
             return
         self.writeAll(out)
         out.close()
-        print ("Saved %s " % fileName)
+        dbg_print ("Saved %s " % fileName)
         
         if Common.abcm2svg:
             Common.abcm2svg.process(fileName)
@@ -200,11 +175,11 @@ class AbcEditor(widgetWithMenu, Editor):
 
     def writeAll(self, out):
         text = self.toPlainText()
-        print('len(text)=', len(text))
+        dbg_print('len(text)=', len(text))
         out.write(text)
 
     def reloadFile(self):
-        print ("ReloadFile", self.fileName)
+        dbg_print ("ReloadFile", self.fileName)
         self.loadFile(self.fileName)
 
     def saveFileAs(self, fileName=None):
