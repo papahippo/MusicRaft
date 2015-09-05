@@ -20,17 +20,25 @@ tabs (Abcm2svg etc.) within the subprocess output notebook.
     def __init__(self, commander=None):
         QtGui.QPlainTextEdit.__init__(self)
         self.creMsg = re.compile(commander.reMsg)
+        self.quiet = False
         self.cursorPositionChanged.connect(self.handleCursorMove)
 
     def handleCursorMove(self):
-        if Common.abcEditor is None:
+        if (Common.abcEditor is None) or self.quiet:
             return
         match = self.creMsg.match(self.textCursor().block().text())
         if match is None:
             return
-        Common.abcEditor.widget.moveToRowCol(*map(lambda s: int(s)-1,
-                                                  match.groups()))
+        location = map(lambda s: int(s)-1, match.groups())
+        print ("Autolocating error in ABC", location )
+        
+        Common.abcEditor.widget.moveToRowCol(*location)
 
+    def setPlainText(self, text):
+        self.quiet = True
+        QtGui.QPlainTextEdit.setPlainText(self, text)
+        self.quiet = False
+    
 class External(object):
     """
 'External' is the generic class representing command processors invoked from

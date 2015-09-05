@@ -37,6 +37,16 @@ class Editor(QtGui.QPlainTextEdit):
             return False
         return QtGui.QPlainTextEdit.eventFilter(object, event)
 
+    def keyPressEvent(self, event):
+        """Reimplement Qt method"""
+        key = event.key()
+        ctrl = event.modifiers() & QtCore.Qt.ControlModifier
+        shift = event.modifiers() & QtCore.Qt.ShiftModifier
+        if key == QtCore.Qt.Key_Insert and not shift and not ctrl:
+            print ("hurrah!")
+            self.setOverwriteMode(not self.overwriteMode())
+        else:
+            QtGui.QPlainTextEdit.keyPressEvent(self, event)
 
     class LineNumberArea(QtGui.QWidget):
 

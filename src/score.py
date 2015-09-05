@@ -26,6 +26,7 @@ class MyScene(QtGui.QGraphicsScene):
         print ("MyScene.mousePressEvent",
                #event.pos(), event.scenePos(), event.screenPos()
                'scenePos x,y =', x, y, 'button =', event.button(),
+               'scene width =', self.width(), 'scene height =', self.height(),
         )
         if event.button() == 1:
             Common.score.locateXY(x, y)
@@ -195,7 +196,7 @@ class Score(QtGui.QGraphicsView, widgetWithMenu):
         self.showWhichPage(self.which, force=True)
 
     def showAtRowAndCol(self, row, col):
-        # self.svgDigests[self.which].removeCursor()
+        print ('showAtRowAndCol', row, col)
         l = len(self.svgDigests)        
         for i in range(l):
             j = (i +self.which) % l
@@ -210,6 +211,7 @@ class Score(QtGui.QGraphicsView, widgetWithMenu):
 
     def locateXY(self, x, y):
         row, col = self.svgDigests[self.which].rowColAtXY(x, y)
+        print ("locateXY(", x, y, " > row,co", row, col)
         if Common.abcEditor:
             Common.abcEditor.widget.moveToRowCol(row, col)
 
@@ -222,7 +224,7 @@ class Score(QtGui.QGraphicsView, widgetWithMenu):
         return self.showWhichPage(self.which - 1)
 
     def showWhichPage(self, which=0, force=False):
-        print ('showWhichPage', which)
+        print ('----- showWhichPage', which)
         which %= len(self.svgDigests)
         if (not force) and (which==self.which):
             return

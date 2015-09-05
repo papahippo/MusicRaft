@@ -24,7 +24,8 @@ class Common:  # yes, shades of FORTRAN; sorry!
     score = None
     abcraft = None
 
-def myQAction(menuText, shortcut=None, triggered=None, enabled=None, checkable=None, checked=None):
+def myQAction(menuText, shortcut=None, triggered=None, enabled=None,
+              checkable=None, checked=None):
     """ Factory function to emulate older version of QAction.
     """
     action = QtGui.QAction(menuText, Common.abcraft)

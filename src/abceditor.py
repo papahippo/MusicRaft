@@ -7,7 +7,7 @@ Created on Sun Aug 30 18:18:56 2015
 """
 import os
 from PySide import QtCore, QtGui
-from common import Common, widgetWithMenu
+from common import Common, widgetWithMenu, myQAction
 from editor import Editor
 
 class AbcHighlighter(QtGui.QSyntaxHighlighter):
@@ -60,7 +60,7 @@ class AbcEditor(widgetWithMenu, Editor):
         self.cursorPositionChanged.connect(
             self.handleCursorMove)
         self.originalText = None
-        
+
         # disabled (see comments in 'AbcHighlighter' above)
         # self.abcHighlighter = AbcHighlighter(self.document())
     
