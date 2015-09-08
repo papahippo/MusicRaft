@@ -3,6 +3,7 @@
 from __future__ import print_function
 
 from PySide import QtCore, QtGui
+from common import Common
 
 ##LMY: from highlighter import PythonHighlighter
 
@@ -39,12 +40,41 @@ class Editor(QtGui.QPlainTextEdit):
     def keyPressEvent(self, event):
         """Reimplement Qt method"""
         key = event.key()
+        # print (type(event))
+        meta = event.modifiers() & QtCore.Qt.MetaModifier
         ctrl = event.modifiers() & QtCore.Qt.ControlModifier
         shift = event.modifiers() & QtCore.Qt.ShiftModifier
-        if key == QtCore.Qt.Key_Insert and not shift and not ctrl:
+        plain = not (meta or ctrl or shift)
+        if key == QtCore.Qt.Key_Insert and plain:
             self.setOverwriteMode(not self.overwriteMode())
+        if key == QtCore.Qt.Key_Tab and plain and Common.snippets:
+            return self.autoComplete(event)
         else:
             QtGui.QPlainTextEdit.keyPressEvent(self, event)
+
+    def autoComplete(self, event):
+        print ('autoComplete')
+        tc = self.textCursor()
+        col0 =  col = tc.positionInBlock()
+        block = tc.block()
+        l = block.length()
+        print ("autoComplete", l)
+        blockText = block.text()
+        while col and ((col >= (l-1))
+            or not (blockText[col-1] in ' |!')):
+            tc.deletePreviousChar()
+            col -= 1
+        key = blockText[col:col0]
+        print ("autoComplete key %d:%d '%s'" % (col, col0, key))
+        snippet = Common.snippets.get(key, ("!%s!" % key,))
+        
+        # rough and ready starter implementation:
+        for i, piece in enumerate(snippet):
+            tc.insertText(piece)
+            if i==0:
+                pos = tc.position()
+        tc.setPosition(pos)
+        self.setTextCursor(tc) 
 
     class LineNumberArea(QtGui.QWidget):
 

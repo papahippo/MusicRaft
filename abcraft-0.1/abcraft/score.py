@@ -16,6 +16,7 @@ from PySide import QtCore, QtGui, QtSvg
 
 from common import Common, dbg_print, widgetWithMenu
 
+dbg_print = print
 
 class MyScene(QtGui.QGraphicsScene):
         

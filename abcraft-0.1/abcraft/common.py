@@ -23,6 +23,30 @@ class Common:  # yes, shades of FORTRAN; sorry!
     abcEditor = None
     score = None
     abcraft = None
+    snippets = {
+        'V': ('V:', ' name="', '" sname="', '"\n',),    # new voice
+        'Q': ('Q:1/4', ),                 # new tempo indication
+        '12': ('[1 ', ' :| [2 ',),        # varied repeat ending coding
+        'cr': ('!<! ', ' !<!)',),         # hairpin dynamic
+        'dim': ('!>! ', ' !>!)',),        # hairpin dynamic
+        'CR': ('"_cresc."',),
+        'Cr': ('"^cresc."',),
+        'MR': ('"_molto rit."',),
+        'Mr': ('"^molto rit."',),
+        'PR': ('"_poco rit."',),
+        'Pr': ('"^poco rit."',),
+        'SB': ('"_steady beat"',),
+        'Sb': ('"^steady beat"',),
+        'm': ('[M:', '2/', '4]',),       # mid-line time-sig change 
+        'tt': ('!tenuto!',),
+        'tp': ('!teepee!',),
+        'ac': ('!>!',),                  # accent; '><TAB>' also works
+        'ro': ('!///!',),                # roll/roffel; '///<TAB>' also works
+        'st': ('!dot!',),                # staccato; 'dot<TAB>' also works
+        '.': ('!dot!',),                 # staccato; 'dot<TAB>' also works
+        'gl': ('!-(!', '!-)!'),          # glissando
+    }
+    
 
 def myQAction(menuText, shortcut=None, triggered=None, enabled=None,
               checkable=None, checked=None):

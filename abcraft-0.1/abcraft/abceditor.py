@@ -17,7 +17,8 @@ class AbcEditor(widgetWithMenu, Editor):
     menuTag = '&ABC'
     minimumWidth = 480
     minimumHeight = None
-    latency = 30
+    latency = 3
+    prevCursorPos = -1 
 
     def __init__(self, dock=None):
         widgetWithMenu.__init__(self)
@@ -59,17 +60,8 @@ class AbcEditor(widgetWithMenu, Editor):
         tC.insertText('"'+ sel +'"')
         
     def handleCursorMove(self):
-        tc = self.textCursor()
-        blockNumber = tc.blockNumber()
-        Common.blockNumber = blockNumber
-        col0 =  col = tc.positionInBlock()
-        blockText = tc.block().text()
-        while col and not blockText[col].isalpha():
-            col -= 1
-        dbg_print ('AbcEditor.handleCursorMove: row =', blockNumber,
-                                           'col =', col, col0)
-        if Common.score:
-            Common.score.showAtRowAndCol(blockNumber, col)
+        self.counted = self.latency  
+        return
 
     def moveToRowCol(self, row=0, col=0):
         block = self.document().findBlockByLineNumber (row)
@@ -82,7 +74,7 @@ class AbcEditor(widgetWithMenu, Editor):
         self.setFocus()
 
     def handleTextChanged(self):
-        self.counted = self.latency  # reset the 'countdown until quite'
+        self.counted = self.latency  
         dbg_print ('textChanged', self.counted)
 
     def countDown(self, force=None):
@@ -94,9 +86,29 @@ class AbcEditor(widgetWithMenu, Editor):
 #        (dbg_print 'countDown', self.counted)
         if self.counted:
             return
-        dbg_print ("autoSave")
-        self.saveFile(fileName='./autosaved.abc')
+        if self.document().isModified():
+            print ("autoSave")
+            return self.saveFile(fileName='./autosaved.abc')
+        tc = self.textCursor()
+        position = tc.position()
+        if position == self.prevCursorPos:
+            return
+        self.prevCursorPos = position
+        blockNumber = tc.blockNumber()
+        Common.blockNumber = blockNumber
+        col0 =  col = tc.positionInBlock()
+        l = tc.block().length()
+        print ("autoTrack", l)
+        blockText = tc.block().text()
+        while col and ((col >= (l-1))
+            or not (blockText[col].lower() in 'abcdefg')):
+            col -= 1
+        print ('AbcEditor.handleCursorMove: row =', blockNumber,
+                                           'col =', col, col0)
+        if Common.score:
+            Common.score.showAtRowAndCol(blockNumber, col)
 
+            
     def newFile(self, fileName='new.abc'):
         self.clear()
         self.setFileName(fileName)
@@ -112,12 +124,15 @@ class AbcEditor(widgetWithMenu, Editor):
         dbg_print ("AbcEditor.loadFile", fileName)
         f = QtCore.QFile(fileName)
 
-        if f.open(QtCore.QFile.ReadOnly | QtCore.QFile.Text):
-            self.readAll(f)
-            f.close()
-            dbg_print ("Loaded %s" % fileName)
-            self.setFileName(fileName)
-            self.moveToRowCol(row, col)  # primarily to gain focus!
+        if not f.open(QtCore.QFile.ReadOnly | QtCore.QFile.Text):
+            return
+
+        self.readAll(f)
+        f.close()
+        dbg_print ("Loaded %s" % fileName)
+        self.setFileName(fileName)
+        self.moveToRowCol(row, col)  # primarily to gain focus!
+        self.document().setModified(True) # forc rewrite of Score
 
     def setFileName(self, fileName=None):
         if fileName is not None:
@@ -145,7 +160,8 @@ class AbcEditor(widgetWithMenu, Editor):
         self.writeAll(out)
         out.close()
         dbg_print ("Saved %s " % fileName)
-        
+        self.document().setModified(False)
+
         if Common.abcm2svg:
             Common.abcm2svg.process(fileName)
         if Common.abc2midi:
@@ -194,4 +210,5 @@ class AbcEditor(widgetWithMenu, Editor):
             fileName = files[0]
         self.setFileName(fileName)
         self.saveFile()
+
  
