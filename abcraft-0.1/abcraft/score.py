@@ -16,8 +16,6 @@ from PySide import QtCore, QtGui, QtSvg
 
 from common import Common, dbg_print, widgetWithMenu
 
-dbg_print = print
-
 class MyScene(QtGui.QGraphicsScene):
         
     def mousePressEvent(self, event):
@@ -167,6 +165,7 @@ class Score(QtGui.QGraphicsView, widgetWithMenu):
         ]
 
     def __init__(self, parent=None):
+        dbg_print ("Score.__init__", parent)
         widgetWithMenu.__init__(self)
         QtGui.QGraphicsView.__init__(self, parent)
         self.svgItem = None
@@ -179,6 +178,7 @@ class Score(QtGui.QGraphicsView, widgetWithMenu):
         self.setDragMode(QtGui.QGraphicsView.ScrollHandDrag)
         self.which = 0  # default to show first generated svg until we know better.
         self.svgDigests = []
+        dbg_print ("!Score.__init__", parent)
 
     def drawBackground(self, p, rect):
         p.save()
@@ -274,7 +274,7 @@ class Score(QtGui.QGraphicsView, widgetWithMenu):
 
     def printPage(self, *whichPages):
         if not whichPages:
-            whichPages = self.whichPage,
+            whichPages = self.which,
         if not QtGui.QPrintDialog(Common.printer, self).exec_():
             return
         painter = QtGui.QPainter(Common.printer)
@@ -285,7 +285,7 @@ class Score(QtGui.QGraphicsView, widgetWithMenu):
         self.showWhichPage(thatPage)
 
     def printScore(self):
-        self.scene().printPage(self, *range(len(self.svgDigests)))
+        self.printPage(self, *range(len(self.svgDigests)))
 
     def wheelEvent(self, event):
         factor = 1.2**( event.delta() / 120.0)

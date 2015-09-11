@@ -9,7 +9,7 @@ import sys, os, re, subprocess
 from PySide import QtCore, QtGui
 from abceditor import AbcEditor
 from score import Score
-from common import Common, myQAction, widgetWithMenu
+from common import Common, Printer, myQAction, widgetWithMenu
 from external import Abc2midi, Abcm2svg, Abc2abc 
 
 
@@ -58,8 +58,7 @@ class AbcCraft(QtGui.QMainWindow):
 
         self.setCentralWidget(Common.score)
        
-        Common.printer = QtGui.QPrinter(QtGui.QPrinter.HighResolution)
-        Common.printer.setPageSize(QtGui.QPrinter.A4)
+        Common.printer = Printer()
 
         Common.abcEditor = Dock(AbcEditor, True)
         Common.abcEditor.setMinimumWidth(640)

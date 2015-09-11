@@ -21,6 +21,7 @@ class AbcEditor(widgetWithMenu, Editor):
     prevCursorPos = -1 
 
     def __init__(self, dock=None):
+        dbg_print ("AbcEditor.__init__", dock)
         widgetWithMenu.__init__(self)
         Editor.__init__(self)
         #font = QtGui.QFont()
