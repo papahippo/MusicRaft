@@ -278,7 +278,7 @@ class Score(QtGui.QGraphicsView, widgetWithMenu):
         if not QtGui.QPrintDialog(Common.printer, self).exec_():
             return
         painter = QtGui.QPainter(Common.printer)
-        thatPage = self.whichPage
+        thatPage = self.which
         for j in whichPages:
             self.showWhichPage(j)
             self.scene().render(painter)
