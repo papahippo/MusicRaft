@@ -12,12 +12,13 @@ import lxml.etree
 import numpy as np
 
 # from PyQt4 import QtCore, QtGui, QtSvg
-from PySide import QtCore, QtGui, QtSvg
+#from PySide import QtCore, QtGui, QtSvg
 
-from common import Common, dbg_print, widgetWithMenu
+from common import (Common, dbg_print, widgetWithMenu,
+                    QtCore, QtGui, QtSvg)
 
 def abcHash(type_, row, col):
-   return type_ and ((ord(type_)<<24) + (row<<10) + col)
+   return (type_ and row and col) and ((ord(type_)<<24) + (row<<10) + col)
 
 def abcUnhash(hash_):
     return ((hash_ and chr((hash_>>24)&0xff)),  # type
@@ -44,9 +45,8 @@ class MyScene(QtGui.QGraphicsScene):
 
 class SvgDigest:
     locatableTypes = ('N', None)
-    xDescale = 1.0621 # fudgge-factor - investigation still pending!
-    yDescale = 1.0631 # fudgge-factor - investigation still pending!
-
+    gScale = None # 0.941  fudge-factor - investigation still pending!
+ 
     def __init__(self, filename):
         self.svg_file = QtCore.QFile(filename)
         #self.buildCribList()
@@ -63,8 +63,8 @@ class SvgDigest:
 "only types " + self.locatableTypes + " can be autolocated in this version."
              )
         # maybe need to use row numbers starting from 1 everywhere(?)
-        hashToMatch = abcHash(type_, row + 1, col)
-        dbg_print ('hashToMatch =', hex(hashToMatch))
+        hashToMatch = abcHash(type_, row, col)
+        dbg_print ('hashToMatch =', hashToMatch and hex(hashToMatch))
         fileName = str(self.svg_file.fileName())
         if self.svg_tree is None:
             # dbg_print("building 'quick dictionary' from '%s'" % fileName)
@@ -82,7 +82,7 @@ class SvgDigest:
         eltCursor = lxml.etree.Element('circle', r='7', stroke='red', 
                           fill="none")
         eltCursor.set('stroke-width', '2')            
-        self.abcEltAtCursor = None
+        self.abcEltAtCursor = self.eltCursor = dad = None
         eltHead = eltAbc = None
 
         for elt in self.svg_tree.iter():
@@ -92,7 +92,11 @@ class SvgDigest:
             if (elt.tag.endswith('abc')
             and (elt.get('type') in self.locatableTypes)):
                 eltAbc = elt # ready to be paired up with a notehead element
-                # dbg_print ("got abc tag!")
+                # use any old ABC record to determine parent ('dad').
+                # we may need this for scale information even if we haven't
+                # yet found a cursor location!
+                #
+                dad = eltAbc.getparent()
             elif elt.tag.endswith('use'):
                 attr, val = elt.items()[-1]
                 if (attr.endswith('href') and val.lower() == '#hd'):
@@ -124,22 +128,21 @@ class SvgDigest:
                     eltCursor.set('c'+ coord, str(self.quickDic[coord][-1]))
             # avoid pairing the same notehead or abc note descripton again!
             eltAbc = eltHead = None
+
+        self.cursorsDad = dad
+        transform = dad.get('transform')
+        dbg_print (dad, transform)
+        scale_match = ((dad is not None)
+            and re.match('scale\((.*)\)', transform))
+        gScale = (scale_match and float(scale_match.group(1))) or 1.0
+        if self.gScale is None:
+            self.gScale = gScale
         if self.abcEltAtCursor is None:
             dbg_print ("can't find cursor position!")
             #print (hex(hashToMatch),
             #       [hex(self.quickDic['hash_'][i]) for i in range(2)])
         else:
-            self.cursorsDad = dad = self.abcEltAtCursor.getparent()
-            tansform = dad.get('transform')
-            dbg_print (dad, tansform)
-            scale_match = dad and re.match('scale\((.*)\)', transform)
-            g_scale = scale_match and scale_match.group(1)
-            if g_scale:
-                if self.xDescale is None:
-                    self.xDescale = 1.0 / g_scale
-                if self.yDescale is None:
-                    self.yDescale = 1.0 / g_scale
-            self.cursorsDad.insert(0, eltCursor)
+            dad.insert(0, eltCursor)
             # test only: self.cursorsDad.remove(eltCursor)
             outFile = open(fileName, 'w')
             dbg_print ('written', fileName)
@@ -155,8 +158,8 @@ class SvgDigest:
     def rowColAtXY(self, x, y):
         if not self.quickDic:
             self.buildQuickDic()
-        x *= self.xDescale # fudgge-factor - investigation still pending!
-        y *= self.yDescale # fudgge-factor - investigation still pending!
+        x /= self.gScale # fudgge-factor - investigation still pending!
+        y /= self.gScale # fudgge-factor - investigation still pending!
         dbg_print('x,y', x, y, [(a, self.quickDic[a][:8])
             for a in self.quickDic.keys()])
         x_dist = x - self.quickDic['x']
@@ -167,7 +170,7 @@ class SvgDigest:
         type_, row, col = abcUnhash(self.quickDic['hash_'][am])
         dbg_print(am, row, col, self.quickDic['x'][am],
                                 self.quickDic['y'][am], )
-        return row - 1, col  # not sure this is the best place for the '-1'!
+        return row, col  # not sure this is the best place for the '-1'!
         
 class Score(QtGui.QGraphicsView, widgetWithMenu):
     menuTag = '&Score'

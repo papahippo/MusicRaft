@@ -6,8 +6,9 @@ Created on Sun Aug 30 18:18:56 2015
 @author: larry
 """
 import os
-from PySide import QtCore, QtGui
-from common import Common, widgetWithMenu, dbg_print
+from common import (Common, widgetWithMenu, dbg_print,
+                    QtCore, QtGui)
+
 from editor import Editor
 
 class AbcEditor(widgetWithMenu, Editor):
@@ -64,8 +65,8 @@ class AbcEditor(widgetWithMenu, Editor):
         self.counted = self.latency  
         return
 
-    def moveToRowCol(self, row=0, col=0):
-        block = self.document().findBlockByLineNumber (row)
+    def moveToRowCol(self, row=1, col=0):
+        block = self.document().findBlockByLineNumber (row-1)
         desiredPosition = block.position() + col
         dbg_print ('AbcEditor.moveToRowCol', row, col,
                'desiredPosition', desiredPosition)
@@ -73,6 +74,33 @@ class AbcEditor(widgetWithMenu, Editor):
         tc.setPosition(desiredPosition)
         self.setTextCursor(tc)
         self.setFocus()
+ 
+    def highlight(self, tc):
+        blockNumber = tc.blockNumber()
+        Common.blockNumber = blockNumber
+        col0 =  col = tc.positionInBlock()
+        l = tc.block().length()
+        print ("autoTrack", l)
+        blockText = tc.block().text()
+        while col and ((col >= (l-1))
+            or not (blockText[col].lower() in 'abcdefg')):
+            col -= 1
+        print ('AbcEditor.handleCursorMove: row =', blockNumber,
+                                           'col =', col, col0)
+        if Common.score:
+            Common.score.showAtRowAndCol(blockNumber+1, col)
+        hi_selection = QtGui.QTextEdit.ExtraSelection()
+ 
+        hi_selection.format.setBackground(self.palette().alternateBase())
+        hi_selection.format.setProperty(QtGui.QTextFormat.FullWidthSelection,
+                                        True)
+        wordColor = QtGui.QColor(QtCore.Qt.red).lighter(160)
+        hi_selection.format.setBackground(wordColor)
+        #setFontUnderline(True)
+        hi_selection.cursor = tc
+        self.setExtraSelections([hi_selection])
+        hi_selection.cursor.clearSelection()
+ 
 
     def handleTextChanged(self):
         self.counted = self.latency  
@@ -92,22 +120,9 @@ class AbcEditor(widgetWithMenu, Editor):
             return self.saveFile(fileName='./autosaved.abc')
         tc = self.textCursor()
         position = tc.position()
-        if position == self.prevCursorPos:
-            return
-        self.prevCursorPos = position
-        blockNumber = tc.blockNumber()
-        Common.blockNumber = blockNumber
-        col0 =  col = tc.positionInBlock()
-        l = tc.block().length()
-        print ("autoTrack", l)
-        blockText = tc.block().text()
-        while col and ((col >= (l-1))
-            or not (blockText[col].lower() in 'abcdefg')):
-            col -= 1
-        print ('AbcEditor.handleCursorMove: row =', blockNumber,
-                                           'col =', col, col0)
-        if Common.score:
-            Common.score.showAtRowAndCol(blockNumber, col)
+        if position != self.prevCursorPos:
+            self.prevCursorPos = position
+            self.highlight(tc)
 
             
     def newFile(self, fileName='new.abc'):
@@ -121,7 +136,7 @@ class AbcEditor(widgetWithMenu, Editor):
         dbg_print ("loadAnyFile 2", fileName)
         self.loadFile(fileName)
 
-    def loadFile(self, fileName, row=0, col=0):
+    def loadFile(self, fileName, row=1, col=0):
         dbg_print ("AbcEditor.loadFile", fileName)
         f = QtCore.QFile(fileName)
 

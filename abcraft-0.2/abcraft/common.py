@@ -5,8 +5,9 @@ Copyright 2015 Hippos Technical Systems BV.
 @author: larry
 """
 from __future__ import print_function
-from PySide import QtCore, QtGui
+from PySide import QtCore, QtGui, QtSvg
 
+_imported_via_us_ = QtCore, QtGui, QtSvg
 #dbg_print = lambda *pp, **kw: None
 # replace (or overrule in certain modules) above to show debug printout by...
 dbg_print = print

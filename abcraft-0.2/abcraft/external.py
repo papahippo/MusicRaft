@@ -6,9 +6,9 @@ command processors (abc2midi etc.) which are executed by abccraft, and to
 their assocated widgets and methods.
 """
 from __future__ import print_function
-import sys, os, re, subprocess
-from PySide import QtCore, QtGui
-from common import Common, dbg_print
+import os, re, subprocess
+from common import (Common, dbg_print,
+                    QtGui)
 
 
 class StdTab(QtGui.QPlainTextEdit):
@@ -55,7 +55,7 @@ within abcraft.
     outFileName = None
     errOnOut = False
     reMsg = r'$^'  # default = don't match any lines.
-    rowColOrigin = (-1, -1)
+    rowColOrigin = (0, -1)
 
     def __init__(self):
         dbg_print ("External __init__", self.fmtNameIn, self.fmtNameOut)
@@ -127,7 +127,7 @@ class Abcm2svg(External):
     fmtNameOut = '%s_page_.svg'
     exe = '/usr/local/bin/abcm2ps'
     reMsg = r'.*in\s+line\s(\d+)\.(\d+).*'
-    rowColOrigin = (-1, 0)
+    rowColOrigin = (0, 0)
 
     def __init__(self):
         External.__init__(self)
@@ -156,8 +156,8 @@ class Abc2midi(External):
     fmtNameOut = '%s.midi'
     exe = '/usr/local/bin/abc2midi'
     errOnOut = True
-    reMsg = r'.*in\s+line\s(\d+)\s\:.*'
-    rowColOrigin = (-1, 0)
+    reMsg = r'.*in\s+line-char\s(\d+)\-(\d+).*'
+    rowColOrigin = (0, 0)
     
     def cmd(self, inF, outF, **kw):
         return ('%s %s -v -EA -o %s'
