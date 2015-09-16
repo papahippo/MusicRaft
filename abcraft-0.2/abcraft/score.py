@@ -7,7 +7,7 @@ Copyright 2015 Hippos Technical Systems BV.
 @author: larry
 """
 
-import sys
+import sys, re
 import lxml.etree
 import numpy as np
 
@@ -16,6 +16,14 @@ from PySide import QtCore, QtGui, QtSvg
 
 from common import Common, dbg_print, widgetWithMenu
 
+def abcHash(type_, row, col):
+   return type_ and ((ord(type_)<<24) + (row<<10) + col)
+
+def abcUnhash(hash_):
+    return ((hash_ and chr((hash_>>24)&0xff)),  # type
+            (hash_ and (hash_>>10)&0x3fff),     # row
+            (hash_ and hash_&0x3ff))     # col
+    
 class MyScene(QtGui.QGraphicsScene):
         
     def mousePressEvent(self, event):
@@ -35,6 +43,7 @@ class MyScene(QtGui.QGraphicsScene):
 
 
 class SvgDigest:
+    locatableTypes = ('N', None)
     xDescale = 1.0621 # fudgge-factor - investigation still pending!
     yDescale = 1.0631 # fudgge-factor - investigation still pending!
 
@@ -42,31 +51,29 @@ class SvgDigest:
         self.svg_file = QtCore.QFile(filename)
         #self.buildCribList()
         self.quickDic = {}
-        self.eltCursor = None
-        self.scaleFactor = 1.0 # 0.75  # STUB!
-        self.attrTab = (
-            ('type', str, np.str_),
-            ('x', float, np.float_),
-            ('y', float, np.float_),
-            ('width', float, np.float_),
-            ('height', float, np.float_),
-            ('row', int, np.int_),
-            ('col', int, np.int_),
-            ('cx', float, np.float_),
-            ('cy', float, np.float_),
-        )
         self.svg_tree = self.cursorsDad = None
         
-    def buildQuickDic(self, row=None, col=None):
+    def buildQuickDic(self, row=None, col=None, type_='N'):
         """ extract the all-imortant information from the .svg
             file which enables us to correlate locations within the
             image with locations within the source abc file.
         """
+        if type_ not in self.locatableTypes:
+            raise TypeError, (
+"only types " + self.locatableTypes + " can be autolocated in this version."
+             )
+        # maybe need to use row numbers starting from 1 everywhere(?)
+        hashToMatch = abcHash(type_, row + 1, col)
+        dbg_print ('hashToMatch =', hex(hashToMatch))
         fileName = str(self.svg_file.fileName())
         if self.svg_tree is None:
             # dbg_print("building 'quick dictionary' from '%s'" % fileName)
             # dbg_print('self.eltCursor =', self.eltCursor)
-            for attr, func, dtype in self.attrTab:
+            for i, attr in enumerate(('x', 'y', 'hash_')):
+                if i==2:
+                    dtype = np.int32
+                else:
+                    dtype = np.float_
                 self.quickDic[attr] = np.array([], dtype=dtype)
             self.svg_tree = lxml.etree.parse(fileName)
             # root = svg_tree.getroot()
@@ -76,47 +83,62 @@ class SvgDigest:
                           fill="none")
         eltCursor.set('stroke-width', '2')            
         self.abcEltAtCursor = None
-        eltHead = None
-#        lateHead = False
-        latest = {}
+        eltHead = eltAbc = None
+
         for elt in self.svg_tree.iter():
             # dbg_print (i, elt.tag, type(elt.tag), str(elt.tag))
             if callable(elt.tag):
                 continue
-            if elt.tag.endswith('abc') and (elt.get('type')=='N'):
+            if (elt.tag.endswith('abc')
+            and (elt.get('type') in self.locatableTypes)):
+                eltAbc = elt # ready to be paired up with a notehead element
                 # dbg_print ("got abc tag!")
-                for attr, func, dtype in self.attrTab:
-#                    lateHead = eltHead is None
-                    if attr in ('cx','cy'):
-                        a = eltHead.get(attr[1:])
-                    else:
-                        a = elt.get(attr)
-                    #dbg_print(attr, a)
-                    fa = (a and func(a)) or -1
-                    latest[attr] = fa
-                    self.quickDic[attr] = np.append(self.quickDic[attr], fa)
-                if (row is not None and  # presumably col is not None and ...
-                    # latest['type'] == 'N' and
-                    latest['row'] == (row+1) and
-                    latest['col'] == col):
-                    dbg_print ('at cursor, note head x,y, cx, cy =',
-                               latest['x'], latest['y'],
-                               latest['cx'], latest['cy'])
-                    self.abcEltAtCursor = elt
-                    for coord in ('cx', 'cy'):
-                        eltCursor.set(coord, str(latest[coord]))
             elif elt.tag.endswith('use'):
                 attr, val = elt.items()[-1]
                 if (attr.endswith('href') and val.lower() == '#hd'):
-                    eltHead = elt
-            #else:
-            #    continue
+                    eltHead = elt # ready to be paired up with an 'abc' element
+            else:
+                continue
+            if eltAbc is None or eltHead is None:
+                continue  # haven't got a note-head/abc pair yet.
+                
+# we've 'paired' a note-head and an ABC note description; hurrah!
+            for i,attr in enumerate(('x','y', 'hash_')):
+                if i==2:
+                    newVal = abcHash(eltAbc.get('type'),
+                                     int(eltAbc.get('row')),
+                                     int(eltAbc.get('col')))
+                    # dbg_print ('newVal =', hex(newVal))
+                else:
+                    newVal = float(eltHead.get(attr))
+                self.quickDic[attr] = np.append(self.quickDic[attr], newVal)
+            if (newVal == hashToMatch):
+                dbg_print ('at cursor',
+                           [(attr, self.quickDic[attr][-1]) 
+                            for attr in ('x', 'y')])
+                #, note head x,y, cx, cy =',
+                #          latest['x'], latest['y'],
+                #          latest['cx'], latest['cy'])
+                self.abcEltAtCursor = eltAbc
+                for coord in ('x', 'y'):
+                    eltCursor.set('c'+ coord, str(self.quickDic[coord][-1]))
+            # avoid pairing the same notehead or abc note descripton again!
+            eltAbc = eltHead = None
         if self.abcEltAtCursor is None:
             dbg_print ("can't find cursor position!")
+            #print (hex(hashToMatch),
+            #       [hex(self.quickDic['hash_'][i]) for i in range(2)])
         else:
-            self.cursorsDad = self.abcEltAtCursor.getparent()
-            # dbg_print (dad)
-            # self.removeCursor()
+            self.cursorsDad = dad = self.abcEltAtCursor.getparent()
+            tansform = dad.get('transform')
+            dbg_print (dad, tansform)
+            scale_match = dad and re.match('scale\((.*)\)', transform)
+            g_scale = scale_match and scale_match.group(1)
+            if g_scale:
+                if self.xDescale is None:
+                    self.xDescale = 1.0 / g_scale
+                if self.yDescale is None:
+                    self.yDescale = 1.0 / g_scale
             self.cursorsDad.insert(0, eltCursor)
             # test only: self.cursorsDad.remove(eltCursor)
             outFile = open(fileName, 'w')
@@ -135,18 +157,17 @@ class SvgDigest:
             self.buildQuickDic()
         x *= self.xDescale # fudgge-factor - investigation still pending!
         y *= self.yDescale # fudgge-factor - investigation still pending!
-        print('x,y', x, y, [(a, self.quickDic[a][:8])
+        dbg_print('x,y', x, y, [(a, self.quickDic[a][:8])
             for a in self.quickDic.keys()])
-        x_dist = x - self.quickDic['cx']
-        y_dist = y - self.quickDic['cy']
+        x_dist = x - self.quickDic['x']
+        y_dist = y - self.quickDic['y']
         a_dist = x_dist*x_dist + y_dist*y_dist
         # dbg_print('a_dist', a_dist[:8])
         am = np.argmin(a_dist)
-        row = self.quickDic['row'][am] - 1
-        col = self.quickDic['col'][am]
-        dbg_print(am, row, col, self.quickDic['cx'][am],
-                                self.quickDic['cy'][am], )
-        return row, col
+        type_, row, col = abcUnhash(self.quickDic['hash_'][am])
+        dbg_print(am, row, col, self.quickDic['x'][am],
+                                self.quickDic['y'][am], )
+        return row - 1, col  # not sure this is the best place for the '-1'!
         
 class Score(QtGui.QGraphicsView, widgetWithMenu):
     menuTag = '&Score'
