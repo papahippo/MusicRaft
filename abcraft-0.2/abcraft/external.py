@@ -19,15 +19,20 @@ tabs (Abcm2svg etc.) within the subprocess output notebook.
     """
     def __init__(self, commander=None):
         QtGui.QPlainTextEdit.__init__(self)
+        dbg_print (self.__class__.__name__+':__init__... commander.reMsg =',
+               commander.reMsg)
         self.creMsg = re.compile(commander.reMsg)
         self.rowColOrigin = commander.rowColOrigin
         self.quiet = False
         self.cursorPositionChanged.connect(self.handleCursorMove)
 
     def handleCursorMove(self):
+        dbg_print (self.__class__.__name__+':handleCursorMove... self.quiet =',
+               self.quiet)
         if (Common.abcEditor is None) or self.quiet:
             return
         match = self.creMsg.match(self.textCursor().block().text())
+        dbg_print (self.__class__.__name__+':handleCursorMove... match =', match)
         if match is None:
             return
         location = [o1+o2 for (o1, o2) in zip(

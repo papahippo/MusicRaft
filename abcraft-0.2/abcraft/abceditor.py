@@ -20,6 +20,7 @@ class AbcEditor(widgetWithMenu, Editor):
     minimumHeight = None
     latency = 3
     prevCursorPos = -1 
+    currentLineColor = None
 
     def __init__(self, dock=None):
         dbg_print ("AbcEditor.__init__", dock)
@@ -94,8 +95,8 @@ class AbcEditor(widgetWithMenu, Editor):
         hi_selection.format.setBackground(self.palette().alternateBase())
         hi_selection.format.setProperty(QtGui.QTextFormat.FullWidthSelection,
                                         True)
-        wordColor = QtGui.QColor(QtCore.Qt.red).lighter(160)
-        hi_selection.format.setBackground(wordColor)
+        if self.currentLineColor is not None:
+            hi_selection.format.setBackground(self.currentLineColor)
         #setFontUnderline(True)
         hi_selection.cursor = tc
         self.setExtraSelections([hi_selection])
