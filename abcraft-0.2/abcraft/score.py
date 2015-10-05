@@ -45,7 +45,7 @@ class MyScene(QtGui.QGraphicsScene):
 
 class SvgDigest:
     locatableTypes = ('N', None)
-    gScale = None # 0.941  fudge-factor - investigation still pending!
+    gScaleMultiplier = 1.0 
  
     def __init__(self, filename):
         self.svg_file = QtCore.QFile(filename)
@@ -134,9 +134,9 @@ class SvgDigest:
         dbg_print (dad, transform)
         scale_match = ((dad is not None)
             and re.match('scale\((.*)\)', transform))
-        gScale = (scale_match and float(scale_match.group(1))) or 1.0
-        if self.gScale is None:
-            self.gScale = gScale
+        gScale = (scale_match and float(scale_match.group(1))) or 0.75
+        dbg_print ("SvgDigest: scale according to svg section =", gScale)
+        self.gScale = gScale * self.gScaleMultiplier
         if self.abcEltAtCursor is None:
             dbg_print ("can't find cursor position!")
             #print (hex(hashToMatch),

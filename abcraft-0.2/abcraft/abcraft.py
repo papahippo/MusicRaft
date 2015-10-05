@@ -9,7 +9,7 @@ import sys, os, re, subprocess
 from PySide import QtCore, QtGui
 from abceditor import AbcEditor
 from score import Score
-from common import Common, Printer, myQAction, widgetWithMenu
+from common import Common, Printer, myQAction, widgetWithMenu, dbg_print
 from external import Abc2midi, Abcm2svg, Abc2abc 
 
 
@@ -65,11 +65,18 @@ class AbcCraft(QtGui.QMainWindow):
         self.addDockWidget(QtCore.Qt.RightDockWidgetArea, Common.abcEditor)
         self.setWindowTitle("ABCraft")
         self.resize(1280, 1024)
+        Common.abcEditor.widget.abcFilenameDropped.connect(self.cloneTheLot)
+        if len(sys.argv)>1:
+            Common.abcEditor.widget.loadFile(sys.argv.pop(1))
+        if len(sys.argv)>1:
+            self.cloneTheLot(False)
 
-        for arg in sys.argv[1:]:
-            if arg.endswith('.abc'):
-                Common.abcEditor.widget.loadFile(arg)
-                break
+    def cloneTheLot(self, filenames=False): # False means already in place!
+        print ('cloneTheLot', filenames)
+        if filenames is not False:
+            sys.argv[1:] = filenames
+            dbg_print('cloneTheLot', sys.argv)
+        # subprocess.Popen(sys.argv)
 
     def startMidi(self):
         if not self.abcMidiThread.outFileName:

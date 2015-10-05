@@ -6,7 +6,7 @@ Created on Sun Aug 30 18:18:56 2015
 @author: larry
 """
 import os
-from common import (Common, widgetWithMenu, dbg_print,
+from common import (Common, widgetWithMenu, dbg_print, filenameFromUrl,
                     QtCore, QtGui)
 
 from editor import Editor
@@ -21,6 +21,8 @@ class AbcEditor(widgetWithMenu, Editor):
     latency = 3
     prevCursorPos = -1 
     currentLineColor = None
+
+    abcFilenameDropped = QtCore.Signal(list)
 
     def __init__(self, dock=None):
         dbg_print ("AbcEditor.__init__", dock)
@@ -228,4 +230,37 @@ class AbcEditor(widgetWithMenu, Editor):
         self.setFileName(fileName)
         self.saveFile()
 
+    #------ Drag and drop
+    def dragEnterEvent(self, event):
+        """Reimplement Qt method
+        Inform Qt about the types of data that the widget accepts"""
+        source = event.mimeData()
+        if source.hasUrls():
+            
+            if 1: #mimedata2url(source, extlist=EDIT_EXT):
+                print ("dragEnterEvent", "hasUrls")
+                event.acceptProposedAction()
+            else:
+                event.ignore()
+        elif source.hasText():
+            print ("dragEnterEvent", "hasText")
+            event.acceptProposedAction()
+        else:
+            event.ignore()
+            
+    def dropEvent(self, event):
+        """Reimplement Qt method
+        Unpack dropped data and handle it"""
+        source = event.mimeData()
+        if source.hasUrls():
+            #paths = map(filenameFromUrl, source.urls())
+            paths = [url.path() for url in source.urls()]
+            print ("dropEvent", "hasUrls", source.urls(), paths)
+            self.abcFilenameDropped.emit(paths)
+        elif source.hasText():
+            print ("dropEvent", "hasText")
+            #editor = self.get_current_editor()
+            #if editor is not None:
+            #    editor.insert_text( source.text() )
+        event.acceptProposedAction()
  

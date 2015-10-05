@@ -130,7 +130,7 @@ class Abcm2svg(External):
     
     fmtNameIn  = '%s.abc'
     fmtNameOut = '%s_page_.svg'
-    exe = '/usr/local/bin/abcm2ps'
+    exe = 'abcm2ps'
     reMsg = r'.*in\s+line\s(\d+)\.(\d+).*'
     rowColOrigin = (0, 0)
 

@@ -5,6 +5,7 @@ Copyright 2015 Hippos Technical Systems BV.
 @author: larry
 """
 from __future__ import print_function
+import os
 from PySide import QtCore, QtGui, QtSvg
 
 _imported_via_us_ = QtCore, QtGui, QtSvg
@@ -12,6 +13,27 @@ _imported_via_us_ = QtCore, QtGui, QtSvg
 # replace (or overrule in certain modules) above to show debug printout by...
 dbg_print = print
 # ... or use soemething more pythonically correct like the logging module!
+
+def filenameFromUrl(url):
+    path = str(url)
+    print ('filenameFromUrl', url, path)
+    return path
+    #if not path.startswith(r"file://"):
+    #    return None
+    if os.name == 'nt':
+        # On Windows platforms, a local path reads: file:///c:/...
+        # and a UNC based path reads like: file://server/share
+        if path.startswith(r"file:///"): # this is a local path
+            path=path[8:]
+        else: # this is a unc path
+            path = path[5:]
+    else:
+        path = path[7:]
+    #if not os.path.splitext(path)[1] == '.abc':
+    #    return None
+    #if not os.path.exists(path):
+    #    return None
+    return path
 
 class Common:  # yes, shades of FORTRAN; sorry!
     timer = None
