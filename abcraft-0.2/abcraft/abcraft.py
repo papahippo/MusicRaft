@@ -65,17 +65,13 @@ class AbcCraft(QtGui.QMainWindow):
         self.addDockWidget(QtCore.Qt.RightDockWidgetArea, Common.abcEditor)
         self.setWindowTitle("ABCraft")
         self.resize(1280, 1024)
-        Common.abcEditor.widget.abcFilenameDropped.connect(self.cloneTheLot)
-        if len(sys.argv)>1:
-            Common.abcEditor.widget.loadFile(sys.argv.pop(1))
-        if len(sys.argv)>1:
-            self.cloneTheLot(False)
+        Common.abcEditor.widget.abcFilenamesDropped.connect(self.openThemAll)
+        self.openThemAll(sys.argv[1:])
 
-    def cloneTheLot(self, filenames=False): # False means already in place!
-        print ('cloneTheLot', filenames)
-        if filenames is not False:
-            sys.argv[1:] = filenames
-            dbg_print('cloneTheLot', sys.argv)
+    def openThemAll(self, filenames=()): # False means already in place!
+        dbg_print('openThemAll', filenames)
+        for fn in filenames:
+            Common.abcEditor.widget.loadFile(fn)
         # subprocess.Popen(sys.argv)
 
     def startMidi(self):

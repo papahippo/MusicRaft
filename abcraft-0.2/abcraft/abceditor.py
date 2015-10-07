@@ -5,9 +5,8 @@ Created on Sun Aug 30 18:18:56 2015
 
 @author: larry
 """
-import os
-from common import (Common, widgetWithMenu, dbg_print, filenameFromUrl,
-                    QtCore, QtGui)
+import sys, os, subprocess
+from common import (Common, widgetWithMenu, dbg_print, QtCore, QtGui)
 
 from editor import Editor
 
@@ -22,7 +21,7 @@ class AbcEditor(widgetWithMenu, Editor):
     prevCursorPos = -1 
     currentLineColor = None
 
-    abcFilenameDropped = QtCore.Signal(list)
+    abcFilenamesDropped = QtCore.Signal(list)
 
     def __init__(self, dock=None):
         dbg_print ("AbcEditor.__init__", dock)
@@ -41,11 +40,14 @@ class AbcEditor(widgetWithMenu, Editor):
         self.cursorPositionChanged.connect(
             self.handleCursorMove)
         self.originalText = None
+        self.haveLoadedFile = False
     
     def menuItems(self):
         return [
                     ('&New',           'Ctrl+N', self.newFile,),
-                    ('&Open',          'Ctrl+L', self.loadAnyFile,),
+                    ('&Open',          'Ctrl+O', self.loadAnyFile,),
+                    ('&Close',         'Ctrl+C', self.closeFile,),
+                    ('Open in new &Instance', 'Ctrl+I', self.cloneAnyFile,),
                     ('&Reload',        'Ctrl+R', self.reloadFile,),
                     ('&Save',          'Ctrl+S', self.saveFile,),
                     ('Save &As',       'Ctrl+A', self.saveFileAs,),
@@ -120,7 +122,9 @@ class AbcEditor(widgetWithMenu, Editor):
             return
         if self.document().isModified():
             print ("autoSave")
-            return self.saveFile(fileName='./autosaved.abc')
+            split = os.path.split(self.fileName)
+            fileName = split[0] + '/autosave_' + split[1]
+            return self.saveFile(fileName=fileName)
         tc = self.textCursor()
         position = tc.position()
         if position != self.prevCursorPos:
@@ -132,15 +136,34 @@ class AbcEditor(widgetWithMenu, Editor):
         self.clear()
         self.setFileName(fileName)
 
+    def closeFile(self):
+        self.clear()
+        self.haveLoadedFile = False
+
     def loadAnyFile(self):
         fileName = QtGui.QFileDialog.getOpenFileName(self,
                                                          "Choose a data file",
                                                          '', '*.abc')[0]
         dbg_print ("loadAnyFile 2", fileName)
-        self.loadFile(fileName)
+        self.loadFile(fileName, newInstance=False)
 
-    def loadFile(self, fileName, row=1, col=0):
-        dbg_print ("AbcEditor.loadFile", fileName)
+    def cloneAnyFile(self):
+        fileName = QtGui.QFileDialog.getOpenFileName(self,
+                                                         "Choose a data file",
+                                                         '', '*.abc')[0]
+        dbg_print ("cloneAnyFile 2", fileName)
+        self.loadFile(fileName, newInstance=True)
+
+    def loadFile(self, fileName, newInstance=None, row=1, col=0):
+        dbg_print ("AbcEditor.loadFile", fileName, newInstance, row, col)
+        if newInstance is None:
+            newInstance = self.haveLoadedFile
+        if newInstance:
+            dbg_print("need to create new instance for", fileName)
+            sys.argv[1:] = fileName,
+            subprocess.Popen(sys.argv)
+            return
+
         f = QtCore.QFile(fileName)
 
         if not f.open(QtCore.QFile.ReadOnly | QtCore.QFile.Text):
@@ -160,6 +183,7 @@ class AbcEditor(widgetWithMenu, Editor):
         dbg_print (title)
         if self.dock:
             self.dock.setWindowTitle(title)
+        self.haveLoadedFile = True
 
     def readAll(self, f):
         dbg_print ('readAll', self, f)
@@ -256,7 +280,7 @@ class AbcEditor(widgetWithMenu, Editor):
             #paths = map(filenameFromUrl, source.urls())
             paths = [url.path() for url in source.urls()]
             print ("dropEvent", "hasUrls", source.urls(), paths)
-            self.abcFilenameDropped.emit(paths)
+            self.abcFilenamesDropped.emit(paths)
         elif source.hasText():
             print ("dropEvent", "hasText")
             #editor = self.get_current_editor()

@@ -183,6 +183,7 @@ class Score(QtGui.QGraphicsView, widgetWithMenu):
                     ("Pre&vious Page", 'Ctrl+PgUp',   self.showPreviousPage,),
                     ('Print &Page',    'Ctrl+P',      self.printPage,),
                     ('Print &Score',   'Ctrl+Alt+P',  self.printScore,),
+                    #('Print S&ce',   'Ctrl+Alt+C',  self.printScene,),
 #                    ('Set &Font', 'F', self.changeMyFont,),
         ]
 
@@ -217,6 +218,11 @@ class Score(QtGui.QGraphicsView, widgetWithMenu):
                 QtGui.QMessageBox.critical(self, "Open SVG File",
                         "Could not open file '%s'." % path)
         self.showWhichPage(self.which, force=True)
+        #
+        # would be nice to have a descriptive composite name, but for now...
+        #
+        self.compositeName = path.split('_page_')[0].replace('autosave_', '')
+
 
     def showAtRowAndCol(self, row, col):
         dbg_print ('showAtRowAndCol', row, col)
@@ -297,17 +303,29 @@ class Score(QtGui.QGraphicsView, widgetWithMenu):
     def printPage(self, *whichPages):
         if not whichPages:
             whichPages = self.which,
-        if not QtGui.QPrintDialog(Common.printer, self).exec_():
+        Common.printer.setDocName(self.compositeName)
+        Common.printer.setOutputFileName(self.compositeName+'.pdf')
+        dialog = QtGui.QPrintDialog(Common.printer, self)
+        dialog.accepted.connect(self.printerAccepted)
+        if not dialog.exec_():
             return
+        print ("-------------", Common.printer.printerName(),
+                                dialog.printer().printerName())
         painter = QtGui.QPainter(Common.printer)
         thatPage = self.which
-        for j in whichPages:
+        for i,j in enumerate(whichPages):
             self.showWhichPage(j)
+            if i:
+                Common.printer.newPage()
             self.scene().render(painter)
+            self.render(painter)
         self.showWhichPage(thatPage)
 
+    def printerAccepted(self, printer):
+        print ('printerAccepted', printer.printerName())
+
     def printScore(self):
-        self.printPage(self, *range(len(self.svgDigests)))
+        self.printPage(*range(len(self.svgDigests)))
 
     def wheelEvent(self, event):
         factor = 1.2**( event.delta() / 120.0)
