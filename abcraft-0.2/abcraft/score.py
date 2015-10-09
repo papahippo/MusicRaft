@@ -45,14 +45,20 @@ class MyScene(QtGui.QGraphicsScene):
 
 class SvgDigest:
     locatableTypes = ('N', None)
- 
+    gScaleXMultiplier = 1.0
+    gScaleYMultiplier = 1.0
+    scene = None
+
     def __init__(self, filename):
         self.svg_file = QtCore.QFile(filename)
         #self.buildCribList()
         self.quickDic = {}
         self.svg_tree = self.cursorsDad = None
-        self.buildQuickDic()
-    
+        #self.buildQuickDic()
+
+    def AdjustForScene(self, scene):
+        self.scene = scene
+
     def buildQuickDic(self, row=None, col=None, type_='N'):
         """ extract the all-imortant information from the .svg
             file which enables us to correlate locations within the
@@ -82,7 +88,16 @@ class SvgDigest:
             #self.inchByInch = [((s.endswith('in') and float(s[:-2])) or None)
             #    for s in sInchByInch]
             sViewBox = root.get('viewBox')
-            self.viewBox = sViewBox and map(float, sViewBox.split(' ')) or None
+            scene = self.scene
+            if sViewBox and scene:
+                viewBox = map(float, sViewBox.split(' '))
+                
+                self.gScaleXMultiplier = ((viewBox[2] - viewBox[0])
+                                                / scene.width())
+                self.gScaleYMultiplier = ((viewBox[3] - viewBox[1])
+                                                / scene.height())
+                dbg_print("Multipliers =", self.gScaleXMultiplier, 
+                                           self.gScaleYMultiplier)
         else:
             self.removeCursor()
         eltCursor = lxml.etree.Element('circle', r='7', stroke='red', 
@@ -164,7 +179,9 @@ class SvgDigest:
         if not self.quickDic:
             self.buildQuickDic()
         x /= self.gScale
+        x *= self.gScaleXMultiplier
         y /= self.gScale
+        y *= self.gScaleYMultiplier
         #dbg_print('x,y', x, y, [(a, self.quickDic[a][:8])
         #    for a in self.quickDic.keys()])
         x_dist = x - self.quickDic['x']
@@ -244,8 +261,7 @@ class Score(QtGui.QGraphicsView, widgetWithMenu):
         self.showWhichPage(j, force=True)
 
     def locateXY(self, x, y):
-        row, col = self.svgDigests[self.which].rowColAtXY(
-                        x*self.gScaleXMultiplier, y*self.gScaleYMultiplier)
+        row, col = self.svgDigests[self.which].rowColAtXY(x, y)
         dbg_print ("locateXY(", x, y, " > row,col", row, col)
         if Common.abcEditor:
             Common.abcEditor.widget.moveToRowCol(row, col)
@@ -267,9 +283,9 @@ class Score(QtGui.QGraphicsView, widgetWithMenu):
         if not svg_file.exists():
             raise IOError, ("'%s' does not exist!" % svg_file.filename())
         self.which = which
-        s = self.scene()
+        scene = self.scene()
 
-        s.clear()
+        scene.clear()
 
         self.svgItem = QtSvg.QGraphicsSvgItem(svg_file.fileName())
         self.svgItem.setFlags(QtGui.QGraphicsItem.ItemClipsToShape)
@@ -290,28 +306,22 @@ class Score(QtGui.QGraphicsView, widgetWithMenu):
         self.outlineItem.setVisible(True)
         self.outlineItem.setZValue(1)
 
-        s.addItem(self.backgroundItem)
-        s.addItem(self.svgItem)
-        s.addItem(self.outlineItem)
+        scene.addItem(self.backgroundItem)
+        scene.addItem(self.svgItem)
+        scene.addItem(self.outlineItem)
 
         rect = self.outlineItem.boundingRect()
-        #dbg_print ("before 'setSceneRect'...", s.sceneRect())
-        s.setSceneRect(rect) # .adjusted(-10, -10, 10, 10))
-        #dbg_print ("after 'setSceneRect'...", s.sceneRect())
+        #dbg_print ("before 'setSceneRect'...", scene.sceneRect())
+        scene.setSceneRect(rect) # .adjusted(-10, -10, 10, 10))
+        #dbg_print ("after 'setSceneRect'...", scene.sceneRect())
 
         self.setViewport(QtGui.QWidget())
 
         self.backgroundItem.setVisible(True)
         self.outlineItem.setVisible(False)
         
-        viewBox = self.svgDigests[which].viewBox
-        if viewBox is None:
-            self.gScaleXMultiplier = self.gScaleYMultiplier = 1.0
-        else:
-            self.gScaleXMultiplier = (viewBox[2] - viewBox[0]) / s.width()
-            self.gScaleYMultiplier = (viewBox[3] - viewBox[1]) / s.height()
-        dbg_print("Multipliers =", self.gScaleXMultiplier, 
-                                   self.gScaleYMultiplier)
+        self.svgDigests[which].AdjustForScene(scene)
+
     def resetZoom(self):
         self.resetTransform()
 
