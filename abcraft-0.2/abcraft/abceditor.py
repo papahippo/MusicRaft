@@ -110,7 +110,7 @@ class AbcEditor(widgetWithMenu, Editor):
 
     def handleTextChanged(self):
         self.counted = self.latency  
-        dbg_print ('textChanged', self.counted)
+        #dbg_print ('textChanged', self.counted)
 
     def countDown(self, force=None):
         if force:

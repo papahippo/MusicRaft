@@ -45,14 +45,14 @@ class MyScene(QtGui.QGraphicsScene):
 
 class SvgDigest:
     locatableTypes = ('N', None)
-    gScaleMultiplier = 1.0 
  
     def __init__(self, filename):
         self.svg_file = QtCore.QFile(filename)
         #self.buildCribList()
         self.quickDic = {}
         self.svg_tree = self.cursorsDad = None
-        
+        self.buildQuickDic()
+    
     def buildQuickDic(self, row=None, col=None, type_='N'):
         """ extract the all-imortant information from the .svg
             file which enables us to correlate locations within the
@@ -64,7 +64,7 @@ class SvgDigest:
              )
         # maybe need to use row numbers starting from 1 everywhere(?)
         hashToMatch = abcHash(type_, row, col)
-        dbg_print ('hashToMatch =', hashToMatch and hex(hashToMatch))
+        #dbg_print ('hashToMatch =', hashToMatch and hex(hashToMatch))
         fileName = str(self.svg_file.fileName())
         if self.svg_tree is None:
             # dbg_print("building 'quick dictionary' from '%s'" % fileName)
@@ -77,10 +77,12 @@ class SvgDigest:
                 self.quickDic[attr] = np.array([], dtype=dtype)
             self.svg_tree = lxml.etree.parse(fileName)
             root = self.svg_tree.getroot()
-            inchByInch = [root.get(dim) for dim in ('width', 'height')]
-            dbg_print ('inchByInch =', inchByInch,)
-            inchByInch = [((s.endswith('in') and float(s[:-2])) or None)
-                for s in inchByInch]
+            #sInchByInch = [root.get(dim) for dim in ('width', 'height')]
+            #dbg_print ('inchByInch =', sInchByInch,)
+            #self.inchByInch = [((s.endswith('in') and float(s[:-2])) or None)
+            #    for s in sInchByInch]
+            sViewBox = root.get('viewBox')
+            self.viewBox = sViewBox and map(float, sViewBox.split(' ')) or None
         else:
             self.removeCursor()
         eltCursor = lxml.etree.Element('circle', r='7', stroke='red', 
@@ -135,12 +137,11 @@ class SvgDigest:
 
         self.cursorsDad = dad
         transform = dad.get('transform')
-        dbg_print (dad, transform)
+        #dbg_print (dad, transform)
         scale_match = ((dad is not None)
             and re.match('scale\((.*)\)', transform))
-        gScale = (scale_match and float(scale_match.group(1))) or 0.75
-        dbg_print ("SvgDigest: scale according to svg section =", gScale)
-        self.gScale = gScale * self.gScaleMultiplier
+        self.gScale = (scale_match and float(scale_match.group(1))) or 0.75
+        dbg_print ("SvgDigest: scale according to svg section =", self.gScale)
         if self.abcEltAtCursor is None:
             dbg_print ("can't find cursor position!")
             #print (hex(hashToMatch),
@@ -162,18 +163,18 @@ class SvgDigest:
     def rowColAtXY(self, x, y):
         if not self.quickDic:
             self.buildQuickDic()
-        x /= self.gScale # fudgge-factor - investigation still pending!
-        y /= self.gScale # fudgge-factor - investigation still pending!
-        dbg_print('x,y', x, y, [(a, self.quickDic[a][:8])
-            for a in self.quickDic.keys()])
+        x /= self.gScale
+        y /= self.gScale
+        #dbg_print('x,y', x, y, [(a, self.quickDic[a][:8])
+        #    for a in self.quickDic.keys()])
         x_dist = x - self.quickDic['x']
         y_dist = y - self.quickDic['y']
         a_dist = x_dist*x_dist + y_dist*y_dist
         # dbg_print('a_dist', a_dist[:8])
         am = np.argmin(a_dist)
         type_, row, col = abcUnhash(self.quickDic['hash_'][am])
-        dbg_print(am, row, col, self.quickDic['x'][am],
-                                self.quickDic['y'][am], )
+        #dbg_print(am, row, col, self.quickDic['x'][am],
+        #                        self.quickDic['y'][am], )
         return row, col  # not sure this is the best place for the '-1'!
         
 class Score(QtGui.QGraphicsView, widgetWithMenu):
@@ -243,8 +244,9 @@ class Score(QtGui.QGraphicsView, widgetWithMenu):
         self.showWhichPage(j, force=True)
 
     def locateXY(self, x, y):
-        row, col = self.svgDigests[self.which].rowColAtXY(x, y)
-        dbg_print ("locateXY(", x, y, " > row,co", row, col)
+        row, col = self.svgDigests[self.which].rowColAtXY(
+                        x*self.gScaleXMultiplier, y*self.gScaleYMultiplier)
+        dbg_print ("locateXY(", x, y, " > row,col", row, col)
         if Common.abcEditor:
             Common.abcEditor.widget.moveToRowCol(row, col)
 
@@ -293,14 +295,23 @@ class Score(QtGui.QGraphicsView, widgetWithMenu):
         s.addItem(self.outlineItem)
 
         rect = self.outlineItem.boundingRect()
-        # dbg_print (rect)
+        #dbg_print ("before 'setSceneRect'...", s.sceneRect())
         s.setSceneRect(rect) # .adjusted(-10, -10, 10, 10))
+        #dbg_print ("after 'setSceneRect'...", s.sceneRect())
 
         self.setViewport(QtGui.QWidget())
 
         self.backgroundItem.setVisible(True)
         self.outlineItem.setVisible(False)
-
+        
+        viewBox = self.svgDigests[which].viewBox
+        if viewBox is None:
+            self.gScaleXMultiplier = self.gScaleYMultiplier = 1.0
+        else:
+            self.gScaleXMultiplier = (viewBox[2] - viewBox[0]) / s.width()
+            self.gScaleYMultiplier = (viewBox[3] - viewBox[1]) / s.height()
+        dbg_print("Multipliers =", self.gScaleXMultiplier, 
+                                   self.gScaleYMultiplier)
     def resetZoom(self):
         self.resetTransform()
 
