@@ -49,6 +49,7 @@ class AbcEditor(widgetWithMenu, Editor):
                     ('&Close',         'Ctrl+C', self.closeFile,),
                     ('Open in new &Instance', 'Ctrl+I', self.cloneAnyFile,),
                     ('&Reload',        'Ctrl+R', self.reloadFile,),
+                    ('R&estart',       'Ctrl+E', self.restart,),
                     ('&Save',          'Ctrl+S', self.saveFile,),
                     ('Save &As',       'Ctrl+A', self.saveFileAs,),
                     ('&Transpose',     'Ctrl+T', self.transpose,),
@@ -153,6 +154,10 @@ class AbcEditor(widgetWithMenu, Editor):
                                                          '', '*.abc')[0]
         dbg_print ("cloneAnyFile 2", fileName)
         self.loadFile(fileName, newInstance=True)
+
+    def restart(self):
+        self.loadFile(self.fileName)
+        sys.exit(0)
 
     def loadFile(self, fileName, newInstance=None, row=1, col=0):
         dbg_print ("AbcEditor.loadFile", fileName, newInstance, row, col)

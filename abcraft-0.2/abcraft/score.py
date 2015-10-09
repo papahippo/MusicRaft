@@ -76,7 +76,11 @@ class SvgDigest:
                     dtype = np.float_
                 self.quickDic[attr] = np.array([], dtype=dtype)
             self.svg_tree = lxml.etree.parse(fileName)
-            # root = svg_tree.getroot()
+            root = self.svg_tree.getroot()
+            inchByInch = [root.get(dim) for dim in ('width', 'height')]
+            dbg_print ('inchByInch =', inchByInch,)
+            inchByInch = [((s.endswith('in') and float(s[:-2])) or None)
+                for s in inchByInch]
         else:
             self.removeCursor()
         eltCursor = lxml.etree.Element('circle', r='7', stroke='red', 
@@ -181,8 +185,8 @@ class Score(QtGui.QGraphicsView, widgetWithMenu):
                     ("&First Page",    'Ctrl+1',      self.showWhichPage,),
                     ("&Next Page",     'Ctrl+PgDown', self.showNextPage,),
                     ("Pre&vious Page", 'Ctrl+PgUp',   self.showPreviousPage,),
-                    ('Print &Page',    'Ctrl+P',      self.printPage,),
-                    ('Print &Score',   'Ctrl+Alt+P',  self.printScore,),
+                    ('&Print',         'Ctrl+P',      self.printScore,),
+                    ('E&xport to PDF', 'Ctrl+Alt+X',  self.ScoreToPDF,),
                     #('Print S&ce',   'Ctrl+Alt+C',  self.printScene,),
 #                    ('Set &Font', 'F', self.changeMyFont,),
         ]
@@ -300,32 +304,25 @@ class Score(QtGui.QGraphicsView, widgetWithMenu):
     def resetZoom(self):
         self.resetTransform()
 
-    def printPage(self, *whichPages):
-        if not whichPages:
-            whichPages = self.which,
+    def printScore(self, toPDF=False):
         Common.printer.setDocName(self.compositeName)
-        Common.printer.setOutputFileName(self.compositeName+'.pdf')
-        dialog = QtGui.QPrintDialog(Common.printer, self)
-        dialog.accepted.connect(self.printerAccepted)
-        if not dialog.exec_():
-            return
-        print ("-------------", Common.printer.printerName(),
-                                dialog.printer().printerName())
+        Common.printer.setOutputFileName(
+            (toPDF and self.compositeName+'.pdf') or '')
         painter = QtGui.QPainter(Common.printer)
         thatPage = self.which
-        for i,j in enumerate(whichPages):
-            self.showWhichPage(j)
+        for i in range(len(self.svgDigests)):
+            self.showWhichPage(i)
             if i:
                 Common.printer.newPage()
             self.scene().render(painter)
-            self.render(painter)
+            #self.render(painter)
         self.showWhichPage(thatPage)
 
-    def printerAccepted(self, printer):
-        print ('printerAccepted', printer.printerName())
+    #def printerAccepted(self, printer):
+    #    print ('printerAccepted', printer.printerName())
 
-    def printScore(self):
-        self.printPage(*range(len(self.svgDigests)))
+    def ScoreToPDF(self):
+        self.printScore(toPDF=True)
 
     def wheelEvent(self, event):
         factor = 1.2**( event.delta() / 120.0)
