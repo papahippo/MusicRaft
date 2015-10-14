@@ -2,8 +2,7 @@
 #partially based on: http://john.nachtimwald.com/2009/08/15/qtextedit-with-line-numbers/ (MIT license)
 from __future__ import print_function
 
-from PySide import QtCore, QtGui
-from common import Common
+from common import (QtCore, QtGui, Common)
 
 ##LMY: from highlighter import PythonHighlighter
 

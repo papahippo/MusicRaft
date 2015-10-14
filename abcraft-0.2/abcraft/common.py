@@ -5,13 +5,19 @@ Copyright 2015 Hippos Technical Systems BV.
 @author: larry
 """
 from __future__ import print_function
-import os
-from PySide import QtCore, QtGui, QtSvg
+try:
+    UsePyQt4, "when defined selects PyQt4 as oppoed to PySide"
+    from PyQt4 import QtCore, QtGui, QtSvg
+    Signal = QtCore.pyqtSignal
+except NameError:
+    from PySide import QtCore, QtGui, QtSvg
+    Signal = QtCore.Signal
 
-_imported_via_us_ = QtCore, QtGui, QtSvg
-#dbg_print = lambda *pp, **kw: None
+_imported_via_us_ = QtCore, QtGui, QtSvg  # to suppress warning!
+
+dbg_print = lambda *pp, **kw: None
 # replace (or overrule in certain modules) above to show debug printout by...
-dbg_print = print
+#dbg_print = print
 # ... or use something more pythonically correct like the logging module!
 
 class Common:  # yes, shades of FORTRAN; sorry!

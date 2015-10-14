@@ -9,7 +9,9 @@ import sys, os, re, subprocess
 from PySide import QtCore, QtGui
 from abceditor import AbcEditor
 from score import Score
-from common import Common, Printer, myQAction, widgetWithMenu, dbg_print
+from common import (QtCore, QtGui, Common,
+                    Printer, myQAction, widgetWithMenu, dbg_print)
+                    
 from external import Abc2midi, Abcm2svg, Abc2abc 
 
 

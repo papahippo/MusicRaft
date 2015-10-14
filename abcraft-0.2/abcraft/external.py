@@ -7,8 +7,7 @@ their assocated widgets and methods.
 """
 from __future__ import print_function
 import os, re, subprocess
-from common import (Common, dbg_print,
-                    QtGui)
+from common import (Common, dbg_print, QtGui)
 
 
 class StdTab(QtGui.QPlainTextEdit):

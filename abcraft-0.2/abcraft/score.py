@@ -14,8 +14,7 @@ import numpy as np
 # from PyQt4 import QtCore, QtGui, QtSvg
 #from PySide import QtCore, QtGui, QtSvg
 
-from common import (Common, dbg_print, widgetWithMenu,
-                    QtCore, QtGui, QtSvg)
+from common import (Common, dbg_print, widgetWithMenu, QtCore, QtGui, QtSvg)
 
 def abcHash(type_, row, col):
    return (type_ and row and col) and ((ord(type_)<<24) + (row<<10) + col)
@@ -110,6 +109,9 @@ class SvgDigest:
             # dbg_print (i, elt.tag, type(elt.tag), str(elt.tag))
             if callable(elt.tag):
                 continue
+            if ((elt.get("stroke-width") is not None) and
+                        (elt.get("stroke") is None)):
+                elt.set("stroke", "black")
             if (elt.tag.endswith('abc')
             and (elt.get('type') in self.locatableTypes)):
                 eltAbc = elt # ready to be paired up with a notehead element
@@ -151,11 +153,11 @@ class SvgDigest:
             eltAbc = eltHead = None
 
         self.cursorsDad = dad
-        transform = dad.get('transform')
+        transform = ((dad is not None) and dad.get('transform')) or None
         #dbg_print (dad, transform)
-        scale_match = ((dad is not None)
+        scale_match = ((transform is not None)
             and re.match('scale\((.*)\)', transform))
-        self.gScale = (scale_match and float(scale_match.group(1))) or 0.75
+        self.gScale = (scale_match and float(scale_match.group(1))) or 1.0 # 0.75
         dbg_print ("SvgDigest: scale according to svg section =", self.gScale)
         if self.abcEltAtCursor is None:
             dbg_print ("can't find cursor position!")

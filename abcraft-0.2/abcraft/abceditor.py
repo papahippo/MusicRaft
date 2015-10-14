@@ -6,7 +6,7 @@ Created on Sun Aug 30 18:18:56 2015
 @author: larry
 """
 import sys, os, subprocess
-from common import (Common, widgetWithMenu, dbg_print, QtCore, QtGui)
+from common import (Signal, Common, widgetWithMenu, dbg_print, QtCore, QtGui)
 
 from editor import Editor
 
@@ -21,7 +21,7 @@ class AbcEditor(widgetWithMenu, Editor):
     prevCursorPos = -1 
     currentLineColor = None
 
-    abcFilenamesDropped = QtCore.Signal(list)
+    abcFilenamesDropped = Signal(list)
 
     def __init__(self, dock=None):
         dbg_print ("AbcEditor.__init__", dock)
@@ -89,7 +89,7 @@ class AbcEditor(widgetWithMenu, Editor):
         print ("autoTrack", l)
         blockText = tc.block().text()
         while col and ((col >= (l-1))
-            or not (blockText[col].lower() in 'abcdefg')):
+            or not (str(blockText[col]).lower() in 'abcdefg')):
             col -= 1
         print ('AbcEditor.handleCursorMove: row =', blockNumber,
                                            'col =', col, col0)
