@@ -86,12 +86,12 @@ class AbcEditor(widgetWithMenu, Editor):
         Common.blockNumber = blockNumber
         col0 =  col = tc.positionInBlock()
         l = tc.block().length()
-        print ("autoTrack", l)
+        dbg_print ("autoTrack", l)
         blockText = tc.block().text()
         while col and ((col >= (l-1))
             or not (str(blockText[col]).lower() in 'abcdefg')):
             col -= 1
-        print ('AbcEditor.handleCursorMove: row =', blockNumber,
+        dbg_print ('AbcEditor.handleCursorMove: row =', blockNumber,
                                            'col =', col, col0)
         if Common.score:
             Common.score.showAtRowAndCol(blockNumber+1, col)

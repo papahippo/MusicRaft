@@ -31,6 +31,8 @@ class Common:  # yes, shades of FORTRAN; sorry!
     abcEditor = None
     score = None
     abcraft = None
+    midiPlayer = None
+
     snippets = {
         'V': ('V:', ' name="', '" sname="', '"\n',),    # new voice
         'Q': ('Q:1/4', ),                 # new tempo indication

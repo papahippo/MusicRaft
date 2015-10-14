@@ -12,8 +12,8 @@ from score import Score
 from common import (QtCore, QtGui, Common,
                     Printer, myQAction, widgetWithMenu, dbg_print)
                     
-from external import Abc2midi, Abcm2svg, Abc2abc 
-
+from external import (Abc2midi, Abcm2svg, Abc2abc) 
+from midiplayer import MidiPlayer
 
 class StdBook(widgetWithMenu,  QtGui.QTabWidget):
     headerText = 'subprocess output'
@@ -60,6 +60,7 @@ class AbcCraft(QtGui.QMainWindow):
 
         self.setCentralWidget(Common.score)
        
+        Common.midiPlayer = MidiPlayer()
         Common.printer = Printer()
 
         Common.abcEditor = Dock(AbcEditor, True)
@@ -77,11 +78,17 @@ class AbcCraft(QtGui.QMainWindow):
         # subprocess.Popen(sys.argv)
 
     def startMidi(self):
-        if not self.abcMidiThread.outFileName:
+        if not (Common.abc2midi and Common.abc2midi.outFileName):
             return
-        subprocess.Popen((self.midiPlayerExe,
-                              self.abcMidiThread.outFileName))     
+        #subprocess.Popen((self.midiPlayerExe,
+        #                      self.abcMidiThread.outFileName))     
         #self.message = QtGui.AbcMessage(dock)
+        if Common.midiPlayer:
+           Common.midiPlayer.play(Common.abc2midi.outFileName) 
+
+    def pauseMidi(self):
+        if Common.midiPlayer:
+           Common.midiPlayer.pause() 
 
     def about(self):
         QtGui.QMessageBox.about(self, "About abcaft",
@@ -91,6 +98,9 @@ class AbcCraft(QtGui.QMainWindow):
     def createActions(self):
         self.startMidiAct = myQAction("Start &Midi",shortcut="Ctrl+M",
                 triggered=self.startMidi)
+
+        self.pauseMidiAct = myQAction("Pause M&idi",shortcut="Ctrl+,",
+                triggered=self.pauseMidi)
 
         self.exitAct = myQAction("E&xit", shortcut="Ctrl+Q",
                                  triggered=self.close)
@@ -106,6 +116,7 @@ class AbcCraft(QtGui.QMainWindow):
 
         self.midiMenu = QtGui.QMenu("&Midi", self)
         self.midiMenu.addAction(self.startMidiAct)
+        self.midiMenu.addAction(self.pauseMidiAct)
 
         self.helpMenu = QtGui.QMenu("&Help", self)
         self.helpMenu.addAction(self.aboutAct)

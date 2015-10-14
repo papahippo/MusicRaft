@@ -23,13 +23,21 @@ class MidiPlayer(QtGui.QWidget):
         dbg_print('MidiPlayer:__init__', self.output)
 
     def play(self, filename):
+        self.output.reset()
         self.accum = dict([(i, 0) for i in range(110, 115)])
         self.midiFile = mido.MidiFile(filename)
         self.messages = self.midiFile.__iter__() # self.midiFile.play()
         self.pendingMessage = None
+        self.paused = False
+        self.cueMessage()
+
+    def pause(self):
+        self.paused = not self.paused
         self.cueMessage()
 
     def cueMessage(self):
+        if self.paused:
+            return
         message = self.pendingMessage
         self.pendingMessage = None
         while True:
@@ -44,7 +52,9 @@ class MidiPlayer(QtGui.QWidget):
                                  + self.accum[112])
                         colNo =  ((self.accum[113]<<7)
                                  + self.accum[114])
-                        self.lineAndCol.emit(lineNo, colNo)
+                        #self.lineAndCol.emit(lineNo, colNo)
+                        if Common.abcEditor.widget:
+                            Common.abcEditor.widget.moveToRowCol(lineNo, colNo)
             try:
                 message = self.messages.next()
             except StopIteration:
