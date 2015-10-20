@@ -13,7 +13,7 @@ import numpy as np
 
 # from PyQt4 import QtCore, QtGui, QtSvg
 #from PySide import QtCore, QtGui, QtSvg
-
+UsePyQt4 = 1
 from common import (Common, dbg_print, widgetWithMenu, QtCore, QtGui, QtSvg)
 
 def abcHash(type_, row, col):
@@ -376,9 +376,9 @@ if __name__ == '__main__':
     
             self.setCentralWidget(self.score)
             self.setWindowTitle("SVG Viewer")
-            self.view.useFiles(sys.argv[1:] or
-                ['./allTunes_page_00%d.svg' % i for i in range(1, 4)  ])
-            self.resize(self.view.sizeHint() + QtCore.QSize(
+            self.score.useFiles(sys.argv[1:] or
+                ['test.svg'])
+            self.score.resize(self.score.sizeHint() + QtCore.QSize(
                 80, 80 + self.menuBar().height()))
 
 

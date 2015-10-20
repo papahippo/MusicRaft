@@ -60,7 +60,7 @@ class Editor(QtGui.QPlainTextEdit):
         print ("autoComplete", l)
         blockText = block.text()
         while col and ((col >= (l-1))
-            or not (blockText[col-1] in ' |!')):
+            or not (str(blockText[col-1]) in ' |!')):
             tc.deletePreviousChar()
             col -= 1
         key = blockText[col:col0]

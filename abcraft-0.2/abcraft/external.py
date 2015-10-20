@@ -20,7 +20,7 @@ tabs (Abcm2svg etc.) within the subprocess output notebook.
         QtGui.QPlainTextEdit.__init__(self)
         dbg_print (self.__class__.__name__+':__init__... commander.reMsg =',
                commander.reMsg)
-        self.creMsg = re.compile(commander.reMsg)
+        self.creMsg = commander.creMsg
         self.rowColOrigin = commander.rowColOrigin
         self.quiet = False
         self.cursorPositionChanged.connect(self.handleCursorMove)
@@ -63,6 +63,7 @@ within abcraft.
 
     def __init__(self):
         dbg_print ("External __init__", self.fmtNameIn, self.fmtNameOut)
+        self.creMsg = re.compile(self.reMsg)
         if Common.stdBook is None:
             dbg_print ("what? no Common.stdBook")
             self.stdTab = None
@@ -97,8 +98,8 @@ within abcraft.
             #                                        cmd1, output=output)
             
             if self.errOnOut:
-                self.postProcess(output)
-                return None
+                print ('output = \n', output)
+                return self.postProcess(output)
             else:
                 self.postProcess(error)
                 return output
@@ -173,6 +174,8 @@ class Abc2abc(External):
     fmtNameIn  = '%s.abc'
     fmtNameOut = '%.0stransposed.abc'  # sneakily don't use basename at all!
     exe = '/usr/local/bin/abc2abc'
+    errOnOut = True
+    reMsg = r'(%Warning|%Error).*'
 
     def cmd(self, inF, outF, transpose=None, **kw):
         flags = ''
@@ -181,3 +184,19 @@ class Abc2abc(External):
         return ('%s %s -OCC -r %s'
             %(self.exe, inF, flags) )
 
+    def postProcess(self, output_and_error):
+        error = ''
+        output = ''
+        for line in output_and_error.split('\n'):
+            if self.creMsg.match(line):
+                output = output[:-1]
+                output_and_error = output_and_error[1:]
+                error += ('line %d: ' % output.count('\n') + line + '\n')
+                
+            else:
+                output += (line + '\n')
+        self.stdTab.creMsg = re.compile(r'.*line\s+(\d+)\:.*')
+        print ('error = \n', error)
+        External.postProcess(self, error)
+        print ('output = \n', output)
+        return output

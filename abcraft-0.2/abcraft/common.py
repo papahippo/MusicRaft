@@ -5,20 +5,24 @@ Copyright 2015 Hippos Technical Systems BV.
 @author: larry
 """
 from __future__ import print_function
-try:
-    UsePyQt4, "when defined selects PyQt4 as oppoed to PySide"
-    from PyQt4 import QtCore, QtGui, QtSvg
-    Signal = QtCore.pyqtSignal
-except NameError:
+import sys, os
+
+dbg_print = (os.getenv('ABCRAFT_DBG') and print) or (lambda *pp, **kw: None)
+
+abcraft_qt = os.getenv('ABCRAFT_QT', 'PySide')
+if abcraft_qt == 'PySide':
     from PySide import QtCore, QtGui, QtSvg
     Signal = QtCore.Signal
+    dbg_print ("using PySide!")
+elif abcraft_qt == 'PyQt4':
+    from PyQt4 import QtCore, QtGui, QtSvg
+    Signal = QtCore.pyqtSignal
+    dbg_print ("using Pyqt4!")
+else:
+    raise NameError, ("bad value: ABCRAFT_QT = " + abcraft_qt)
 
 _imported_via_us_ = QtCore, QtGui, QtSvg  # to suppress warning!
 
-dbg_print = lambda *pp, **kw: None
-# replace (or overrule in certain modules) above to show debug printout by...
-#dbg_print = print
-# ... or use something more pythonically correct like the logging module!
 
 class Common:  # yes, shades of FORTRAN; sorry!
     timer = None
@@ -104,7 +108,8 @@ class widgetWithMenu(object):
         for tag, shortcut, func in self.menuItems():
             action = myQAction(tag, shortcut=shortcut, triggered=func)
             self.menu.addAction(action)
-        Common.abcraft.menuBar().addMenu(self.menu)
+        if Common.abcraft:
+            Common.abcraft.menuBar().addMenu(self.menu)
         #QtGui.QMainWindow().menuWidget ().addMenu(self.menu)
 
     def menuItems(self):

@@ -6,7 +6,6 @@ Copyright 2015 Hippos Technical Systems BV.
 """
 from __future__ import print_function
 import sys, os, re, subprocess
-from PySide import QtCore, QtGui
 from abceditor import AbcEditor
 from score import Score
 from common import (QtCore, QtGui, Common,
