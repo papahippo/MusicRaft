@@ -225,6 +225,7 @@ class Score(QtGui.QGraphicsView, widgetWithMenu):
         self.setDragMode(QtGui.QGraphicsView.ScrollHandDrag)
         self.which = 0  # default to show first generated svg until we know better.
         self.svgDigests = []
+        Common.abcEditor.widget.settledAt.connect(self.showAtRowAndCol)
         dbg_print ("!Score.__init__", parent)
 
     def drawBackground(self, p, rect):

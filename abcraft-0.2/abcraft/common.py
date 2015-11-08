@@ -34,7 +34,7 @@ class Common:  # yes, shades of FORTRAN; sorry!
     printer = None
     abcEditor = None
     score = None
-    abcraft = None
+    abcRaft = None
     midiPlayer = None
 
     snippets = {
@@ -75,7 +75,7 @@ def myQAction(menuText, shortcut=None, triggered=None, enabled=None,
               checkable=None, checked=None):
     """ Factory function to emulate older version of QAction.
     """
-    action = QtGui.QAction(menuText, Common.abcraft)
+    action = QtGui.QAction(menuText, Common.abcRaft)
     if shortcut:
         action.setShortcut(shortcut)
     if triggered:
@@ -108,8 +108,8 @@ class widgetWithMenu(object):
         for tag, shortcut, func in self.menuItems():
             action = myQAction(tag, shortcut=shortcut, triggered=func)
             self.menu.addAction(action)
-        if Common.abcraft:
-            Common.abcraft.menuBar().addMenu(self.menu)
+        if Common.abcRaft:
+            Common.abcRaft.menuBar().addMenu(self.menu)
         #QtGui.QMainWindow().menuWidget ().addMenu(self.menu)
 
     def menuItems(self):

@@ -33,7 +33,7 @@ class Dock(QtGui.QDockWidget):
         self.widget.menu.addAction(self.toggleViewAction())
 
     
-class AbcCraft(QtGui.QMainWindow):
+class AbcRaft(QtGui.QMainWindow):
 
     midiPlayerExe = 'timidity'
     interval = 100
@@ -41,7 +41,7 @@ class AbcCraft(QtGui.QMainWindow):
     def __init__(self):
         #print sys.path
         QtGui.QMainWindow.__init__(self)
-        Common.abcraft = self
+        Common.abcRaft = self
         Common.timer = QtCore.QTimer()
         Common.timer.start(self.interval)
         
@@ -51,20 +51,19 @@ class AbcCraft(QtGui.QMainWindow):
         Common.stdBook = Dock(StdBook,  True)
         self.addDockWidget(QtCore.Qt.BottomDockWidgetArea, Common.stdBook)
         Common.stdBook.setMinimumHeight(140)
+        Common.abcEditor = Dock(AbcEditor, True)
+        Common.abcEditor.setMinimumWidth(640)
+        self.addDockWidget(QtCore.Qt.RightDockWidgetArea, Common.abcEditor)
 
-        Common.abcm2svg = Abcm2svg()
-        Common.abc2midi = Abc2midi()
         Common.abc2abc = Abc2abc()
-        Common.score = Score(self)
-
-        self.setCentralWidget(Common.score)
+        Common.abc2midi = Abc2midi()
+        Common.abcm2svg = Abcm2svg()
        
         Common.midiPlayer = MidiPlayer()
         Common.printer = Printer()
 
-        Common.abcEditor = Dock(AbcEditor, True)
-        Common.abcEditor.setMinimumWidth(640)
-        self.addDockWidget(QtCore.Qt.RightDockWidgetArea, Common.abcEditor)
+        Common.score = Score(self)
+        self.setCentralWidget(Common.score)
         self.setWindowTitle("ABCraft")
         self.resize(1280, 1024)
         Common.abcEditor.widget.abcFilenamesDropped.connect(self.openThemAll)
@@ -128,7 +127,7 @@ class AbcCraft(QtGui.QMainWindow):
 
 def main():
     app = QtGui.QApplication(sys.argv)
-    abcCraft = AbcCraft()
+    abcCraft = AbcRaft()
     abcCraft.show()
     try:
         sys.exit(app.exec_())

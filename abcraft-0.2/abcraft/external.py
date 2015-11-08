@@ -66,7 +66,8 @@ within abcraft.
 
 
     def __init__(self):
-        dbg_print ("External __init__", self.fmtNameIn, self.fmtNameOut)
+        dbg_print ("External __init__", self.__class__.__name__,
+                   self.fmtNameIn, self.fmtNameOut)
         self.creMsg = re.compile(self.reMsg)
         if Common.stdBook is None:
             dbg_print ("what? no Common.stdBook")
@@ -75,9 +76,14 @@ within abcraft.
             self.stdTab = StdTab(self)
             Common.stdBook.widget.addTab(self.stdTab,
                                          self.__class__.__name__)
+            Common.stdBook.widget.setCurrentWidget(self.stdTab)
+        if Common.abcEditor is None:
+            print ("what? no abcEditor!")
+        else:
+            Common.abcEditor.widget.fileSaved.connect(self.process)
 
     def process(self, inFileName, **kw):
-        dbg_print ("External", self.cmd, kw, "run on", inFileName,
+        print ("External", self.cmd, kw, "run on", inFileName,
                self.fmtNameIn)
         baseName = os.path.splitext(inFileName)[0]
         if inFileName != (self.fmtNameIn % baseName):
@@ -102,7 +108,7 @@ within abcraft.
             #                                        cmd1, output=output)
             
             if self.errOnOut:
-                print ('output = \n', output)
+                dbg_print ('output = \n', output)
                 return self.postProcess(output)
             else:
                 self.postProcess(error)

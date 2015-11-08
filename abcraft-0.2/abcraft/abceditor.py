@@ -22,6 +22,8 @@ class AbcEditor(widgetWithMenu, Editor):
     currentLineColor = None
 
     abcFilenamesDropped = Signal(list)
+    settledAt = Signal(int, int)
+    fileSaved = Signal(str)
 
     def __init__(self, dock=None):
         dbg_print ("AbcEditor.__init__", dock)
@@ -83,7 +85,7 @@ class AbcEditor(widgetWithMenu, Editor):
  
     def highlight(self, tc):
         blockNumber = tc.blockNumber()
-        Common.blockNumber = blockNumber
+        # Common.blockNumber = blockNumber
         col0 =  col = tc.positionInBlock()
         l = tc.block().length()
         dbg_print ("autoTrack", l)
@@ -93,8 +95,9 @@ class AbcEditor(widgetWithMenu, Editor):
             col -= 1
         dbg_print ('AbcEditor.handleCursorMove: row =', blockNumber,
                                            'col =', col, col0)
-        if Common.score:
-            Common.score.showAtRowAndCol(blockNumber+1, col)
+        #if Common.score:
+        #    Common.score.showAtRowAndCol(blockNumber+1, col)
+        self.settledAt.emit(blockNumber+1, col)
         hi_selection = QtGui.QTextEdit.ExtraSelection()
  
         hi_selection.format.setBackground(self.palette().alternateBase())
@@ -196,7 +199,7 @@ class AbcEditor(widgetWithMenu, Editor):
         text = stream.readAll()
         self.setPlainText(text)
 
-    def saveFile(self, fileName=None):
+    def saveFile(self, fileName=None,):
         if fileName is None:
             fileName = self.fileName
         if fileName is None:
@@ -209,6 +212,8 @@ class AbcEditor(widgetWithMenu, Editor):
         out.close()
         dbg_print ("Saved %s " % fileName)
         self.document().setModified(False)
+        self.fileSaved.emit(fileName)
+        return
 
         if Common.abcm2svg:
             Common.abcm2svg.process(fileName)
