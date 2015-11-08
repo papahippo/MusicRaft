@@ -16,8 +16,10 @@ This now very bare looking class will be embellished with facilities for
 error location helpers etc. in due course. It is the class behind the several
 tabs (Abcm2svg etc.) within the subprocess output notebook.
     """
-    def __init__(self, commander=None):
+    def __init__(self, commander):
         QtGui.QPlainTextEdit.__init__(self)
+        font = QtGui.QFont(*commander.stdFont)
+        self.setFont(font)
         dbg_print (self.__class__.__name__+':__init__... commander.reMsg =',
                commander.reMsg)
         self.creMsg = commander.creMsg
@@ -60,6 +62,8 @@ within abcraft.
     errOnOut = False
     reMsg = r'$^'  # default = don't match any lines.
     rowColOrigin = (0, -1)
+    stdFont = 'Courier New', 10, False
+
 
     def __init__(self):
         dbg_print ("External __init__", self.fmtNameIn, self.fmtNameOut)
