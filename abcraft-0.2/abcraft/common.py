@@ -19,7 +19,7 @@ elif abcraft_qt == 'PyQt4':
     Signal = QtCore.pyqtSignal
     dbg_print ("using Pyqt4!")
 else:
-    raise NameError, ("bad value: ABCRAFT_QT = " + abcraft_qt)
+    raise NameError("bad value: ABCRAFT_QT = " + abcraft_qt)
 
 _imported_via_us_ = QtCore, QtGui, QtSvg  # to suppress warning!
 
@@ -56,8 +56,8 @@ class Common:  # yes, shades of FORTRAN; sorry!
         'tp': ('!teepee!',),
         'ac': ('!>!',),                  # accent; '><TAB>' also works
         'ro': ('!///!',),                # roll/roffel; '///<TAB>' also works
-        'st': ('!dot!',),                # staccato; 'dot<TAB>' also works
-        '.': ('!dot!',),                 # staccato; 'dot<TAB>' also works
+        'su': ('!dot!',),                # staccato; 'dot<TAB>' also works
+#        '.': ('!dot!',),                 # staccato; 'dot<TAB>' also works
         'gl': ('!-(!', '!-)!'),          # glissando
     }
     
