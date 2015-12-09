@@ -6,13 +6,13 @@ Copyright 2015 Hippos Technical Systems BV.
 """
 from __future__ import print_function
 import sys, os, re, subprocess
-from abceditor import AbcEditor
-from score import Score
-from common import (QtCore, QtGui, Common,
+from .abceditor import AbcEditor
+from .score import Score
+from .common import (QtCore, QtGui, Common,
                     Printer, myQAction, widgetWithMenu, dbg_print)
                     
-from external import (Abc2midi, Abcm2svg, Abc2abc) 
-from midiplayer import MidiPlayer
+from .external import (Abc2midi, Abcm2svg, Abc2abc) 
+from .midiplayer import MidiPlayer
 
 class StdBook(widgetWithMenu,  QtGui.QTabWidget):
     headerText = 'subprocess output'

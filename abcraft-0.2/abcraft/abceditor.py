@@ -6,9 +6,9 @@ Created on Sun Aug 30 18:18:56 2015
 @author: larry
 """
 import sys, os, subprocess
-from common import (Signal, Common, widgetWithMenu, dbg_print, QtCore, QtGui)
+from .common import (Signal, Common, widgetWithMenu, dbg_print, QtCore, QtGui)
 
-from editor import Editor
+from .editor import Editor
 
 class AbcEditor(widgetWithMenu, Editor):
     loadFileArgs= ("Load an existing ABC file", '', '*.abc')

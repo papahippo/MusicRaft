@@ -5,7 +5,7 @@ Copyright 2015 Hippos Technical Systems BV.
 @author: larry
 """
 from __future__ import print_function
-import sys, os
+import os
 
 dbg_print = (os.getenv('ABCRAFT_DBG') and print) or (lambda *pp, **kw: None)
 

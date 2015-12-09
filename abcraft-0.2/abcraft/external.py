@@ -7,7 +7,7 @@ their assocated widgets and methods.
 """
 from __future__ import print_function
 import os, re, subprocess
-from common import (Common, dbg_print, QtGui)
+from .common import (Common, dbg_print, QtGui)
 
 
 class StdTab(QtGui.QPlainTextEdit):
@@ -87,7 +87,7 @@ within abcraft.
                self.fmtNameIn)
         baseName = os.path.splitext(inFileName)[0]
         if inFileName != (self.fmtNameIn % baseName):
-            raise TypeError, ("%s cannot handle this filetype: %s" %
+            raise TypeError ("%s cannot handle this filetype: %s" %
                              (self.fmtNameIn,  baseName, self.__class__.__name__,     inFileName))
         self.outFileName = self.fmtNameOut % baseName
         if self.cmd is not None:

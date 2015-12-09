@@ -11,10 +11,7 @@ import sys, re
 import lxml.etree
 import numpy as np
 
-# from PyQt4 import QtCore, QtGui, QtSvg
-#from PySide import QtCore, QtGui, QtSvg
-UsePyQt4 = 1
-from common import (Common, dbg_print, widgetWithMenu, QtCore, QtGui, QtSvg)
+from .common import (Common, dbg_print, widgetWithMenu, QtCore, QtGui, QtSvg)
 
 def abcHash(type_, row, col):
    return (type_ and row and col) and ((ord(type_)<<24) + (row<<10) + col)
@@ -64,7 +61,7 @@ class SvgDigest:
             image with locations within the source abc file.
         """
         if type_ not in self.locatableTypes:
-            raise TypeError, (
+            raise TypeError (
 "only types " + self.locatableTypes + " can be autolocated in this version."
              )
         # maybe need to use row numbers starting from 1 everywhere(?)
@@ -284,7 +281,7 @@ class Score(QtGui.QGraphicsView, widgetWithMenu):
             return
         svg_file = self.svgDigests[which].svg_file
         if not svg_file.exists():
-            raise IOError, ("'%s' does not exist!" % svg_file.filename())
+            raise IOError("'%s' does not exist!" % svg_file.filename())
         self.which = which
         scene = self.scene()
 

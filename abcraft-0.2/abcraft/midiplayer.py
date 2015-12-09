@@ -8,7 +8,7 @@ Run with (for example):
 """
 
 import sys, mido
-from common import (Signal, Common, widgetWithMenu, dbg_print, QtCore, QtGui)
+from .common import (Signal, Common, widgetWithMenu, dbg_print, QtCore, QtGui)
 
 #class MidiPlayer(object):
 class MidiPlayer(QtGui.QWidget):
