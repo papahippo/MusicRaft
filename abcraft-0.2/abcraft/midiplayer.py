@@ -8,11 +8,11 @@ Run with (for example):
 """
 
 import sys, mido
-from .common import (Signal, Common, widgetWithMenu, dbg_print, QtCore, QtGui)
-
+from common import (Signal, Common, widgetWithMenu, dbg_print, QtCore, QtGui)
+#from PyQt4 import (  QtCore, QtGui)
 #class MidiPlayer(object):
 class MidiPlayer(QtGui.QWidget):
-    
+        
     lineAndCol = Signal(int, int)
 
     outputPort = 'TiMidity port 1'
@@ -52,9 +52,9 @@ class MidiPlayer(QtGui.QWidget):
                                  + self.accum[112])
                         colNo =  ((self.accum[113]<<7)
                                  + self.accum[114])
-                        #self.lineAndCol.emit(lineNo, colNo)
-                        if Common.abcEditor.widget:
-                            Common.abcEditor.widget.moveToRowCol(lineNo, colNo)
+                        self.lineAndCol.emit(lineNo, colNo)
+                        #if Common.abcEditor.widget:
+                        #    Common.abcEditor.widget.moveToRowCol(lineNo, colNo)
             try:
                 message = self.messages.next()
             except StopIteration:
