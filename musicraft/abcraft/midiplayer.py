@@ -8,9 +8,9 @@ Run with (for example):
 """
 
 import sys, mido
-from common import (Signal, Common, widgetWithMenu, dbg_print, QtCore, QtGui)
-#from PyQt4 import (  QtCore, QtGui)
-#class MidiPlayer(object):
+from ..share import (Signal, WithMenu, dbg_print, QtCore, QtGui)
+
+
 class MidiPlayer(QtGui.QWidget):
         
     lineAndCol = Signal(int, int)
@@ -53,18 +53,14 @@ class MidiPlayer(QtGui.QWidget):
                         colNo =  ((self.accum[113]<<7)
                                  + self.accum[114])
                         self.lineAndCol.emit(lineNo, colNo)
-                        #if Common.abcEditor.widget:
-                        #    Common.abcEditor.widget.moveToRowCol(lineNo, colNo)
             try:
                 message = self.messages.next()
             except StopIteration:
                 dbg_print('cue_msg; StopIteration')
                 return
             dbg_print(message.type, message)
-            #if pendingMessage.type != 'control_change':
             if message.time != 0:
                 break
-            #dbg_print(dir(pendingMessage), pendingMessage.type)
         self.pendingMessage = message
         milliseconds = int(message.time * 1000)
         QtCore.QTimer.singleShot(milliseconds, self.cueMessage)

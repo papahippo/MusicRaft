@@ -6,8 +6,8 @@ Created on Sun Aug 30 18:18:56 2015
 @author: larry
 """
 import sys, os, subprocess
-from share import (Signal, dbg_print, QtCore, QtGui, QtSvg)
-from editor import Editor
+from ..share import (Signal, dbg_print, QtCore, QtGui, QtSvg)
+from .editor import Editor
 
 def myQAction(menuText, shortcut=None, triggered=None, enabled=None,
               checkable=None, checked=None):
@@ -58,8 +58,9 @@ class RaftEditor(Editor):
     minimumHeight = None
 
 
-    def __init__(self, dock=None):
+    def __init__(self, raft, dock=None):
         dbg_print ("AbcEditor.__init__", dock)
+        self.raft = raft
         Editor.__init__(self)
         self.timer = QtCore.QTimer()
         self.timer.start(self.interval)

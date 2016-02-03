@@ -11,7 +11,7 @@ import sys, re
 import lxml.etree
 import numpy as np
 
-from common import (Common, dbg_print, widgetWithMenu, QtCore, QtGui, QtSvg)
+from ..share import (dbg_print, QtCore, QtGui, QtSvg, WithMenu, Printer)
 
 def abcHash(type_, row, col):
    return (type_ and row and col) and ((ord(type_)<<24) + (row<<10) + col)
@@ -33,12 +33,11 @@ class MyScene(QtGui.QGraphicsScene):
                'scene width =', self.width(), 'scene height =', self.height(),
         )
         if event.button() == 1:
-            Common.score.locateXY(x, y)
+            self.parent().locateXY(x, y)
             event.accept()
         else:
             event.ignore()
 
-# maybe unnecessary if we can use getParent
 
 class SvgDigest:
     locatableTypes = ('N', None)
@@ -194,7 +193,7 @@ class SvgDigest:
         #                        self.quickDic['y'][am], )
         return row, col  # not sure this is the best place for the '-1'!
         
-class Score(QtGui.QGraphicsView, widgetWithMenu):
+class Score(QtGui.QGraphicsView, WithMenu):
     menuTag = '&Score'
 
     def menuItems(self):
@@ -211,8 +210,10 @@ class Score(QtGui.QGraphicsView, widgetWithMenu):
 
     def __init__(self, raft=None):
         dbg_print ("Score.__init__", raft)
-        widgetWithMenu.__init__(self)
+        WithMenu.__init__(self)
         QtGui.QGraphicsView.__init__(self, raft)
+        self.raft = raft
+        self.printer = Printer()
         self.svgItem = None
         self.backgroundItem = None
         self.outlineItem = None
@@ -223,8 +224,8 @@ class Score(QtGui.QGraphicsView, widgetWithMenu):
         self.setDragMode(QtGui.QGraphicsView.ScrollHandDrag)
         self.which = 0  # default to show first generated svg until we know better.
         self.svgDigests = []
-        Common.abcEditor.widget.settledAt.connect(self.showAtRowAndCol)
-        dbg_print ("!Score.__init__", parent)
+        raft.editor.settledAt.connect(self.showAtRowAndCol)
+        dbg_print ("!Score.__init__", raft)
 
     def drawBackground(self, p, rect):
         p.save()
@@ -264,8 +265,7 @@ class Score(QtGui.QGraphicsView, widgetWithMenu):
     def locateXY(self, x, y):
         row, col = self.svgDigests[self.which].rowColAtXY(x, y)
         dbg_print ("locateXY(", x, y, " > row,col", row, col)
-        if Common.abcEditor:
-            Common.abcEditor.widget.moveToRowCol(row, col)
+        self.raft.editor.moveToRowCol(row, col)
 
     def showNextPage(self):
         dbg_print ('showNextPage')
@@ -327,21 +327,19 @@ class Score(QtGui.QGraphicsView, widgetWithMenu):
         self.resetTransform()
 
     def printScore(self, toPDF=False):
-        Common.printer.setDocName(self.compositeName)
-        Common.printer.setOutputFileName(
+        self.printer.setDocName(self.compositeName)
+        self.printer.setOutputFileName(
             (toPDF and self.compositeName+'.pdf') or '')
-        painter = QtGui.QPainter(Common.printer)
+        painter = QtGui.QPainter(self.printer)
         thatPage = self.which
         for i in range(len(self.svgDigests)):
             self.showWhichPage(i)
             if i:
-                Common.printer.newPage()
+                self.printer.newPage()
             self.scene().render(painter)
             #self.render(painter)
         self.showWhichPage(thatPage)
 
-    #def printerAccepted(self, printer):
-    #    print ('printerAccepted', printer.printerName())
 
     def ScoreToPDF(self):
         self.printScore(toPDF=True)
