@@ -34,7 +34,7 @@ class WithMenu(object):
         if not (self.menuTag and self.menuItems()):
             return
         for tag, shortcut, func in self.menuItems():
-            action = myQAction(tag, shortcut=shortcut, triggered=func)
+            action = self.myQAction(tag, shortcut=shortcut, triggered=func)
             self.menu.addAction(action)
         menuOwner.menuBar().addMenu(self.menu)
 

@@ -32,7 +32,6 @@ class Raft(QtGui.QMainWindow, WithMenu):
 
     def __init__(self):
         QtGui.QMainWindow.__init__(self)
-        WithMenu.__init__(self, self)
         self.stdBook = Dock(self, StdBook,  True)
         self.addDockWidget(QtCore.Qt.BottomDockWidgetArea, self.stdBook)
         self.stdBook.setMinimumHeight(140)
@@ -41,6 +40,7 @@ class Raft(QtGui.QMainWindow, WithMenu):
         self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.raftEditor)
         self.editor = self.raftEditor.widget
         self.createMenus()
+        WithMenu.__init__(self, self)
 
 
     def start(self):

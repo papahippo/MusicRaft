@@ -1,15 +1,28 @@
-# abcraft
-Tis is essentially a rework of 'my' ABC craft music score processor to
-use PySide/PyQt4 (currently it is a geanyplug-in)
-'abcraft' is a working title; maybe it will become 'abccraft' or
-'abcside' - perhaps even 'abcclef (easy to design an icon for that!).
+# 'abcraft' is the git PROJECT title of this tree of files containing the
+ python PACKAGE 'musicraft'.
 
-I'm maintaining two prototype versions here:
+'musicraft' started out as a rework of the geanypy plug-in 'ABCcraft'.
 
-abcraft-0.1 depends on the use of abcm2ps version 6.6.22.
+I reluctantly ditched the geanypy approach; gerany+geanypy is a great
+editor+plug-in tool, but installation on a Windows system still seems to
+require some good luck and/or black magic.
 
-abcraft-0.2 works with the latest stable acm2ps (version 7.8.14) but not
-with the older version. This will be reworked soon to be less fussy 
-about specific versions, and hopefully by reasonably future-proof.
+I have (somewhat belatedly!) radically separated the pure editing stuff
+from the music-score related stuff.
+
+Here is a quick synopsis of the musicraft package:
+
+musicraft/__init__.py:
+    This is the file which makes musicraft into a package.
+
+
+I'm also maintaining two older prototype packages here:
+
+abcraft-0.1 depends on the use of abcm2ps version 6.6.22. It has little or no
+functionality not available in later versions so will be removed soon.
+
+abcraft-0.2 works with most versions of abcm2ps, sometimes requiring tweaks in
+the startup file. Until 'musicraft' is fully working, this is teh latest functional
+version.
 
 

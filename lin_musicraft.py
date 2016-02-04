@@ -5,6 +5,8 @@ Copyright 2015 Hippos Technical Systems BV.
 @author: larry
 """
 from __future__ import print_function
+import sys
+print (sys.path)
 import musicraft
 print ("imported musicraft package from", musicraft.__file__)
 musicraft.abcraft.external.Abcm2svg.exe = '/usr/local/bin/abcm2ps'
