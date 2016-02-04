@@ -6,7 +6,7 @@ Copyright 2015 Hippos Technical Systems BV.
 """
 from __future__ import print_function
 import sys, os, re, subprocess
-from ..share import (QtCore, QtGui, Printer)
+from ..share import (Share, QtCore, QtGui, Printer)
 from .score import Score
 
 from .external import (Abc2midi, Abcm2svg, Abc2abc)
@@ -18,21 +18,23 @@ class AbcRaft(QtGui.QMainWindow):
 
     midiPlayerExe = 'timidity'
 
-    def __init__(self, raft):
-        self.raft = raft
-        self.abc2abc = Abc2abc(raft)
-        self.abc2midi = Abc2midi(raft)
-        self.abcm2svg = Abcm2svg(raft)
+    def __init__(self):
+        QtGui.QMainWindow.__init__(self)
+        Share.abcRaft = self
+        self.score = Score()
+        self.abc2abc = Abc2abc()
+        self.abc2midi = Abc2midi()
+        self.abcm2svg = Abcm2svg()
 
-        self.midiPlayer = MidiPlayer(raft)
-        self.printer = Printer(raft)
+        self.midiPlayer = MidiPlayer()
+        self.printer = Printer()
 
-        self.score = Score(raft)
-        raft.setCentralWidget(self.score)
-        raft.setWindowTitle("ABCraft")
+        Share.raft.setCentralWidget(self.score)
+        Share.raft.setWindowTitle("ABCraft")
         self.resize(1280, 1024)
-        self.create_actions()
-        self.create_menus()
+        if 0:  # problematic...
+            self.create_actions()
+            self.create_menus()
 
     def start_midi(self):
         if not (self.abc2midi and self.abc2midi.outFileName):
@@ -45,7 +47,7 @@ class AbcRaft(QtGui.QMainWindow):
            self.midiPlayer.pause()
 
     def create_actions(self):
-        self.start_midi_action = self.raft.myQAction("Start &Midi",shortcut="Ctrl+M",
+        self.start_midi_action = Share.raft.myQAction("Start &Midi",shortcut="Ctrl+M",
                 triggered=self.start_midi)
 
         self.pause_midi_action = myQAction("Pause M&idi",shortcut="Ctrl+,",
@@ -57,17 +59,5 @@ class AbcRaft(QtGui.QMainWindow):
         self.midi_menu.addAction(self.start_midi_action)
         self.midi_menuMenu.addAction(self.pause_midi_action)
 
-        self.raft.menuBar().addMenu(self.midi_menu)
-        self.raft.menuBar().show()
-
-    def main():
-        app = QtGui.QApplication(sys.argv)
-        abcCraft = AbcRaft()
-        abcCraft.show()
-        try:
-            sys.exit(app.exec_())
-        except:
-            pass
-
-    if __name__ == '__main__':
-        main()
+        Share.raft.menuBar().addMenu(self.midi_menu)
+        Share.raft.menuBar().show()

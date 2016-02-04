@@ -20,5 +20,5 @@ class AbcraftBundle(Bundle):
         'linux2': 'lin_abcraft.py',
     }
 
-if __name__ == '__main__':  # in practivce, always the case?
+if __name__ == '__main__':  # in practice, always the case?
     AbcraftBundle().install()

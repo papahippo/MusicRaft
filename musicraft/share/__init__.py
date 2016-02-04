@@ -3,6 +3,9 @@ import sys, os
 
 dbg_print = (os.getenv('ABCRAFT_DBG') and print) or (lambda *pp, **kw: None)
 
+class Share:
+    pass
+
 abcraft_qt = os.getenv('ABCRAFT_QT', 'PySide')
 if abcraft_qt == 'PySide':
     from PySide import QtCore, QtGui, QtSvg
@@ -29,14 +32,14 @@ class Printer(QtGui.QPrinter):
 class WithMenu(object):
     menuTag = None
 
-    def __init__(self, menuOwner):
+    def __init__(self):
         self.menu = QtGui.QMenu(self.menuTag)
         if not (self.menuTag and self.menuItems()):
             return
         for tag, shortcut, func in self.menuItems():
             action = self.myQAction(tag, shortcut=shortcut, triggered=func)
             self.menu.addAction(action)
-        menuOwner.menuBar().addMenu(self.menu)
+        Share.raft.menuBar().addMenu(self.menu)
 
     def menuItems(self):
         return [

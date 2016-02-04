@@ -2,7 +2,7 @@
 #partially based on: http://john.nachtimwald.com/2009/08/15/qtextedit-with-line-numbers/ (MIT license)
 from __future__ import print_function
 import sys, os
-from ..share import (Signal, dbg_print, QtCore, QtGui, QtSvg)
+from ..share import (Share, Signal, dbg_print, QtCore, QtGui, QtSvg)
 
 ##LMY: from highlighter import PythonHighlighter
 
@@ -46,7 +46,7 @@ class Editor(QtGui.QPlainTextEdit):
         plain = not (meta or ctrl or shift)
         if key == QtCore.Qt.Key_Insert and plain:
             self.setOverwriteMode(not self.overwriteMode())
-        if key == QtCore.Qt.Key_Tab and plain and Common.snippets:
+        if key == QtCore.Qt.Key_Tab and plain and Share.snippets:
             return self.autoComplete(event)
         else:
             QtGui.QPlainTextEdit.keyPressEvent(self, event)
@@ -65,7 +65,7 @@ class Editor(QtGui.QPlainTextEdit):
             col -= 1
         key = blockText[col:col0]
         print ("autoComplete key %d:%d '%s'" % (col, col0, key))
-        snippet = Common.snippets.get(key, ("!%s!" % key,))
+        snippet = self.snippets.get(key, ("!%s!" % key,))
         
         # rough and ready starter implementation:
         for i, piece in enumerate(snippet):

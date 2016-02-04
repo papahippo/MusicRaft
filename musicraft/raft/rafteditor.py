@@ -6,25 +6,8 @@ Created on Sun Aug 30 18:18:56 2015
 @author: larry
 """
 import sys, os, subprocess
-from ..share import (Signal, dbg_print, QtCore, QtGui, QtSvg)
+from ..share import (Share, Signal, dbg_print, QtCore, QtGui, QtSvg)
 from .editor import Editor
-
-def myQAction(menuText, shortcut=None, triggered=None, enabled=None,
-              checkable=None, checked=None):
-    """ Factory function to emulate older version of QAction.
-    """
-    action = QtGui.QAction(menuText, Common.abcRaft)
-    if shortcut:
-        action.setShortcut(shortcut)
-    if triggered:
-        action.triggered.connect(triggered)
-    if enabled is not None:
-        action.setEnabled(enabled)
-    if checkable is not None:
-        action.setCheckable(checkable)
-    if checked is not None:
-        action.setChecked(checked)
-    return action
 
 
 class RaftEditor(Editor):
@@ -58,9 +41,8 @@ class RaftEditor(Editor):
     minimumHeight = None
 
 
-    def __init__(self, raft, dock=None):
+    def __init__(self, dock=None):
         dbg_print ("AbcEditor.__init__", dock)
-        self.raft = raft
         Editor.__init__(self)
         self.timer = QtCore.QTimer()
         self.timer.start(self.interval)
@@ -235,8 +217,6 @@ class RaftEditor(Editor):
         return
 
     def transpose(self):
-        if not Common.abc2abc:
-            return
         semitones, ok = QtGui.QInputDialog.getInteger(self,
                 "Transpose (automatic clef change(s))",
                 "semitones (+/- for up/down:)", 0, -24, 24, 1)
@@ -246,7 +226,7 @@ class RaftEditor(Editor):
         self.originalText = self.toPlainText()
         self.setFileName(fileName)
         self.saveFile(fileName=fileName)
-        transposedText = Common.abc2abc.process(fileName,
+        transposedText = Share.abcraft.abc2abc.process(fileName,
                                                 transpose=semitones)
         self.newFile('transposed.abc')
         self.setPlainText(transposedText)

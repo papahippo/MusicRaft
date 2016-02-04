@@ -7,7 +7,7 @@ their assocated widgets and methods.
 """
 from __future__ import print_function
 import re
-from ..share import (dbg_print, )
+from ..share import (Share, dbg_print)
 from ..raft.external import External
 
 
@@ -51,9 +51,9 @@ class Abcm2svg(External):
             if match:
                 svgList.append(match.group(1))
         dbg_print (svgList)
-        if svgList and Common.score:
-            Common.score.useFiles(svgList)
-            # Common.score.showWhichPage(0)
+        if svgList:
+            Share.abcRaft.score.useFiles(svgList)
+            # Share.abcRaft.score.showWhichPage(0)
 
 
 class Abc2midi(External):

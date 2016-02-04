@@ -6,23 +6,22 @@ Copyright 2016 Hippos Technical Systems BV.
 """
 import sys
 from .rafteditor import RaftEditor
-from ..share import (Signal, dbg_print, QtCore, QtGui, QtSvg, WithMenu)
+from ..share import (Share, Signal, dbg_print, QtCore, QtGui, QtSvg, WithMenu)
 
 
 class StdBook(QtGui.QTabWidget):
     headerText = 'subprocess output'
     whereDockable   = QtCore.Qt.AllDockWidgetAreas
 
-    def __init__(self, raft, dock=None):
-        self.raft = raft
+    def __init__(self, dock=None):
         QtGui.QTabWidget.__init__(self)
 
 
 class Dock(QtGui.QDockWidget):
-    def __init__(self, raft, widgetClass, visible=True):
+    def __init__(self, widgetClass, visible=True):
         QtGui.QDockWidget.__init__(self, widgetClass.headerText)
         self.setAllowedAreas(widgetClass.whereDockable)
-        self.widget = widgetClass(raft, dock=self)
+        self.widget = widgetClass(dock=self)
         self.setWidget(self.widget)
         self.setVisible(visible)
 
@@ -32,15 +31,16 @@ class Raft(QtGui.QMainWindow, WithMenu):
 
     def __init__(self):
         QtGui.QMainWindow.__init__(self)
-        self.stdBook = Dock(self, StdBook,  True)
+        Share.raft = self
+        self.stdBook = Dock(StdBook,  True)
         self.addDockWidget(QtCore.Qt.BottomDockWidgetArea, self.stdBook)
         self.stdBook.setMinimumHeight(140)
-        self.raftEditor = Dock(self, RaftEditor, True)
+        self.raftEditor = Dock(RaftEditor, True)
         self.raftEditor.setMinimumWidth(640)
         self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.raftEditor)
         self.editor = self.raftEditor.widget
         self.createMenus()
-        WithMenu.__init__(self, self)
+        WithMenu.__init__(self)
 
 
     def start(self):
@@ -82,10 +82,11 @@ class Raft(QtGui.QMainWindow, WithMenu):
         ]
 
 
-def main():
+def main(Plugins=()):
     app = QtGui.QApplication(sys.argv)
-    raft = Raft()
-    raft.start()
+    Raft()
+    Share.plugins = [Plugin() for Plugin in Plugins]
+    Share.raft.start()
     try:
         sys.exit(app.exec_())
     except:

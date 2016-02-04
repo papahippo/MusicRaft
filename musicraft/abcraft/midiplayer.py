@@ -8,7 +8,7 @@ Run with (for example):
 """
 
 import sys, mido
-from ..share import (Signal, WithMenu, dbg_print, QtCore, QtGui)
+from ..share import (Share, Signal, WithMenu, dbg_print, QtCore, QtGui)
 
 
 class MidiPlayer(QtGui.QWidget):
@@ -19,7 +19,12 @@ class MidiPlayer(QtGui.QWidget):
 
     def __init__(self):
         QtGui.QWidget.__init__(self)
-        self.output = mido.open_output(self.outputPort)
+        try:
+            self.output = mido.open_output(self.outputPort)
+        except IOError:
+            print ("sorry; couldn't setup MIDI player")
+            print ("perhapsoverruling outputPort (currently {0} will help".format(self.outputPort))
+            self.output = None
         dbg_print('MidiPlayer:__init__', self.output)
 
     def play(self, filename):

@@ -7,7 +7,7 @@ their assocated widgets and methods.
 """
 from __future__ import print_function
 import os, re, subprocess
-from ..share import (dbg_print, QtGui)
+from ..share import (Share, dbg_print, QtGui)
 
 
 class StdTab(QtGui.QPlainTextEdit):
@@ -22,7 +22,6 @@ tabs (Abcm2svg etc.) within the subprocess output notebook.
         self.setFont(font)
         dbg_print (self.__class__.__name__+':__init__... commander.reMsg =',
                commander.reMsg)
-        self.raft = commander.raft
         self.creMsg = commander.creMsg
         self.rowColOrigin = commander.rowColOrigin
         self.quiet = False
@@ -31,7 +30,7 @@ tabs (Abcm2svg etc.) within the subprocess output notebook.
     def handleCursorMove(self):
         dbg_print (self.__class__.__name__+':handleCursorMove... self.quiet =',
                self.quiet)
-        if (Common.abcEditor is None) or self.quiet:
+        if self.quiet:
             return
         match = self.creMsg.match(self.textCursor().block().text())
         dbg_print (self.__class__.__name__+':handleCursorMove... match =', match)
@@ -43,7 +42,7 @@ tabs (Abcm2svg etc.) within the subprocess output notebook.
 
         print ("Autolocating error in ABC", location )
         
-        self.raft.editor.moveToRowCol(*location)
+        Share.raft.editor.moveToRowCol(*location)
 
     def setPlainText(self, text):
         self.quiet = True
@@ -66,15 +65,15 @@ within abcraft.
     stdFont = 'Courier New', 10, False
 
 
-    def __init__(self, raft):
+    def __init__(self):
         dbg_print ("External __init__", self.__class__.__name__,
                    self.fmtNameIn, self.fmtNameOut)
         self.creMsg = re.compile(self.reMsg)
         self.stdTab = StdTab(self)
-        raft.stdBook.widget.addTab(self.stdTab,
+        Share.raft.stdBook.widget.addTab(self.stdTab,
                                      self.__class__.__name__)
-        raft.stdBook.widget.setCurrentWidget(self.stdTab)
-        raft.editor.fileSaved.connect(self.process)
+        Share.raft.stdBook.widget.setCurrentWidget(self.stdTab)
+        Share.raft.editor.fileSaved.connect(self.process)
 
     def process(self, inFileName, **kw):
         print ("External", self.cmd, kw, "run on", inFileName,

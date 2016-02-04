@@ -11,7 +11,7 @@ import sys, re
 import lxml.etree
 import numpy as np
 
-from ..share import (dbg_print, QtCore, QtGui, QtSvg, WithMenu, Printer)
+from ..share import (Share, dbg_print, QtCore, QtGui, QtSvg, WithMenu, Printer)
 
 def abcHash(type_, row, col):
    return (type_ and row and col) and ((ord(type_)<<24) + (row<<10) + col)
@@ -208,11 +208,10 @@ class Score(QtGui.QGraphicsView, WithMenu):
 #                    ('Set &Font', 'F', self.changeMyFont,),
         ]
 
-    def __init__(self, raft=None):
-        dbg_print ("Score.__init__", raft)
+    def __init__(self):
+        dbg_print ("Score.__init__")
+        QtGui.QGraphicsView.__init__(self)
         WithMenu.__init__(self)
-        QtGui.QGraphicsView.__init__(self, raft)
-        self.raft = raft
         self.printer = Printer()
         self.svgItem = None
         self.backgroundItem = None
@@ -224,8 +223,8 @@ class Score(QtGui.QGraphicsView, WithMenu):
         self.setDragMode(QtGui.QGraphicsView.ScrollHandDrag)
         self.which = 0  # default to show first generated svg until we know better.
         self.svgDigests = []
-        raft.editor.settledAt.connect(self.showAtRowAndCol)
-        dbg_print ("!Score.__init__", raft)
+        Share.raft.editor.settledAt.connect(self.showAtRowAndCol)
+        dbg_print ("!Score.__init__")
 
     def drawBackground(self, p, rect):
         p.save()
@@ -265,7 +264,7 @@ class Score(QtGui.QGraphicsView, WithMenu):
     def locateXY(self, x, y):
         row, col = self.svgDigests[self.which].rowColAtXY(x, y)
         dbg_print ("locateXY(", x, y, " > row,col", row, col)
-        self.raft.editor.moveToRowCol(row, col)
+        Share.raft.editor.moveToRowCol(row, col)
 
     def showNextPage(self):
         dbg_print ('showNextPage')
