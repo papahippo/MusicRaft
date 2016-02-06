@@ -7,7 +7,7 @@ Copyright 2016 Hippos Technical Systems BV.
 import sys
 from .rafteditor import RaftEditor
 from ..share import (Share, Signal, dbg_print, QtCore, QtGui, QtSvg, WithMenu)
-
+import qdarkstyle
 
 class StdBook(QtGui.QTabWidget):
     headerText = 'subprocess output'
@@ -85,6 +85,7 @@ class Raft(QtGui.QMainWindow, WithMenu):
 
 def main(Plugins=()):
     app = QtGui.QApplication(sys.argv)
+    app.setStyleSheet(qdarkstyle.load_stylesheet())
     Raft()
     Share.plugins = [Plugin() for Plugin in Plugins]
     Share.raft.start()

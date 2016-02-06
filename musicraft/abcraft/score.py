@@ -163,7 +163,7 @@ class SvgDigest:
         else:
             dad.insert(0, eltCursor)
             # test only: self.cursorsDad.remove(eltCursor)
-            outFile = open(fileName, 'w')
+            outFile = open(fileName, 'wb')
             dbg_print ('written', fileName)
             self.svg_tree.write(outFile)
             self.eltCursor = eltCursor
