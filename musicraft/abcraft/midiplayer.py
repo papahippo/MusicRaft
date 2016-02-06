@@ -15,7 +15,7 @@ class MidiPlayer(QtGui.QWidget):
         
     lineAndCol = Signal(int, int)
 
-    outputPort = 'TiMidity port 1'
+    outputPort = 'TiMidity port 0'
 
     def __init__(self):
         QtGui.QWidget.__init__(self)

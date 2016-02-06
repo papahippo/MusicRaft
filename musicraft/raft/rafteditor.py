@@ -128,7 +128,7 @@ class RaftEditor(Editor):
         if self.document().isModified():
             print ("autoSave")
             split = os.path.split(self.fileName)
-            fileName = split[0] + '/autosave_' + split[1]
+            fileName = 'autosave_'.join(split)
             return self.saveFile(fileName=fileName)
         tc = self.textCursor()
         position = tc.position()
@@ -148,7 +148,7 @@ class RaftEditor(Editor):
     def loadAnyFile(self):
         fileName = QtGui.QFileDialog.getOpenFileName(self,
                                                          "Choose a data file",
-                                                         '', '*.abc')[0]
+                                                         '.', '*.abc')[0]
         dbg_print ("loadAnyFile 2", fileName)
         self.loadFile(fileName, newInstance=False)
 

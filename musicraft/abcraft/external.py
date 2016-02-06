@@ -6,7 +6,7 @@ command processors (abc2midi etc.) which are executed by abccraft, and to
 their assocated widgets and methods.
 """
 from __future__ import print_function
-import re
+import os, re
 from ..share import (Share, dbg_print)
 from ..raft.external import External
 
@@ -19,19 +19,17 @@ postscript (as opposed to svg) output. This is currently unused (see
     """
     fmtNameIn  = '%s.abc'
     fmtNameOut = '%s.ps'
-    exe = 'abcm2ps'
-    #exe = '/home/larry/musicprogs/abcm2ps-6.4.1/abcm2ps'
+    exec_file = 'abcm2ps'
 
     def cmd(self, inF, outF, **kw):
-        return ('%s -O %s %s'
-            %(self.exe, outF, inF) )
+        return External.cmd(self, '-A', '-O', outF, inF)
 
 
 class Abcm2svg(External):
     
     fmtNameIn  = '%s.abc'
     fmtNameOut = '%s_page_.svg'
-    exe = 'abcm2ps'
+    exec_file = 'abcm2ps'
     reMsg = r'.*in\s+line\s(\d+)\.(\d+).*'
     rowColOrigin = (0, 0)
 
@@ -40,8 +38,7 @@ class Abcm2svg(External):
         self.outFile_CRE = re.compile("Output written on\s+(\S.*)\s\(.*")
 
     def cmd(self, inF, outF, **kw):
-        return ('%s -v -A -O %s %s'
-            %(self.exe, outF, inF) )
+        return External.cmd(self, '-v -A -O', outF, inF)
 
     def postProcess(self, error):
         External.postProcess(self, error)
@@ -60,30 +57,28 @@ class Abc2midi(External):
 
     fmtNameIn  = '%s.abc'
     fmtNameOut = '%s.midi'
-    exe = '/usr/local/bin/abc2midi'
+    exec_file = 'abc2midi'
     errOnOut = True
     reMsg = r'.*in\s+line-char\s(\d+)\-(\d+).*'
     rowColOrigin = (0, 0)
     
     def cmd(self, inF, outF, **kw):
-        return ('%s %s -v -EA -o %s'
-            %(self.exe, inF, outF) )
+        return External.cmd(self, inF, '-v', '-EA', '-o', outF)
 
 
 class Abc2abc(External):
     
     fmtNameIn  = '%s.abc'
     fmtNameOut = '%.0stransposed.abc'  # sneakily don't use basename at all!
-    exe = '/usr/local/bin/abc2abc'
+    exec_file = 'abc2abc'
     errOnOut = True
     reMsg = r'(%Warning|%Error).*'
 
     def cmd(self, inF, outF, transpose=None, **kw):
-        flags = ''
+        pp = [inF, '-OCC', '-r']
         if transpose is not None:
-            flags += '-t %d' % transpose
-        return ('%s %s -OCC -r %s'
-            %(self.exe, inF, flags) )
+            pp += ['-t', str(transpose)]
+        return External.cmd(self, *pp)
 
     def postProcess(self, output_and_error):
         error = ''

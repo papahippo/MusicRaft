@@ -54,10 +54,10 @@ class External(object):
 'External' is the generic class representing command processors invoked from
 within abcraft.
     """
-    cmd = 'echo'  # just a stub which might be useful
     fmtNameIn  = '%s.in'
     fmtNameOut = '%s.out'
-    exe = None
+    exec_dir = os.path.normpath(os.path.split(__file__)[0] + '/../share/' + os.sys.platform + '/bin')
+    exec_file = "base_class_stub_of_exec_file"
     outFileName = None
     errOnOut = False
     reMsg = r'$^'  # default = don't match any lines.
@@ -66,8 +66,6 @@ within abcraft.
 
 
     def __init__(self):
-        dbg_print ("External __init__", self.__class__.__name__,
-                   self.fmtNameIn, self.fmtNameOut)
         self.creMsg = re.compile(self.reMsg)
         self.stdTab = StdTab(self)
         Share.raft.stdBook.widget.addTab(self.stdTab,
@@ -75,37 +73,37 @@ within abcraft.
         Share.raft.stdBook.widget.setCurrentWidget(self.stdTab)
         Share.raft.editor.fileSaved.connect(self.process)
 
+    def cmd(self, *pp):
+        answer = ' '.join((os.path.sep.join((self.exec_dir, self.exec_file)),) + pp)
+        dbg_print ("External.cmd answer = ", answer)
+        return answer
     def process(self, inFileName, **kw):
-        print ("External", self.cmd, kw, "run on", inFileName,
-               self.fmtNameIn)
         baseName = os.path.splitext(inFileName)[0]
         if inFileName != (self.fmtNameIn % baseName):
             raise TypeError ("%s cannot handle this filetype: %s" %
                              (self.fmtNameIn,  baseName, self.__class__.__name__,     inFileName))
         self.outFileName = self.fmtNameOut % baseName
-        if self.cmd is not None:
-            cmd1 = self.cmd(inFileName, self.outFileName, **kw)
-            dbg_print (cmd1)
-            if self.errOnOut:
-                stderr = subprocess.STDOUT
-            else:
-                stderr = subprocess.PIPE
-            process = subprocess.Popen(cmd1, stdout=subprocess.PIPE,
-                                             stderr=stderr,
-                                             shell=True)
-            output, error = process.communicate()
-            _retcode = process.poll()
-            if _retcode:
-                pass
-            #    raise subprocess.CalledProcessError(retcode,
-            #                                        cmd1, output=output)
-            
-            if self.errOnOut:
-                dbg_print ('output = \n', output)
-                return self.postProcess(output)
-            else:
-                self.postProcess(error)
-                return output
+        if self.cmd is None:
+            return
+
+        cmd1 = self.cmd(inFileName, self.outFileName, **kw)
+        dbg_print (cmd1)
+        process = subprocess.Popen(cmd1, stdout=subprocess.PIPE, shell=True,
+            stderr= subprocess.STDOUT if self.errOnOut else subprocess.PIPE)
+        output_bytes, error_bytes = process.communicate()
+        output = output_bytes and output_bytes.decode()
+        error = error_bytes and error_bytes.decode()
+        _retcode = process.poll()
+        if _retcode:
+            pass
+        #    raise subprocess.CalledProcessError(retcode,
+        #                                        cmd1, output=output)
+        if self.errOnOut:
+            dbg_print ('output = \n', output)
+            return self.postProcess(output)
+        else:
+            self.postProcess(error)
+            return output
 
     def postProcess(self, error):
         if self.stdTab is None:

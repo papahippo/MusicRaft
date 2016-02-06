@@ -32,6 +32,7 @@ class Raft(QtGui.QMainWindow, WithMenu):
     def __init__(self):
         QtGui.QMainWindow.__init__(self)
         Share.raft = self
+        self.resize(1280, 1024)
         self.stdBook = Dock(StdBook,  True)
         self.addDockWidget(QtCore.Qt.BottomDockWidgetArea, self.stdBook)
         self.stdBook.setMinimumHeight(140)
