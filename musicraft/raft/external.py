@@ -6,6 +6,8 @@ command processors (abc2midi etc.) which are executed by abccraft, and to
 their assocated widgets and methods.
 """
 from __future__ import print_function
+import logging
+logger = logging.getLogger()
 import os, re, subprocess
 from ..share import (Share, dbg_print, QtGui)
 
@@ -56,7 +58,9 @@ within abcraft.
     """
     fmtNameIn  = '%s.in'
     fmtNameOut = '%s.out'
-    exec_dir = os.path.normpath(os.path.split(__file__)[0] + '/../share/' + os.sys.platform + '/bin')
+    exec_dir = os.path.normpath(os.path.split(__file__)[0] + '/../share/' + os.sys.platform + '/bin').replace(
+        'linux2', 'linux')
+    #exec_dir = os.path.normpath(os.path.split(__file__)[0] + '/../share/' + os.sys.platform + '/bin')
     exec_file = "base_class_stub_of_exec_file"
     outFileName = None
     errOnOut = False
@@ -77,11 +81,13 @@ within abcraft.
         answer = ' '.join((os.path.sep.join((self.exec_dir, self.exec_file)),) + pp)
         dbg_print ("External.cmd answer = ", answer)
         return answer
+
     def process(self, inFileName, **kw):
         baseName = os.path.splitext(inFileName)[0]
         if inFileName != (self.fmtNameIn % baseName):
-            raise TypeError ("%s cannot handle this filetype: %s" %
-                             (self.fmtNameIn,  baseName, self.__class__.__name__,     inFileName))
+            logger.warning("ignoring file {0} (doesn't conform to '{1}'".format(
+                                        inFileName,             self.fmtNameIn))
+            return
         self.outFileName = self.fmtNameOut % baseName
         if self.cmd is None:
             return

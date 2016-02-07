@@ -92,7 +92,7 @@ class Abc2abc(External):
             else:
                 output += (line + '\n')
         self.stdTab.creMsg = re.compile(r'.*line\s+(\d+)\:.*')
-        print ('error = \n', error)
+        # print ('error = \n', error)
         External.postProcess(self, error)
-        print ('output = \n', output)
+        # print ('output = \n', output)
         return output
