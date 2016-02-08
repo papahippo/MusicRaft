@@ -16,7 +16,8 @@ class StdBook(QtGui.QTabWidget):
     def __init__(self, dock=None):
         QtGui.QTabWidget.__init__(self)
 
-
+class DisplayBook(QtGui.QTabWidget):
+    pass  # for now
 class Dock(QtGui.QDockWidget):
     def __init__(self, widgetClass, visible=True):
         QtGui.QDockWidget.__init__(self, widgetClass.headerText)
@@ -41,6 +42,10 @@ class Raft(QtGui.QMainWindow, WithMenu):
         self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.raftEditor)
         self.editor = self.raftEditor.widget
         self.createMenus()
+        self.displayBook = DisplayBook()
+        self.setCentralWidget(self.displayBook)
+        #self.displayBook.setBaseSize(640, 480)
+        #self.displayBook.addTab(QtGui.QGraphicsView(), "test widget")
         WithMenu.__init__(self)
 
 
@@ -85,7 +90,7 @@ class Raft(QtGui.QMainWindow, WithMenu):
 
 def main(Plugins=()):
     app = QtGui.QApplication(sys.argv)
-    app.setStyleSheet(qdarkstyle.load_stylesheet())
+    # app.setStyleSheet(qdarkstyle.load_stylesheet())
     Raft()
     Share.plugins = [Plugin() for Plugin in Plugins]
     Share.raft.start()

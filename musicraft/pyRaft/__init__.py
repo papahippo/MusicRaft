@@ -7,34 +7,18 @@ Copyright 2015 Hippos Technical Systems BV.
 from __future__ import print_function
 import sys, os, re, subprocess
 from ..share import (Share, QtCore, QtGui, Printer)
-from .score import Score
+from .htmlview import HtmlView
+from .external import (Python)
 
-from .external import (Abc2midi, Abcm2svg, Abc2abc)
-
-from .midiplayer import MidiPlayer
-
-
-class AbcRaft(QtGui.QMainWindow):
-
-    midiPlayerExe = 'timidity'
+class PyRaft(QtGui.QMainWindow):
 
     def __init__(self):
         QtGui.QMainWindow.__init__(self)
         Share.abcRaft = self
-        self.score = Score()
-        self.abc2abc = Abc2abc()
-        self.abc2midi = Abc2midi()
-        self.abcm2svg = Abcm2svg()
+        self.htmlView = HtmlView()
+        self.python = Python()
+        Share.raft.displayBook.addTab(self.htmlView, "HTML")
 
-        self.midiPlayer = MidiPlayer()
-        self.printer = Printer()
-
-        Share.raft.setWindowTitle("ABCraft")
-        Share.raft.displayBook.addTab(self.score, "Score")
-
-        if 0:  # problematic...
-            self.create_actions()
-            self.create_menus()
 
     def start_midi(self):
         if not (self.abc2midi and self.abc2midi.outFileName):
