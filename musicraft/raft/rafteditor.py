@@ -11,10 +11,6 @@ from .editor import Editor
 
 
 class RaftEditor(Editor):
-    loadFileArgs= ("Load an existing ABC file", '', '*.abc')
-    saveFileArgs= ("Save ABC source to file as", '', '*.abc')
-    headerText = 'ABC Edit'
-    menuTag = '&ABC'
     minimumWidth = 480
     minimumHeight = None
     interval = 100
@@ -28,8 +24,6 @@ class RaftEditor(Editor):
 
 # hastily rescued from widgetWithMenu mix-in:
 #
-    loadFileArgs= ("Choose a data file", '', '*.txt')
-    saveFileArgs= ("Save file as", '', '*.txt')
     headerText = 'Edit'
     menuTag = '&File'
     whereDockable   = QtCore.Qt.AllDockWidgetAreas
@@ -251,7 +245,7 @@ class RaftEditor(Editor):
         """
         if fileName is None:
             files = QtGui.QFileDialog.getSaveFileName(self,
-                *self.saveFileArgs)
+                "Save source to file as", '', '*.abc')
             if not files:
                 return
             fileName = files[0]

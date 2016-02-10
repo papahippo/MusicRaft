@@ -82,6 +82,9 @@ within abcraft.
         dbg_print ("External.cmd answer = ", answer)
         return answer
 
+    def process_output(self, output):
+        return output
+
     def process(self, inFileName, **kw):
         baseName = os.path.splitext(inFileName)[0]
         if inFileName != (self.fmtNameIn % baseName):
@@ -110,9 +113,6 @@ within abcraft.
         else:
             self.process_error(error)
             return self.process_ouput(output)
-
-    def process_output(self, output):
-        return output
 
     def process_error(self, error):
         if self.stdTab is None:
