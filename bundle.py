@@ -7,6 +7,7 @@ Copyright 2015 Hippos Technical Systems BV.
 from __future__ import print_function
 import sys, os, zipfile, webbrowser, pip
 
+print ("aha")
 class Bundle(object):
     target_package = '<must override!>'
     needs = ()          # default = needs nothing else but python!

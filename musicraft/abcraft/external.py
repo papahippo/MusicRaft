@@ -40,7 +40,7 @@ class Abcm2svg(External):
     def cmd(self, inF, outF, **kw):
         return External.cmd(self, '-v -A -O', outF, inF)
 
-    def process_output(self, output):
+    def handle_output(self, output):
         return output
 
     def process_error(self, error):

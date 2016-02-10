@@ -82,37 +82,37 @@ within abcraft.
         dbg_print ("External.cmd answer = ", answer)
         return answer
 
-    def process_output(self, output):
+    def handle_output(self, output):
+        print (output)
         return output
 
     def process(self, inFileName, **kw):
+        print(inFileName)
         baseName = os.path.splitext(inFileName)[0]
         if inFileName != (self.fmtNameIn % baseName):
-            logger.warning("ignoring file {0} (doesn't conform to '{1}'".format(
-                                        inFileName,             self.fmtNameIn))
+            #logger.warning("ignoring file {0} (doesn't conform to '{1}'".format(
+            #                            inFileName,             self.fmtNameIn))
             return
         self.outFileName = self.fmtNameOut % baseName
         if self.cmd is None:
             return
-
         cmd1 = self.cmd(inFileName, self.outFileName, **kw)
         dbg_print (cmd1)
         process = subprocess.Popen(cmd1, stdout=subprocess.PIPE, shell=True,
             stderr= subprocess.STDOUT if self.errOnOut else subprocess.PIPE)
+        process.wait()
         output_bytes, error_bytes = process.communicate()
-        output = output_bytes and output_bytes.decode()
-        error = error_bytes and error_bytes.decode()
-        _retcode = process.poll()
-        if _retcode:
-            pass
-        #    raise subprocess.CalledProcessError(retcode,
-        #                                        cmd1, output=output)
+        output = output_bytes.decode()
+        error = error_bytes.decode()
         if self.errOnOut:
             dbg_print ('output = \n', output)
             return self.process_error(output)
         else:
             self.process_error(error)
-            return self.process_ouput(output)
+            return self.handle_output(output)
+            # Share.pyRaft.htmlView.showOutput(output)
+            #print(len(answer), dir(self))
+            #return answer
 
     def process_error(self, error):
         if self.stdTab is None:

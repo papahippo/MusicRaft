@@ -18,8 +18,11 @@ class Python -
     fmtNameIn  = '%s.py'
     fmtNameOut = '%s.html'  # ? maybe unused
     exec_dir = '/usr/bin'
-    exec_file = '/usr/bin/python'
+    exec_file = 'python'
 
-    def process_output(self, output):
+    def cmd(self, inF, outF, **kw):
+        return External.cmd(self, inF)
+
+    def handle_output(self, output):
         Share.pyRaft.htmlView.showOutput(output)
         return output

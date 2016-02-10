@@ -14,7 +14,7 @@ class PyRaft(QtGui.QMainWindow):
 
     def __init__(self):
         QtGui.QMainWindow.__init__(self)
-        Share.abcRaft = self
+        Share.pyRaft = self
         self.htmlView = HtmlView()
         self.python = Python()
         Share.raft.displayBook.addTab(self.htmlView, "HTML")

@@ -142,7 +142,8 @@ class RaftEditor(Editor):
     def loadAnyFile(self):
         fileName = QtGui.QFileDialog.getOpenFileName(self,
                                                          "Choose a data file",
-                                                         '.', '*.abc')[0]
+                                                         '.', '*.*')[0]
+#                                                         '.', '*.abc')[0]
         dbg_print ("loadAnyFile 2", fileName)
         self.loadFile(fileName, newInstance=False)
 
