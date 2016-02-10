@@ -40,8 +40,8 @@ class Abcm2svg(External):
     def cmd(self, inF, outF, **kw):
         return External.cmd(self, '-v -A -O', outF, inF)
 
-    def postProcess(self, error):
-        External.postProcess(self, error)
+    def process_error(self, error):
+        External.process_error(self, error)
         svgList = []
         for line in error.split('\n'):
             match = self.outFile_CRE.match(line)
@@ -80,7 +80,7 @@ class Abc2abc(External):
             pp += ['-t', str(transpose)]
         return External.cmd(self, *pp)
 
-    def postProcess(self, output_and_error):
+    def process_error(self, output_and_error):
         error = ''
         output = ''
         for line in output_and_error.split('\n'):
@@ -93,6 +93,6 @@ class Abc2abc(External):
                 output += (line + '\n')
         self.stdTab.creMsg = re.compile(r'.*line\s+(\d+)\:.*')
         # print ('error = \n', error)
-        External.postProcess(self, error)
+        External.process_error(self, error)
         # print ('output = \n', output)
         return output

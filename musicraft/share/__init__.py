@@ -8,11 +8,11 @@ class Share:
 
 abcraft_qt = os.getenv('ABCRAFT_QT', 'PySide')
 if abcraft_qt == 'PySide':
-    from PySide import QtCore, QtGui, QtSvg
+    from PySide import (QtCore, QtGui, QtSvg, QtWebKit)
     Signal = QtCore.Signal
     dbg_print ("using PySide!")
 elif abcraft_qt == 'PyQt4':
-    from PyQt4 import QtCore, QtGui, QtSvg
+    from PyQt4 import (QtCore, QtGui, QtSvg, QtWebKit)
     Signal = QtCore.pyqtSignal
     dbg_print ("using Pyqt4!")
 else:

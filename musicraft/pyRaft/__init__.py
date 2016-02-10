@@ -7,7 +7,7 @@ Copyright 2015 Hippos Technical Systems BV.
 from __future__ import print_function
 import sys, os, re, subprocess
 from ..share import (Share, QtCore, QtGui, Printer)
-from .htmlview import HtmlView
+from .html_view import HtmlView
 from .external import (Python)
 
 class PyRaft(QtGui.QMainWindow):

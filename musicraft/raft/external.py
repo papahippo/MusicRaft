@@ -106,12 +106,15 @@ within abcraft.
         #                                        cmd1, output=output)
         if self.errOnOut:
             dbg_print ('output = \n', output)
-            return self.postProcess(output)
+            return self.process_error(output)
         else:
-            self.postProcess(error)
-            return output
+            self.process_error(error)
+            return self.process_ouput(output)
 
-    def postProcess(self, error):
+    def process_output(self, output):
+        return output
+
+    def process_error(self, error):
         if self.stdTab is None:
             dbg_print ("self.stdTab is None!")
         else:
