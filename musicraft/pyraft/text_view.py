@@ -13,9 +13,9 @@ import numpy as np
 
 from ..share import (Share, dbg_print, QtCore, QtGui, QtWebKit, WithMenu, Printer)
 
-class HtmlView(QtWebKit.QWebView, WithMenu):
+class TextView(QtGui.QPlainTextEdit, WithMenu):
 
-    menuTag = '&Score'
+    menuTag = '&Text'
 
     def menuItems(self):
         return [
@@ -23,12 +23,12 @@ class HtmlView(QtWebKit.QWebView, WithMenu):
         ]
 
     def __init__(self):
-        dbg_print ("HtmlView.__init__")
-        QtWebKit.QWebView.__init__(self)
+        dbg_print ("TextView.__init__")
+        QtGui.QPlainTextEdit.__init__(self)
         WithMenu.__init__(self)
 
-    def showOutput(self, html_bytes):
-        self.setContent(html_bytes)
+    def showOutput(self, text_bytes):
+        self.setPlainText(text_bytes)
 
     def showAtRowAndCol(self, row, col):
         pass  # for now!
