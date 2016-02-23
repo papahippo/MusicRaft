@@ -11,10 +11,9 @@ from .html_view import HtmlView
 from .text_view import TextView
 from .external import (Python)
 
-class PyRaft(QtGui.QMainWindow):
+class PyRaft(object):
 
     def __init__(self):
-        QtGui.QMainWindow.__init__(self)
         Share.pyRaft = self
         self.htmlView = HtmlView()
         self.textView = TextView()
@@ -22,29 +21,3 @@ class PyRaft(QtGui.QMainWindow):
         Share.raft.displayBook.addTab(self.htmlView, "Html")
         Share.raft.displayBook.addTab(self.textView, "Text")
 
-
-    def start_midi(self):
-        if not (self.abc2midi and self.abc2midi.outFileName):
-            return
-        if self.midiPlayer:
-           self.midiPlayer.play(self.abc2midi.outFileName)
-
-    def pause_midi(self):
-        if self.midiPlayer:
-           self.midiPlayer.pause()
-
-    def create_actions(self):
-        self.start_midi_action = Share.raft.myQAction("Start &Midi",shortcut="Ctrl+M",
-                triggered=self.start_midi)
-
-        self.pause_midi_action = myQAction("Pause M&idi",shortcut="Ctrl+,",
-                triggered=self.pause_midi)
-
-    def create_menus(self):
-
-        self.midi_menu = QtGui.QMenu("&Midi", self)
-        self.midi_menu.addAction(self.start_midi_action)
-        self.midi_menuMenu.addAction(self.pause_midi_action)
-
-        Share.raft.menuBar().addMenu(self.midi_menu)
-        Share.raft.menuBar().show()

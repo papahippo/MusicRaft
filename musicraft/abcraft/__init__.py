@@ -14,12 +14,11 @@ from .external import (Abc2midi, Abcm2svg, Abc2abc)
 from .midiplayer import MidiPlayer
 
 
-class AbcRaft(QtGui.QMainWindow):
+class AbcRaft(object):
 
     midiPlayerExe = 'timidity'
 
     def __init__(self):
-        QtGui.QMainWindow.__init__(self)
         Share.abcRaft = self
         self.score = Score()
         self.abc2abc = Abc2abc()
@@ -50,7 +49,7 @@ class AbcRaft(QtGui.QMainWindow):
         self.start_midi_action = Share.raft.myQAction("Start &Midi",shortcut="Ctrl+M",
                 triggered=self.start_midi)
 
-        self.pause_midi_action = myQAction("Pause M&idi",shortcut="Ctrl+,",
+        self.pause_midi_action = self.myQAction("Pause M&idi",shortcut="Ctrl+,",
                 triggered=self.pause_midi)
 
     def create_menus(self):

@@ -103,9 +103,9 @@ within abcraft.
         process.wait()
         output_bytes, error_bytes = process.communicate()
         output = output_bytes.decode()
-        error = error_bytes.decode()
+        error = (error_bytes or bytes()).decode()
         if self.errOnOut:
-            dbg_print ('output = \n', output)
+            #dbg_print ('output = \n', output)
             return self.process_error(output)
         else:
             self.process_error(error)
