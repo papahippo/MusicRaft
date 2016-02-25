@@ -7,7 +7,7 @@ Copyright 2016 Hippos Technical Systems BV.
 import sys
 from .rafteditor import RaftEditor
 from ..share import (Share, Signal, dbg_print, QtCore, QtGui, QtSvg, WithMenu)
-import qdarkstyle
+#import qdarkstyle
 
 class StdBook(QtGui.QTabWidget):
     headerText = 'subprocess output'

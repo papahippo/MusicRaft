@@ -21,6 +21,7 @@ class RaftEditor(Editor):
     filenamesDropped = Signal(list)
     settledAt = Signal(int, int)
     fileSaved = Signal(str)
+    fileLoaded = Signal(str)
 
 # hastily rescued from widgetWithMenu mix-in:
 #
@@ -178,7 +179,8 @@ class RaftEditor(Editor):
         dbg_print ("Loaded %s" % fileName)
         self.setFileName(fileName)
         self.moveToRowCol(row, col)  # primarily to gain focus!
-        self.document().setModified(True) # forc rewrite of Score
+        self.document().setModified(True) # force rewrite of Score
+        self.fileLoaded.emit(fileName)
 
     def setFileName(self, fileName=None):
         if fileName is not None:
