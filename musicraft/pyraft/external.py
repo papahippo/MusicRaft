@@ -20,7 +20,7 @@ class Python -
     fmtNameIn  = '%s.py'
     fmtNameOut = '%s.html'  # ? maybe unused
     exec_dir = '/usr/bin'
-    exec_file = 'python'
+    exec_file = 'python3'
 
     def cmd(self, inF, outF, **kw):
         return External.cmd(self, inF)
