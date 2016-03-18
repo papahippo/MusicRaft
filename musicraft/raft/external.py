@@ -32,7 +32,7 @@ tabs (Abcm2svg etc.) within the subprocess output notebook.
     def handleCursorMove(self):
         dbg_print (self.__class__.__name__+':handleCursorMove... self.quiet =',
                self.quiet)
-        if self.quiet:
+        if self.quiet or self.creMsg is None:
             return
         match = self.creMsg.match(self.textCursor().block().text())
         dbg_print (self.__class__.__name__+':handleCursorMove... match =', match)
@@ -50,7 +50,8 @@ tabs (Abcm2svg etc.) within the subprocess output notebook.
         self.quiet = True
         QtGui.QPlainTextEdit.setPlainText(self, text)
         self.quiet = False
-    
+
+
 class External(object):
     """
 'External' is the generic class representing command processors invoked from
@@ -70,7 +71,7 @@ within abcraft.
 
 
     def __init__(self):
-        self.creMsg = re.compile(self.reMsg)
+        self.creMsg = (self.reMsg is not None and re.compile(self.reMsg)) or None
         self.stdTab = StdTab(self)
         Share.raft.stdBook.widget.addTab(self.stdTab,
                                      self.__class__.__name__)

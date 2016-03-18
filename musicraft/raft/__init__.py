@@ -10,7 +10,7 @@ from ..share import (Share, Signal, dbg_print, QtCore, QtGui, QtSvg, WithMenu)
 #import qdarkstyle
 
 class StdBook(QtGui.QTabWidget):
-    headerText = 'subprocess output'
+    headerText = 'error/diagnostic output'
     whereDockable   = QtCore.Qt.AllDockWidgetAreas
 
     def __init__(self, dock=None):
