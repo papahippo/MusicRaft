@@ -11,8 +11,8 @@ import sys, re
 import numpy as np
 
 from ..share import (Share, dbg_print, QtCore, QtGui, QtSvg, WithMenu, Printer)
-
-
+import pyqtgraph as pg
+print(pg.__file__)
 class MyScene(QtGui.QGraphicsScene):
         
     def _mousePressEvent(self, event):
@@ -31,7 +31,8 @@ class MyScene(QtGui.QGraphicsScene):
             event.ignore()
 
 
-class FreqView(QtGui.QGraphicsView, WithMenu):
+#class FreqView(QtGui.QGraphicsView, WithMenu):
+class FreqView(pg.GraphicsWindow):
     menuTag = '&Tuning'
 
     def menuItems(self):
@@ -40,13 +41,25 @@ class FreqView(QtGui.QGraphicsView, WithMenu):
 
     def __init__(self):
         dbg_print ("FreqView.__init__")
-        QtGui.QGraphicsView.__init__(self)
-        WithMenu.__init__(self)
-        self.setScene(MyScene(self))
-        self.setTransformationAnchor(QtGui.QGraphicsView.AnchorUnderMouse)
-        self.setDragMode(QtGui.QGraphicsView.ScrollHandDrag)
+        #QtGui.QGraphicsView.__init__(self)
+        pg.GraphicsWindow.__init__(self)
+        # WithMenu.__init__(self)
+        # self.setScene(MyScene(self))
+        # self.setTransformationAnchor(QtGui.QGraphicsView.AnchorUnderMouse)
+        # self.setDragMode(QtGui.QGraphicsView.ScrollHandDrag)
+        self.resize(1000,600)
+        self.plotStaves()
         dbg_print ("!FreqView.__init__")
 
+    def plotStaves(self):
+        self.staves_plot = self.addPlot()
+        self.staves_plot.setYRange(60, 88)
+        for ixPitch in range(128):
+            inf_line = pg.InfiniteLine(movable=True, angle=0, pos=ixPitch,
+                                       pen=(0, 0, 200), # bounds = [-20, 20],
+                                       hoverPen=(0,200,0), label=str(ixPitch),
+                       labelOpts={'color': (200,0,0), 'movable': True, 'fill': (0, 0, 200, 100)})
+            self.staves_plot.addItem(inf_line)
 
     def wheelEvent(self, event):
         factor = 1.2**( event.delta() / 120.0)

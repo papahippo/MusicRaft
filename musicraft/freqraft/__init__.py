@@ -29,9 +29,10 @@ class FreqRaft(object):
                 format=pyaudio.paInt16,
                 channels=1,
                 rate=44100,
+                frames_per_buffer=2000,
                 #input_device_index=self.inputDeviceIndex,
-                input=True,
-                stream_callback=self.mic_callback)
+                input=True)  # ,
+                # stream_callback=self.mic_callback)
             self.latest_note = "Valid input device but no note yet"
         except KeyError:
             print ("I cannot open pyaudio!\n", file=sys.stderr)
@@ -42,19 +43,25 @@ class FreqRaft(object):
         self.stdTab = StdTab(self)
         Share.raft.stdBook.widget.addTab(self.stdTab,
                                      'frequency')
+        self.timer = QtCore.QTimer()
+        self.timer.timeout.connect(self.timer_callback)
+        self.timer.start(50)
 
     def write(self, text):
-        self.stdTab.setPlainText(str(text))
+        self.stdTab.appendPlainText(str(text))
+        #print(text)
 
-    def mic_callback(self, in_data, frame_count, time_info, status):
+    def timer_callback(self):
         # global data1, curve1
         # print (frame_count, hex(len(in_data)), file=sys.stderr)
+        #print('timer_callback.1')
+        in_data = self.stream.read(4000)
         samples = numpy.fromstring(in_data, dtype=numpy.int16)
-
+        #print('timer_callback.2', len(in_data))
         avgNote, volume = default_voice.DeriveNote(samples)
         pitch = avgNote and avgNote.GetPitch()
         if pitch is not None and volume>6.:
-            print("pitch=%s avgNote=%s volume=%s\n"
+            self.write("pitch=%s avgNote=%s volume=%s\n"
                  % (pitch,  avgNote,  volume))
             # data1[:-1] = data1[1:]  # shift data in the array one sample left
                                     # (see also: np.roll)
@@ -62,5 +69,23 @@ class FreqRaft(object):
             # curve1.setData(data1)
 
         return (in_data, pyaudio.paContinue)
+
+    if 0:
+        def mic_callback(self, in_data, frame_count, time_info, status):
+            # global data1, curve1
+            # print (frame_count, hex(len(in_data)), file=sys.stderr)
+            samples = numpy.fromstring(in_data, dtype=numpy.int16)
+
+            avgNote, volume = default_voice.DeriveNote(samples)
+            pitch = avgNote and avgNote.GetPitch()
+            if pitch is not None and volume>6.:
+                self.write("pitch=%s avgNote=%s volume=%s\n"
+                     % (pitch,  avgNote,  volume))
+                # data1[:-1] = data1[1:]  # shift data in the array one sample left
+                                        # (see also: np.roll)
+                # data1[-1] = pitch
+                # curve1.setData(data1)
+
+            return (in_data, pyaudio.paContinue)
 
 
