@@ -9,10 +9,12 @@ Copyright 2015 Hippos Technical Systems BV.
 
 import sys, re
 import numpy as np
-
+from PIL import Image
 from ..share import (Share, dbg_print, QtCore, QtGui, QtSvg, WithMenu, Printer)
 import pyqtgraph as pg
-print(pg.__file__)
+from .terpsichore import default_voice
+
+
 class MyScene(QtGui.QGraphicsScene):
         
     def _mousePressEvent(self, event):
@@ -32,7 +34,7 @@ class MyScene(QtGui.QGraphicsScene):
 
 
 #class FreqView(QtGui.QGraphicsView, WithMenu):
-class FreqView(pg.GraphicsWindow):
+class FreqView(pg.GraphicsView):
     menuTag = '&Tuning'
 
     def menuItems(self):
@@ -41,6 +43,7 @@ class FreqView(pg.GraphicsWindow):
 
     def __init__(self):
         dbg_print ("FreqView.__init__")
+        print(dir(self))
         #QtGui.QGraphicsView.__init__(self)
         pg.GraphicsWindow.__init__(self)
         # WithMenu.__init__(self)
@@ -53,13 +56,22 @@ class FreqView(pg.GraphicsWindow):
 
     def plotStaves(self):
         self.staves_plot = self.addPlot()
-        self.staves_plot.setYRange(60, 88)
+        self.staves_plot.setYRange(10*16, 50*16)
+        self.staves_plot.setXRange(0, 500)
         for ixPitch in range(128):
-            inf_line = pg.InfiniteLine(movable=True, angle=0, pos=ixPitch,
+            inf_line = pg.InfiniteLine(movable=True, angle=0, pos=ixPitch*16,
                                        pen=(0, 0, 200), # bounds = [-20, 20],
-                                       hoverPen=(0,200,0), label=str(ixPitch),
+                                       hoverPen=(0,200,0),
+                                       label=default_voice.GetNote(ixPitch).real_name,
                        labelOpts={'color': (200,0,0), 'movable': True, 'fill': (0, 0, 200, 100)})
             self.staves_plot.addItem(inf_line)
+        img = Image.open('/home/larry/python/fortuna440/images/Bass_clef_inv.png')
+        img_ar = np.array(img)
+        print(img_ar.shape)
+        img_ar_v = np.swapaxes(np.flipud(img_ar.view(dtype=np.uint32).reshape(img_ar.shape[:-1])), 0, 1)
+        img_item = pg.ImageItem(img_ar_v, opacity=0.5)
+        self.staves_plot.addItem(img_item, autoLevels=False)
+        img_item.setPos(0, 256)
 
     def wheelEvent(self, event):
         factor = 1.2**( event.delta() / 120.0)
