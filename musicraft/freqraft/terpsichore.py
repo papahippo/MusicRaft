@@ -122,15 +122,18 @@ for octave in [None]+list(range(-1,10)):
                     notes_by_Pitch[new_Pitch][i_sharp_flat] = new_note
 
 class _Clef(musicItem):
-    def __init__(self, lines=[], marked=None, symbol=None, scaleHint=16):
+    def __init__(self, lines=[], marked=None, symbol=None, scaleHint=16, descent=7):
         self.lines = lines
         self.marked = marked
         self.symbol = symbol
         self.scaleHint = scaleHint
+        self.descent = descent
 
 class Clef(musicGroup):
-    Treble = _Clef(lines=(Note.E4, Note.G4, Note.B4, Note.D5, Note.F5), marked=1, symbol='images/Treble_clef_inv.png', scaleHint=16)
-    Bass   = _Clef(lines=(Note.G2, Note.B2, Note.D3, Note.F3, Note.A3), marked=3, symbol='images/Bass_clef_inv.png', scaleHint=13)
+    Treble = _Clef(lines=(Note.E4, Note.G4, Note.B4, Note.D5, Note.F5),
+                   descent=5, marked=1, symbol='Treble_clef_inv.png', scaleHint=16)
+    Bass   = _Clef(lines=(Note.G2, Note.B2, Note.D3, Note.F3, Note.A3),
+                   descent=8.5, marked=3, symbol='Bass_clef_inv.png', scaleHint=13)
 
 class Voice(musicItem):
     def __init__(self, pitch_shift=0, clef=None, key=Key.CM, default_octave=3,
@@ -241,5 +244,8 @@ def best_note_name_for_pitch(i):
 #print(Instrument.__dict__.values())
 
 if __name__ == '__main__':
-    print (Note.A3, Note.B4, [(notes_by_Pitch[i],'\n') for i in range(56,62)])
+    #print (Note.A3, Note.B4, [(notes_by_Pitch[i],'\n') for i in range(56,62)])
     print ([best_note_name_for_pitch(i) for i in range(50,70)])
+    clef =Clef.Bass
+    marked_semi = clef.lines[clef.marked]
+    print(marked_semi, marked_semi.GetPitch() - clef.descent)  #, dir(marked_semi))

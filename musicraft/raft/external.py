@@ -30,8 +30,8 @@ tabs (Abcm2svg etc.) within the subprocess output notebook.
         self.cursorPositionChanged.connect(self.handleCursorMove)
 
     def handleCursorMove(self):
-        dbg_print (self.__class__.__name__+':handleCursorMove... self.quiet =',
-               self.quiet)
+        # dbg_print (self.__class__.__name__+':handleCursorMove... self.quiet =',
+        #        self.quiet)
         if self.quiet or self.creMsg is None:
             return
         match = self.creMsg.match(self.textCursor().block().text())

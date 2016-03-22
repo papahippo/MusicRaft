@@ -60,13 +60,15 @@ class FreqRaft(object):
         #print('timer_callback.2', len(in_data))
         avgNote, volume = default_voice.DeriveNote(samples)
         pitch = avgNote and avgNote.GetPitch()
-        if pitch is not None and volume>6.:
-            self.write("pitch=%s avgNote=%s volume=%s\n"
-                 % (pitch,  avgNote,  volume))
+        if volume>6.:
+            if pitch is not None:
+                self.write("pitch=%s avgNote=%s volume=%s\n"
+                             % (pitch,  avgNote,  volume))
             # data1[:-1] = data1[1:]  # shift data in the array one sample left
                                     # (see also: np.roll)
             # data1[-1] = pitch
             # curve1.setData(data1)
+            self.freqView.add_sample(volume, pitch)
 
         return (in_data, pyaudio.paContinue)
 

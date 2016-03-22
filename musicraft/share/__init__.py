@@ -6,6 +6,9 @@ dbg_print = (os.getenv('ABCRAFT_DBG') and print) or (lambda *pp, **kw: None)
 class Share:
     pass
 
+image_path = os.path.normpath(os.path.split(__file__)[0]+'/..') + '/images/'
+print('image_path =', image_path)
+
 abcraft_qt = os.getenv('ABCRAFT_QT', 'PySide')
 if abcraft_qt == 'PySide':
     from PySide import (QtCore, QtGui, QtSvg, QtWebKit)
