@@ -202,17 +202,14 @@ class Score(QtGui.QGraphicsView, WithMenu):
                     ("&First Page",    'Ctrl+1',      self.showWhichPage,),
                     ("&Next Page",     'Ctrl+PgDown', self.showNextPage,),
                     ("Pre&vious Page", 'Ctrl+PgUp',   self.showPreviousPage,),
-                    ('&Print',         'Ctrl+P',      self.printScore,),
-                    ('E&xport to PDF', 'Ctrl+Alt+X',  self.ScoreToPDF,),
-                    #('Print S&ce',   'Ctrl+Alt+C',  self.printScene,),
-#                    ('Set &Font', 'F', self.changeMyFont,),
+                    ('&Print',         'Ctrl+P',      self.printAll,),
+                    ('E&xport to PDF', 'Ctrl+Alt+X',  self.PrintAllToPDF,),
         ]
 
     def __init__(self):
         dbg_print ("Score.__init__")
         QtGui.QGraphicsView.__init__(self)
         WithMenu.__init__(self)
-        self.printer = Printer()
         self.svgItem = None
         self.backgroundItem = None
         self.outlineItem = None
@@ -326,23 +323,14 @@ class Score(QtGui.QGraphicsView, WithMenu):
     def resetZoom(self):
         self.resetTransform()
 
-    def printScore(self, toPDF=False):
-        self.printer.setDocName(self.compositeName)
-        self.printer.setOutputFileName(
-            (toPDF and self.compositeName+'.pdf') or '')
-        painter = QtGui.QPainter(self.printer)
+    def renderAll(self, painter):
         thatPage = self.which
         for i in range(len(self.svgDigests)):
             self.showWhichPage(i)
             if i:
                 self.printer.newPage()
             self.scene().render(painter)
-            #self.render(painter)
         self.showWhichPage(thatPage)
-
-
-    def ScoreToPDF(self):
-        self.printScore(toPDF=True)
 
     def wheelEvent(self, event):
         factor = 1.2**( event.delta() / 120.0)

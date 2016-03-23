@@ -13,13 +13,15 @@ import numpy as np
 
 from ..share import (Share, dbg_print, QtCore, QtGui, QtWebKit, WithMenu, Printer)
 
+
 class HtmlView(QtWebKit.QWebView, WithMenu):
 
-    menuTag = '&Score'
+    menuTag = '&Html'
 
     def menuItems(self):
         return [
-#                    ('Set &Font', 'F', self.changeMyFont,),
+                    ('&Print',         None,  self.printAll,),
+                    ('E&xport to PDF', None,  self.PrintAllToPDF,),
         ]
 
     def __init__(self):
