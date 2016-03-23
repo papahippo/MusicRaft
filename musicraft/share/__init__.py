@@ -71,10 +71,9 @@ class WithMenu(object):
             (toPDF and self.compositeName+'.pdf') or '')
         self.renderAll(QtGui.QPainter(self.printer))
 
-
     def renderAll(self, painter):
         self.scene().render(painter)
 
-    def PrintAllToPDF(self):
+    def printAllToPDF(self):
         self.printAll(toPDF=True)
 

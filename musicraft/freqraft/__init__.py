@@ -21,7 +21,7 @@ class FreqRaft(object):
     rowColOrigin = (0, -1)  # also likewise!
 
     def __init__(self):
-        Share.pyRaft = self
+        Share.freqRaft = self
 # following code cribbed from source code of myPlot1.py:
         try:
             self.pyaud = pyaudio.PyAudio()

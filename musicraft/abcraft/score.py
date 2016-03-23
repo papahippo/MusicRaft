@@ -203,7 +203,7 @@ class Score(QtGui.QGraphicsView, WithMenu):
                     ("&Next Page",     'Ctrl+PgDown', self.showNextPage,),
                     ("Pre&vious Page", 'Ctrl+PgUp',   self.showPreviousPage,),
                     ('&Print',         'Ctrl+P',      self.printAll,),
-                    ('E&xport to PDF', 'Ctrl+Alt+X',  self.PrintAllToPDF,),
+                    ('E&xport to PDF', 'Ctrl+Alt+X',  self.printAllToPDF,),
         ]
 
     def __init__(self):

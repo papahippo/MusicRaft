@@ -7,7 +7,7 @@ Copyright 2015 Hippos Technical Systems BV.
 @author: larry
 """
 
-import sys, re
+import sys, os, re
 import lxml.etree
 import numpy as np
 
@@ -21,7 +21,7 @@ class HtmlView(QtWebKit.QWebView, WithMenu):
     def menuItems(self):
         return [
                     ('&Print',         None,  self.printAll,),
-                    ('E&xport to PDF', None,  self.PrintAllToPDF,),
+                    ('E&xport to PDF', None,  self.printAllToPDF,),
         ]
 
     def __init__(self):
@@ -37,3 +37,14 @@ class HtmlView(QtWebKit.QWebView, WithMenu):
 
     def locateXY(self, x, y):
         pass  # for now!
+
+    def printAll(self, toPDF=False):
+        print("printAll!")
+        self.printer.setPageSize(QtGui.QPrinter.A4)
+        self.printer.setOutputFormat(QtGui.QPrinter.PdfFormat)
+        #self.printer.setOutputFileName(toPDF and self.compositeName or '')
+        # see quick fix in .external! ...
+        printName = toPDF and (os.path.splitext(self.fileName)[0] + '.pdf') or ''
+        print("printing to file ", printName)
+        self.printer.setOutputFileName(printName)
+        self.print_(self.printer)
