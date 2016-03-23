@@ -6,7 +6,7 @@ Created on Sun Aug 30 18:18:56 2015
 @author: larry
 """
 import sys, os, subprocess
-from ..share import (Share, Signal, dbg_print, QtCore, QtGui, QtSvg)
+from ..share import (Share, Signal, dbg_print, QtCore, QtGui, QtSvg, temp_dir)
 from .editor import Editor
 
 
@@ -121,10 +121,11 @@ class RaftEditor(Editor):
         if self.counted:
             return
         if self.document().isModified():
-            print ("autoSave")
+            dbg_print ("autoSave")
             split = os.path.split(self.fileName)
             fileName = 'autosave_'.join(split)
-            return self.saveFile(fileName=fileName)
+            return self.saveFile(
+                fileName=temp_dir+ '/autosave_' + os.path.split(self.fileName)[1])
         tc = self.textCursor()
         position = tc.position()
         if position != self.prevCursorPos:

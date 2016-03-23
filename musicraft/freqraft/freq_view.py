@@ -10,7 +10,7 @@ Copyright 2015 Hippos Technical Systems BV.
 import sys, re
 import numpy as np
 from PIL import Image
-from ..share import (Share, dbg_print, QtCore, QtGui, image_path, QtSvg, WithMenu, Printer)
+from ..share import (Share, dbg_print, QtCore, QtGui, image_dir, QtSvg, WithMenu, Printer)
 import pyqtgraph as pg
 from .terpsichore import default_voice, Clef, Note
 
@@ -70,7 +70,7 @@ class FreqView(pg.GraphicsView):
         all_staff_lines = []  # accumulator
         for clef in (Clef.Bass, Clef.Treble):
             all_staff_lines += clef.lines
-            img = Image.open(image_path + clef.symbol).resize(
+            img = Image.open(image_dir + clef.symbol).resize(
                 (32*clef.scaleHint, 920*clef.scaleHint), Image.ANTIALIAS)
             img_ar = np.array(img)
             #print(img_ar.shape)

@@ -1,13 +1,13 @@
 from __future__ import print_function
-import sys, os
+import sys, os, tempfile
 
 dbg_print = (os.getenv('ABCRAFT_DBG') and print) or (lambda *pp, **kw: None)
 
 class Share:
     pass
 
-image_path = os.path.normpath(os.path.split(__file__)[0]+'/..') + '/images/'
-print('image_path =', image_path)
+image_dir = os.path.normpath(os.path.split(__file__)[0] + '/..') + '/images/'
+temp_dir = tempfile.gettempdir()
 
 abcraft_qt = os.getenv('ABCRAFT_QT', 'PySide')
 if abcraft_qt == 'PySide':
@@ -36,6 +36,8 @@ class WithMenu(object):
     menuTag = None
 
     def __init__(self):
+        self.printer = Printer()
+        self.compositeName = 'temp'  # under review, like so much!
         self.menu = QtGui.QMenu(self.menuTag)
         if not (self.menuTag and self.menuItems()):
             return
@@ -62,4 +64,17 @@ class WithMenu(object):
         if checked is not None:
             action.setChecked(checked)
         return action
+
+    def printAll(self, toPDF=False):
+        self.printer.setDocName(self.compositeName)
+        self.printer.setOutputFileName(
+            (toPDF and self.compositeName+'.pdf') or '')
+        self.renderAll(QtGui.QPainter(self.printer))
+
+
+    def renderAll(self, painter):
+        self.scene().render(painter)
+
+    def PrintAllToPDF(self):
+        self.printAll(toPDF=True)
 
