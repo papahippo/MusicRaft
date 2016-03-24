@@ -15,26 +15,11 @@ import pyqtgraph as pg
 from .terpsichore import default_voice, Clef, Note
 
 
-class MyScene(QtGui.QGraphicsScene):
-        
-    def _mousePressEvent(self, event):
-        scP = event.scenePos()
-        x = scP.x()
-        y = scP.y()
-        dbg_print ("MyScene.mousePressEvent",
-               #event.pos(), event.scenePos(), event.screenPos()
-               'scenePos x,y =', x, y, 'button =', event.button(),
-               'scene width =', self.width(), 'scene height =', self.height(),
-        )
-        if event.button() == 1:
-            self.parent().locateXY(x, y)
-            event.accept()
-        else:
-            event.ignore()
+# class MyScene(pg.GraphicsScene):
+# etc... removed; not working; not necesary?
 
 
-#class FreqView(QtGui.QGraphicsView, WithMenu):
-class FreqView(pg.GraphicsView):
+class FreqView(pg.GraphicsView, WithMenu):
     menuTag = '&Tuning'
     pps = 1000  # points per semitone
     n_samples = 1000
@@ -45,18 +30,15 @@ class FreqView(pg.GraphicsView):
 
     def __init__(self):
         dbg_print ("FreqView.__init__")
-        #print(dir(self))
-        #QtGui.QGraphicsView.__init__(self)
         pg.GraphicsWindow.__init__(self)
-        # WithMenu.__init__(self)
-        # self.setScene(MyScene(self))
-        # self.setTransformationAnchor(QtGui.QGraphicsView.AnchorUnderMouse)
-        # self.setDragMode(QtGui.QGraphicsView.ScrollHandDrag)
-        #self.resize(1000,600)
+        WithMenu.__init__(self)
+        # self.setScene(MyScene(self)) # see above
+
+        # avoid showing "window in the making"' during startup.
+        # not sure when or why window gets shown again but it does so conveniently!\
+        self.hide()
         self.plotStaves()
         self.data = np.array([np.NaN]*self.n_samples, dtype=np.float32)
-        #self.data = np.array([54*self.pps]*self.n_samples, dtype=np.float32)
-        #self.show_data()
         self.curve = self.staves_plot.plot(self.data, axisItems={}) # , connect='finite')
         dbg_print ("!FreqView.__init__")
 
@@ -85,13 +67,17 @@ class FreqView(pg.GraphicsView):
             note = default_voice.GetNote(ixPitch)
             width = 1
             style = None
+            label = note.real_name
+            labelOpts={'color': (200,0,0), 'movable': False, 'position': 0.8,
+                       'anchors': (0.5, 0.5), 'fill': (0, 0, 200, 100)}
             if note in all_staff_lines:
                 colour = (200, 200, 200)
                 width = 2
-            #elif note is Note.A4:
+            #elif note is Note.A4: # traditional tuning note nominally 440Hz but often inflated
             #    colour = (0, 200, 0)
             #elif note.pitch == 0:
             elif note is Note.C4:
+                label += " = middle C"
                 style = QtCore.Qt.DashLine
                 colour = (220, 220, 220)
             elif len(note.real_name) == 2:
@@ -102,9 +88,7 @@ class FreqView(pg.GraphicsView):
                                        pen=dict(color=colour, width=width, style=style),
                                        # bounds = [-20, 20],
                                        hoverPen=(0,240,0),
-                                       label=note.real_name,
-                       labelOpts={'color': (200,0,0), 'movable': False, 'position': 0.8,
-                                  'anchors': (0.5, 0.5), 'fill': (0, 0, 200, 100)})
+                                       label=label, labelOpts=labelOpts)
             self.staves_plot.addItem(inf_line)
 
     def add_sample(self, volume, freq):

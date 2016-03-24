@@ -1,11 +1,10 @@
 #!/usr/bin/python
 """
-# usage:
-print A3, B4
-# see below for more details.
-# pynotabene - another object oriented approach to music representation in the python language.
-#    The defining feature of 'py nota bene' iis that notes are represented not as quoted strings
+# terpsichore - another object oriented approach to music representation in the python language.
+#    The defining feature of 'terpsichore' iis that notes are represented not as quoted strings
 #    but as instances of a 'note' class.
+# N.B. This has been hacked rather impatiently/unsympathetically in order to use it within
+#    'musicraft'.
 """
 import numpy, math
 # import analyse
@@ -118,7 +117,9 @@ for octave in [None]+list(range(-1,10)):
                         elif i_sharp_flat and (fifths>0):
                             fifths -= 12
                         setattr(Key, python_key_name, _Key(fifths, mode, real_key_name))
-                elif 2*i_sharp_flat != (1+delta):
+                elif (2*i_sharp_flat != (1+delta) and
+                          (notes_by_Pitch[new_Pitch][i_sharp_flat] is None
+                        or len(notes_by_Pitch[new_Pitch][i_sharp_flat].real_name) > 2)):
                     notes_by_Pitch[new_Pitch][i_sharp_flat] = new_note
 
 class _Clef(musicItem):
@@ -163,7 +164,7 @@ class Voice(musicItem):
         if isinstance(note_or_number, Note_):
             return note_or_number # note, thus
         elif isinstance(note_or_number, int):
-            return notes_by_Pitch[note_or_number][self.key.fifths<0]
+            return notes_by_Pitch[note_or_number][self.key.fifths <= 0]
         elif isinstance(note_or_number, float):
             #return notes_by_Pitch[int(note_or_number)][self.key.fifths<0]
             i_near = int(note_or_number+0.5)
