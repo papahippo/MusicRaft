@@ -259,7 +259,6 @@ class Score(QtGui.QGraphicsView, WithMenu):
         self.showWhichPage(j, force=True)
 
     def locateXY(self, x, y):
-        return
         row, col = self.svgDigests[self.which].rowColAtXY(x, y)
         dbg_print ("locateXY(", x, y, " > row,col", row, col)
         Share.raft.editor.moveToRowCol(row, col)
