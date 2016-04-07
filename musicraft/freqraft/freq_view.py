@@ -3,7 +3,7 @@ from __future__ import print_function
 """
 Copyright 2015 Hippos Technical Systems BV.
 (but borrows somme code from the painting/svgviewer example of PyQt v4.x)
-
+DECLARED OBSOLESCENT per 4th April 2016; see PitchView.py
 @author: larry
 """
 

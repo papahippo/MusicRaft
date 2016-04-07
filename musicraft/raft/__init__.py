@@ -38,7 +38,7 @@ class Raft(QtGui.QMainWindow, WithMenu):
         self.addDockWidget(QtCore.Qt.BottomDockWidgetArea, self.stdBook)
         self.stdBook.setMinimumHeight(140)
         self.raftEditor = Dock(RaftEditor, True)
-        self.raftEditor.setMinimumWidth(640)
+        self.raftEditor.setMinimumWidth(320)
         self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.raftEditor)
         self.editor = self.raftEditor.widget
         self.createMenus()
