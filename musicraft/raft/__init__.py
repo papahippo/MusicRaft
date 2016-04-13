@@ -51,12 +51,7 @@ class Raft(QtGui.QMainWindow, WithMenu):
 
     def start(self):
         self.show()
-        self.openThemAll(sys.argv[1:])
-
-    def openThemAll(self, filenames=()): # False means already in place!
-        dbg_print('openThemAll', filenames)
-        for fn in filenames:
-            self.editor.loadFile(fn)
+        self.editor.openThemAll(sys.argv[1:])
 
     def about(self):
         QtGui.QMessageBox.about(self, "About 'Raft'",

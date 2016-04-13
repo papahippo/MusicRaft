@@ -51,6 +51,7 @@ class RaftEditor(Editor):
         self.dock = dock
         self.timer.timeout.connect(self.countDown)
         self.cursorPositionChanged.connect(self.handleCursorMove)
+        self.filenamesDropped.connect(self.openThemAll)
         self.originalText = None
         self.haveLoadedFile = False
         self.setMinimumHeight(400)
@@ -255,6 +256,11 @@ class RaftEditor(Editor):
             fileName = files[0]
         self.setFileName(fileName)
         self.saveFile()
+
+    def openThemAll(self, filenames=()): # False means already in place!
+        dbg_print('openThemAll', filenames)
+        for fn in filenames:
+            self.loadFile(fn)
 
     #------ Drag and drop
     def dragEnterEvent(self, event):
