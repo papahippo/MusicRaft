@@ -6,6 +6,7 @@ Copyright 2016 Hippos Technical Systems BV.
 """
 import sys
 from .rafteditor import RaftEditor
+from .editbook import EditBook
 from ..share import (Share, Signal, dbg_print, QtCore, QtGui, QtSvg, WithMenu)
 #import qdarkstyle
 
@@ -37,8 +38,8 @@ class Raft(QtGui.QMainWindow, WithMenu):
         self.stdBook = Dock(StdBook,  True)
         self.addDockWidget(QtCore.Qt.BottomDockWidgetArea, self.stdBook)
         self.stdBook.setMinimumHeight(140)
-        self.raftEditor = Dock(RaftEditor, True)
-        self.raftEditor.setMinimumWidth(320)
+        self.raftEditor = Dock(EditBook, True)
+        # self.raftEditor.setMinimumWidth(320)
         self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.raftEditor)
         self.editor = self.raftEditor.widget
         self.createMenus()
@@ -71,7 +72,7 @@ class Raft(QtGui.QMainWindow, WithMenu):
                     ('&New',           'Ctrl+N', self.editor.newFile,),
                     ('&Open',          'Ctrl+O', self.editor.loadAnyFile,),
                     ('&Close',         'Ctrl+C', self.editor.closeFile,),
-                    ('Open in new &Instance', 'Ctrl+I', self.editor.cloneAnyFile,),
+                    #('Open in new &Instance', 'Ctrl+I', self.editor.cloneAnyFile,),
                     ('&Reload',        'Ctrl+R', self.editor.reloadFile,),
                     ('R&estart',       'Ctrl+E', self.editor.restart,),
                     ('&Save',          'Ctrl+S', self.editor.saveFile,),

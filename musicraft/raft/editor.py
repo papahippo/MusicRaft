@@ -1,15 +1,20 @@
 #!/usr/bin/python
 #partially based on: http://john.nachtimwald.com/2009/08/15/qtextedit-with-line-numbers/ (MIT license)
 from __future__ import print_function
-import sys, os
-from ..share import (Share, Signal, dbg_print, QtCore, QtGui, QtSvg)
+import sys, os, subprocess
+from ..share import (Share, Signal, dbg_print, QtCore, QtGui, QtSvg, temp_dir)
 
 ##LMY: from highlighter import PythonHighlighter
 
 class Editor(QtGui.QPlainTextEdit):
 
-    def __init__(self):
-        QtGui.QPlainTextEdit.__init__(self)
+    headerText = 'Edit'
+    prevCursorPos = -1
+    currentLineColor = None
+
+    def __init__(self, book=None, **kw):
+        self.book = book
+        QtGui.QPlainTextEdit.__init__(self, **kw)
         self.lineNumberArea = self.LineNumberArea(self)
         self.viewport().installEventFilter(self)
         
@@ -25,6 +30,198 @@ class Editor(QtGui.QPlainTextEdit):
           selection-background-color: #437DCD;
         }'''
         self.setStyleSheet(css)
+
+        font = self.font()
+        font.setPointSize(10)
+        self.setFont(font)
+        self.setCursorWidth(2)
+        self.setWindowTitle('title')
+        self.textChanged.connect(self.handleTextChanged)
+        self.setLineWrapMode(QtGui.QPlainTextEdit.NoWrap)
+        self.cursorPositionChanged.connect(self.handleCursorMove)
+        self.originalText = None
+        self.haveLoadedFile = False
+
+    def Quote(self):
+        tC = self.textCursor()
+        c0 = '#' # dummy non-match!
+        while c0 not in "ABCDEFG":
+            tC.movePosition(tC.Left, tC.KeepAnchor)
+            sel = tC.selectedText()
+            c0 = sel[0]
+        tC.removeSelectedText()
+        tC.insertText('"'+ sel +'"')
+
+    def handleCursorMove(self):
+        self.book.counted = self.book.latency
+        return
+
+    def moveToRowCol(self, row=1, col=0):
+        block = self.document().findBlockByLineNumber (row-1)
+        desiredPosition = block.position() + col
+        dbg_print ('AbcEditor.moveToRowCol', row, col,
+               'desiredPosition', desiredPosition)
+        tc = self.textCursor()
+        tc.setPosition(desiredPosition)
+        self.setTextCursor(tc)
+        self.setFocus()
+
+    def highlight(self, tc):
+        blockNumber = tc.blockNumber()
+        # Common.blockNumber = blockNumber
+        col0 =  col = tc.positionInBlock()
+        l = tc.block().length()
+        dbg_print ("autoTrack", l)
+        blockText = tc.block().text()
+        while col and ((col >= (l-1))
+            or not (str(blockText[col]).lower() in 'abcdefg')):
+            col -= 1
+        dbg_print ('AbcEditor.handleCursorMove: row =', blockNumber,
+                                           'col =', col, col0)
+        #if Common.score:
+        #    Common.score.showAtRowAndCol(blockNumber+1, col)
+        self.book.settledAt.emit(blockNumber+1, col)
+        hi_selection = QtGui.QTextEdit.ExtraSelection()
+
+        hi_selection.format.setBackground(self.palette().alternateBase())
+        hi_selection.format.setProperty(QtGui.QTextFormat.FullWidthSelection,
+                                        True)
+        if self.currentLineColor is not None:
+            hi_selection.format.setBackground(self.currentLineColor)
+        #setFontUnderline(True)
+        hi_selection.cursor = tc
+        self.setExtraSelections([hi_selection])
+        hi_selection.cursor.clearSelection()
+
+
+    def handleTextChanged(self):
+        self.book.counted = self.book.latency
+        #dbg_print ('textChanged', self.counted)
+
+    def handleLull(self):
+        if self.document().isModified():
+            dbg_print ("autoSave")
+            split = os.path.split(self.fileName)
+            fileName = 'autosave_'.join(split)
+            return self.saveFile(
+                fileName=temp_dir+ '/autosave_' + os.path.split(self.fileName)[1])
+        tc = self.textCursor()
+        position = tc.position()
+        if position != self.prevCursorPos:
+            self.prevCursorPos = position
+            self.highlight(tc)
+
+
+    def closeFile(self):
+        self.clear()
+        self.haveLoadedFile = False
+
+    def cloneAnyFile(self):
+        fileName = QtGui.QFileDialog.getOpenFileName(self,
+                                                         "Choose a data file",
+                                                         '', '*.abc')[0]
+        dbg_print ("cloneAnyFile 2", fileName)
+        self.loadFile(fileName, newInstance=True)
+
+    def restart(self):
+        self.loadFile(self.fileName)
+        sys.exit(0)
+
+    def loadFile(self, fileName, newInstance=None, row=1, col=0):
+        dbg_print ("AbcEditor.loadFile", fileName, newInstance, row, col)
+        if newInstance is None:
+            newInstance = self.haveLoadedFile
+        if newInstance:
+            dbg_print("need to create new instance for", fileName)
+            sys.argv[1:] = fileName,
+            subprocess.Popen(sys.argv)
+            return
+
+        f = QtCore.QFile(fileName)
+
+        if not f.open(QtCore.QFile.ReadOnly | QtCore.QFile.Text):
+            return
+
+        self.readAll(f)
+        f.close()
+        dbg_print ("Loaded %s" % fileName)
+        self.setFileName(fileName)
+        self.moveToRowCol(row, col)  # primarily to gain focus!
+        self.document().setModified(True) # force rewrite of Score
+        self.book.fileLoaded.emit(fileName)
+
+    def setFileName(self, fileName=None):
+        if fileName is not None:
+            self.fileName = fileName
+        title = "%s - %s" % (self.headerText, os.path.abspath(self.fileName))
+        dbg_print (title)
+        # self.book.dock.setWindowTitle(title)
+        self.haveLoadedFile = True
+
+    def readAll(self, f):
+        dbg_print ('readAll', self, f)
+        stream = QtCore.QTextStream(f)
+        text = stream.readAll()
+        self.setPlainText(text)
+
+    def saveFile(self, fileName=None,):
+        if fileName is None:
+            fileName = self.fileName
+        if fileName is None:
+            return
+        #f = QtCore.QFile(fileName)
+        out = open(fileName, 'w')
+        if not out:
+            return
+        self.writeAll(out)
+        out.close()
+        dbg_print ("Saved %s " % fileName)
+        self.document().setModified(False)
+        self.book.fileSaved.emit(fileName)
+        self.book.setTabText(0, os.path.split(fileName)[1])
+        return
+
+    def transpose(self):
+        semitones, ok = QtGui.QInputDialog.getInteger(self,
+                "Transpose (automatic clef change(s))",
+                "semitones (+/- for up/down:)", 0, -24, 24, 1)
+        if not ok:
+            return
+        fileName = 'original.abc'
+        self.originalText = self.toPlainText()
+        self.setFileName(fileName)
+        self.saveFile(fileName=fileName)
+        transposedText = Share.abcraft.abc2abc.process(fileName,
+                                                transpose=semitones)
+        self.newFile('transposed.abc')
+        self.setPlainText(transposedText)
+
+    def undoTranspose(self):
+        if self.originalText:
+            self.setPlainText(self.originalText)
+            self.originalText = None
+
+    def writeAll(self, out):
+        text = self.toPlainText()
+        dbg_print('len(text)=', len(text))
+        out.write(text)
+
+    def reloadFile(self):
+        dbg_print ("ReloadFile", self.fileName)
+        self.loadFile(self.fileName)
+
+    def saveFileAs(self, fileName=None):
+        """
+        save the current panel contents to a new file.
+        """
+        if fileName is None:
+            files = QtGui.QFileDialog.getSaveFileName(self,
+                "Save source to file as", '', '*.abc')
+            if not files:
+                return
+            fileName = files[0]
+        self.setFileName(fileName)
+        self.saveFile()
 
     def resizeEvent(self,e):
         self.lineNumberArea.setFixedHeight(self.height())
@@ -74,6 +271,41 @@ class Editor(QtGui.QPlainTextEdit):
                 pos = tc.position()
         tc.setPosition(pos)
         self.setTextCursor(tc) 
+
+    #------ Drag and drop
+    def dragEnterEvent(self, event):
+        """Reimplement Qt method
+        Inform Qt about the types of data that the widget accepts"""
+        source = event.mimeData()
+        if source.hasUrls():
+
+            if 1: #mimedata2url(source, extlist=EDIT_EXT):
+                print ("dragEnterEvent", "hasUrls")
+                event.acceptProposedAction()
+            else:
+                event.ignore()
+        elif source.hasText():
+            print ("dragEnterEvent", "hasText")
+            event.acceptProposedAction()
+        else:
+            event.ignore()
+
+    def dropEvent(self, event):
+        """Reimplement Qt method
+        Unpack dropped data and handle it"""
+        source = event.mimeData()
+        if source.hasUrls():
+            #paths = map(filenameFromUrl, source.urls())
+            paths = [url.path() for url in source.urls()]
+            print ("dropEvent", "hasUrls", source.urls(), paths)
+            self.book.filenamesDropped.emit(paths)
+        elif source.hasText():
+            print ("dropEvent", "hasText")
+            #editor = self.get_current_editor()
+            #if editor is not None:
+            #    editor.insert_text( source.text() )
+        event.acceptProposedAction()
+
 
     class LineNumberArea(QtGui.QWidget):
 
