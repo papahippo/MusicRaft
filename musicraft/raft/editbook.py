@@ -30,7 +30,7 @@ class EditBook(QtGui.QTabWidget):
     counted =0
     fileName = None
     minimumWidth = 640
-    minimumHeight = 800
+    minimumHeight = None # 800
 
     headerText = 'Edit'
 
@@ -75,7 +75,7 @@ class EditBook(QtGui.QTabWidget):
                                                          '.', '*.*')[0]
 #                                                         '.', '*.abc')[0]
         dbg_print ("loadAnyFile 2", fileName)
-        self.loadFile(fileName, newInstance=False)
+        self.editors[-1].loadFile(fileName, newInstance=False)
 
 # temporary hacks while getting tabbed approach working:
 
