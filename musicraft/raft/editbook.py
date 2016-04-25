@@ -108,7 +108,9 @@ class EditBook(QtGui.QTabWidget):
 
     def closeFile(self):
         self.activeEdit.closeFile()
-        self.editors.remo
+        self.editors.remove(self.activeEdit)
+        self.removeTab(self.currentIndex())
+        self.openThemAll()
 
     def restart(self):
         self.activeEdit.restart()
