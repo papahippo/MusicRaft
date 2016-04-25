@@ -2,7 +2,7 @@
 from __future__ import print_function
 """
 Copyright 2015 Hippos Technical Systems BV.
-(but borrows somme code from the painting/svgviewer example of PyQt v4.x)
+(but borrows some code from the painting/svgviewer example of PyQt v4.x)
 
 @author: larry
 """
@@ -19,7 +19,7 @@ def abcHash(type_, row, col):
 def abcUnhash(hash_):
     return ((hash_ and chr((hash_>>24)&0xff)),  # type
             (hash_ and (hash_>>10)&0x3fff),     # row
-            (hash_ and hash_&0x3ff))     # col
+            (hash_ and hash_&0x3ff))            # col
     
 class MyScene(QtGui.QGraphicsScene):
         

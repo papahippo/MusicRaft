@@ -11,6 +11,7 @@ class Editor(QtGui.QPlainTextEdit):
     headerText = 'Edit'
     prevCursorPos = -1
     currentLineColor = None
+    editBecomesActive = Signal()
 
     def __init__(self, book=None, **kw):
         self.book = book
@@ -37,6 +38,7 @@ class Editor(QtGui.QPlainTextEdit):
         self.setCursorWidth(2)
         self.setWindowTitle('title')
         self.textChanged.connect(self.handleTextChanged)
+        self.editBecomesActive.connect(self.handleTextChanged)
         self.setLineWrapMode(QtGui.QPlainTextEdit.NoWrap)
         self.cursorPositionChanged.connect(self.handleCursorMove)
         self.originalText = None
@@ -96,10 +98,10 @@ class Editor(QtGui.QPlainTextEdit):
 
     def handleTextChanged(self):
         self.book.counted = self.book.latency
-        #dbg_print ('textChanged', self.counted)
+        print ('handleTextChanged', self.book.counted)
 
     def handleLull(self):
-        if self.document().isModified():
+        if 1:  # self.document().isModified():
             dbg_print ("autoSave")
             split = os.path.split(self.fileName)
             fileName = 'autosave_'.join(split)
@@ -178,7 +180,6 @@ class Editor(QtGui.QPlainTextEdit):
         dbg_print ("Saved %s " % fileName)
         self.document().setModified(False)
         self.book.fileSaved.emit(fileName)
-        self.book.setTabText(0, os.path.split(fileName)[1])
         return
 
     def transpose(self):
@@ -210,7 +211,7 @@ class Editor(QtGui.QPlainTextEdit):
         dbg_print ("ReloadFile", self.fileName)
         self.loadFile(self.fileName)
 
-    def saveFileAs(self, fileName=None):
+    def saveFileAs(self, fileName=None, show=True):
         """
         save the current panel contents to a new file.
         """
@@ -220,8 +221,10 @@ class Editor(QtGui.QPlainTextEdit):
             if not files:
                 return
             fileName = files[0]
-        self.setFileName(fileName)
+        if show:
+            self.setFileName(fileName)
         self.saveFile()
+        self.book.setTabText(self.book.currentIndex(), os.path.split(fileName)[1])
 
     def resizeEvent(self,e):
         self.lineNumberArea.setFixedHeight(self.height())

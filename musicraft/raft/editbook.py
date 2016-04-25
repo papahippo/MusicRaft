@@ -20,7 +20,6 @@ class EditBook(QtGui.QTabWidget):
     settledAt = Signal(int, int)
     fileSaved = Signal(str)
     fileLoaded = Signal(str)
-    editBecomesActive = Signal(Editor)
 
 # hastily rescued from widgetWithMenu mix-in:
 #
@@ -47,6 +46,7 @@ class EditBook(QtGui.QTabWidget):
         self.timer.timeout.connect(self.countDown)
         self.timer.start(self.interval)
         self.filenamesDropped.connect(self.openThemAll)
+        self.currentChanged.connect(self.activateCurrent)
 
     def countDown(self, force=None):
         if force:
@@ -54,8 +54,8 @@ class EditBook(QtGui.QTabWidget):
         if self.counted==0:
             return
         self.counted -=1
-#        (dbg_print 'countDown', self.counted)
-        if self.counted:
+        print('countDown', self.counted)
+        if not self.counted:
             self.activeEdit.handleLull()
 
     def newFile(self):
@@ -78,7 +78,8 @@ class EditBook(QtGui.QTabWidget):
 
     def setActiveEdit(self, ed):
         self.activeEdit = ed
-        self.editBecomesActive.emit(ed)
+        self.setCurrentWidget(ed)
+        ed.editBecomesActive.emit()
 
     def loadAnyFile(self):
         fileName = QtGui.QFileDialog.getOpenFileName(self,
@@ -88,7 +89,13 @@ class EditBook(QtGui.QTabWidget):
         dbg_print ("loadAnyFile 2", fileName)
         self.openThemAll((fileName,))
 
-# temporary hacks while getting tabbed approach working:
+
+    def activateCurrent(self, ix):
+        print('activateCurrent', ix)
+        self.activeEdit = self.editors[ix]
+        self.activeEdit.editBecomesActive.emit()
+
+    # temporary hacks while getting tabbed approach working:
 
     def reloadFile(self):
         self.activeEdit.reloadFile()
@@ -101,6 +108,7 @@ class EditBook(QtGui.QTabWidget):
 
     def closeFile(self):
         self.activeEdit.closeFile()
+        self.editors.remo
 
     def restart(self):
         self.activeEdit.restart()
