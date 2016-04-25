@@ -14,7 +14,7 @@ from ..share import (Share, dbg_print, QtGui)
 
 class StdTab(QtGui.QPlainTextEdit):
     """
-This now very bare looking class will be embellished with facilities for
+This once very bare looking class is gradually being embellished with facilities for
 error location helpers etc. in due course. It is the class behind the several
 tabs (Abcm2svg etc.) within the subprocess output notebook.
     """
@@ -68,13 +68,13 @@ within abcraft.
     reMsg = r'$^'  # default = don't match any lines.
     rowColOrigin = (0, -1)
     stdFont = 'Courier New', 10, False
-
+    name = None  # = use class name
 
     def __init__(self):
         self.creMsg = (self.reMsg is not None and re.compile(self.reMsg)) or None
         self.stdTab = StdTab(self)
         Share.raft.stdBook.widget.addTab(self.stdTab,
-                                     self.__class__.__name__)
+                                         self.name or self.__class__.__name__)
         Share.raft.stdBook.widget.setCurrentWidget(self.stdTab)
         Share.raft.editor.fileSaved.connect(self.process)
 
@@ -120,3 +120,19 @@ within abcraft.
             dbg_print ("self.stdTab is None!")
         else:
             self.stdTab.setPlainText(error)
+
+    def write(self, s):
+        self.stdTab.
+        self.stdTab.appendPlainText(s)
+
+class StdOut(External):
+    name = 'raft'
+
+class StdErr:
+
+    def __init__(self, stdOut):
+        self.stdOut = stdOut
+
+    def write(self, s):
+#TODO: change colour to red to distinguish err from out
+        self.stdOut.write(s)
