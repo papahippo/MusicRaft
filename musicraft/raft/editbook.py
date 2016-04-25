@@ -20,6 +20,7 @@ class EditBook(QtGui.QTabWidget):
     settledAt = Signal(int, int)
     fileSaved = Signal(str)
     fileLoaded = Signal(str)
+    editBecomesActive = Signal(Editor)
 
 # hastily rescued from widgetWithMenu mix-in:
 #
@@ -57,22 +58,27 @@ class EditBook(QtGui.QTabWidget):
         if self.counted:
             self.activeEdit.handleLull()
 
-    def newFile(self, fileName='new.abc', force=True):
-        if (not force) and self.editors:
-            return
-        self.clear()
-        self.setFileName(fileName)
+    def newFile(self):
+        self.openThemAll(force=True)
 
-    def openThemAll(self, filenames=()):
-        if (not filenames):
-            return self.newFile(force=False)
+    def openThemAll(self, filenames=(), force=False):
+        if not self.editors:
+            force=True
+        if force and not filenames:
+            filenames = ('new.abc',)
         dbg_print('openThemAll', filenames)
+        if not filenames:
+            return
         for fn in filenames:
             ed = Editor(book=self)
             self.editors.append(ed)
             self.addTab(ed, os.path.split(fn)[1])
             ed.loadFile(fn)
         self.setActiveEdit(ed)
+
+    def setActiveEdit(self, ed):
+        self.activeEdit = ed
+        self.editBecomesActive.emit(ed)
 
     def loadAnyFile(self):
         fileName = QtGui.QFileDialog.getOpenFileName(self,

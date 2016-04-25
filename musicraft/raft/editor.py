@@ -130,13 +130,14 @@ class Editor(QtGui.QPlainTextEdit):
     def loadFile(self, fileName, newInstance=None, row=1, col=0):
         dbg_print ("AbcEditor.loadFile", fileName, newInstance, row, col)
         if newInstance is None:
-            newInstance = self.haveLoadedFile
+            newInstance = False # self.haveLoadedFile
         if newInstance:
             dbg_print("need to create new instance for", fileName)
             sys.argv[1:] = fileName,
             subprocess.Popen(sys.argv)
             return
 
+        self.setFileName(fileName)
         f = QtCore.QFile(fileName)
 
         if not f.open(QtCore.QFile.ReadOnly | QtCore.QFile.Text):
@@ -145,7 +146,6 @@ class Editor(QtGui.QPlainTextEdit):
         self.readAll(f)
         f.close()
         dbg_print ("Loaded %s" % fileName)
-        self.setFileName(fileName)
         self.moveToRowCol(row, col)  # primarily to gain focus!
         self.document().setModified(True) # force rewrite of Score
         self.book.fileLoaded.emit(fileName)
