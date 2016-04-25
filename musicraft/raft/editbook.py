@@ -55,19 +55,24 @@ class EditBook(QtGui.QTabWidget):
         self.counted -=1
 #        (dbg_print 'countDown', self.counted)
         if self.counted:
-            self.editors[-1].handleLull()
+            self.activeEdit.handleLull()
 
-    def newFile(self, fileName='new.abc'):
+    def newFile(self, fileName='new.abc', force=True):
+        if (not force) and self.editors:
+            return
         self.clear()
         self.setFileName(fileName)
 
-    def openThemAll(self, filenames=()): # False means already in place!
+    def openThemAll(self, filenames=()):
+        if (not filenames):
+            return self.newFile(force=False)
         dbg_print('openThemAll', filenames)
         for fn in filenames:
             ed = Editor(book=self)
             self.editors.append(ed)
             self.addTab(ed, os.path.split(fn)[1])
             ed.loadFile(fn)
+        self.setActiveEdit(ed)
 
     def loadAnyFile(self):
         fileName = QtGui.QFileDialog.getOpenFileName(self,
@@ -75,24 +80,25 @@ class EditBook(QtGui.QTabWidget):
                                                          '.', '*.*')[0]
 #                                                         '.', '*.abc')[0]
         dbg_print ("loadAnyFile 2", fileName)
-        self.editors[-1].loadFile(fileName, newInstance=False)
+        self.openThemAll((fileName,))
 
 # temporary hacks while getting tabbed approach working:
 
     def reloadFile(self):
-        self.editors[-1].reloadFile()
+        self.activeEdit.reloadFile()
 
     def saveFile(self):
-        self.editors[-1].saveFile()
+        self.activeEdit.saveFile()
 
     def saveFileAs(self):
-        self.editors[-1].saveFileAs()
+        self.activeEdit.saveFileAs()
 
     def closeFile(self):
-        self.editors[-1].closeFile()
+        self.activeEdit.closeFile()
 
     def restart(self):
-        self.editors[-1].restart()
+        self.activeEdit.restart()
 
     def moveToRowCol(self, *location):
-        self.editors[-1].moveToRowCol(*location)
+        self.activeEdit.moveToRowCol(*location)
+
