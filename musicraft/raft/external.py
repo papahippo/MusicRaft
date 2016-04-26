@@ -20,8 +20,7 @@ tabs (Abcm2svg etc.) within the subprocess output notebook.
     """
     def __init__(self, commander):
         QtGui.QPlainTextEdit.__init__(self)
-        self.font = QtGui.QFont(*commander.stdFont)
-        self.setFont(self.font)
+        # self.setFont(commander.font)  # maybe unnecessary - see External.write
         dbg_print (self.__class__.__name__+':__init__... commander.reMsg =',
                commander.reMsg)
         self.creMsg = commander.creMsg
@@ -68,14 +67,18 @@ within abcraft.
     reMsg = None  # r'$^'  # default = don't match any lines.
     rowColOrigin = (0, -1)
     stdFont = 'Courier New', 10, False, False
+    useItalic = False
     tabName = True  # = use class name
     lastStdTab = None
+
     def __init__(self):
+        self.font = QtGui.QFont(*self.stdFont)
         self.creMsg = (self.reMsg is not None and re.compile(self.reMsg)) or None
         if self.tabName is True:
             self.tabName = self.__class__.__name__
         if self.tabName:
             External.lastStdTab = self.stdTab = StdTab(self)
+            self.stdTab.setFont(self.font)
             Share.raft.stdBook.widget.addTab(self.stdTab, self.tabName)
         elif self.tabName is None:
             self.stdTab = External.lastStdTab
@@ -88,11 +91,11 @@ within abcraft.
         return answer
 
     def handle_output(self, output):
-        print (output)
+        #dbg_print (output)
         return output
 
     def process(self, inFileName, **kw):
-        print(inFileName)
+        #dbg_print(inFileName)
         baseName = os.path.splitext(inFileName)[0]
         if inFileName != (self.fmtNameIn % baseName):
             #logger.warning("ignoring file {0} (doesn't conform to '{1}'".format(
@@ -126,12 +129,20 @@ within abcraft.
             self.stdTab.setPlainText(error)
 
     def write(self, s):
-        self.stdTab.setFont(self.stdTab.font)  # to cope with stdout/stderr case.
+        if s =='\n':  # unjustifiable kludge, perhaps .. but it has the desired effect!
+            return    # compensate for extra new line provided by appendPlainText.
+        self.stdTab.setFont(self.font)  # to cope with stdout/stderr case.
+        tc = self.stdTab.textCursor()
+        cf = tc.charFormat()
+        cf.setFontItalic(self.useItalic)
+        tc.setCharFormat(cf)
+        self.stdTab.setTextCursor(tc)
         self.stdTab.appendPlainText(s)
 
+
 class StdOut(External):
-    tabName = None  # = hitch-hike with previously created sibling.
-    pass
+    tabName = 'System'
 
 class StdErr(StdOut):
-    stdFont = 'Courier New', 10, False, True
+    tabName = None  # = hitch-hike with previously created sibling.
+    useItalic = True

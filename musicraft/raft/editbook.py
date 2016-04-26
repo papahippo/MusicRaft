@@ -54,7 +54,7 @@ class EditBook(QtGui.QTabWidget):
         if self.counted==0:
             return
         self.counted -=1
-        print('countDown', self.counted)
+        # dbg_print('countDown', self.counted)
         if not self.counted:
             self.activeEdit.handleLull()
 
@@ -91,7 +91,7 @@ class EditBook(QtGui.QTabWidget):
 
 
     def activateCurrent(self, ix):
-        print('activateCurrent', ix)
+        dbg_print('activateCurrent', ix)
         self.activeEdit = self.editors[ix]
         self.activeEdit.editBecomesActive.emit()
 

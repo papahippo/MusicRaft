@@ -204,7 +204,7 @@ class Editor(QtGui.QPlainTextEdit):
 
     def writeAll(self, out):
         text = self.toPlainText()
-        dbg_print('len(text)=', len(text))
+        # dbg_print('len(text)=', len(text))
         out.write(text)
 
     def reloadFile(self):
