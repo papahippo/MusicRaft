@@ -8,6 +8,7 @@ import sys
 from .rafteditor import RaftEditor
 from .editbook import EditBook
 from ..share import (Share, Signal, dbg_print, QtCore, QtGui, QtSvg, WithMenu)
+from .external import (StdOut, StdErr)
 #import qdarkstyle
 
 class StdBook(QtGui.QTabWidget):
@@ -42,6 +43,11 @@ class Raft(QtGui.QMainWindow, WithMenu):
         # self.raftEditor.setMinimumWidth(320)
         self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.raftEditor)
         self.editor = self.raftEditor.widget
+        sys.stdout = StdOut()
+        sys.stderr = StdErr()
+        print ("testing stdout...", file=sys.stdout)
+        print ("testing stderr...", file=sys.stderr)
+        #sys.exit(0)
         self.createMenus()
         self.displayBook = DisplayBook()
         self.setCentralWidget(self.displayBook)

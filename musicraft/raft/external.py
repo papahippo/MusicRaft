@@ -20,8 +20,8 @@ tabs (Abcm2svg etc.) within the subprocess output notebook.
     """
     def __init__(self, commander):
         QtGui.QPlainTextEdit.__init__(self)
-        font = QtGui.QFont(*commander.stdFont)
-        self.setFont(font)
+        self.font = QtGui.QFont(*commander.stdFont)
+        self.setFont(self.font)
         dbg_print (self.__class__.__name__+':__init__... commander.reMsg =',
                commander.reMsg)
         self.creMsg = commander.creMsg
@@ -35,14 +35,14 @@ tabs (Abcm2svg etc.) within the subprocess output notebook.
         if self.quiet or self.creMsg is None:
             return
         match = self.creMsg.match(self.textCursor().block().text())
-        dbg_print (self.__class__.__name__+':handleCursorMove... match =', match)
+        # dbg_print (self.__class__.__name__+':handleCursorMove... match =', match)
         if match is None:
             return
         location = [o1+o2 for (o1, o2) in zip(
                         map(lambda s: int(s), match.groups()),
                        self.rowColOrigin)]
 
-        print ("Autolocating error in ABC", location )
+        # print ("Autolocating error in ABC", location )
         
         Share.raft.editor.moveToRowCol(*location)
 
@@ -65,16 +65,20 @@ within abcraft.
     exec_file = "base_class_stub_of_exec_file"
     outFileName = None
     errOnOut = False
-    reMsg = r'$^'  # default = don't match any lines.
+    reMsg = None  # r'$^'  # default = don't match any lines.
     rowColOrigin = (0, -1)
-    stdFont = 'Courier New', 10, False
-    name = None  # = use class name
-
+    stdFont = 'Courier New', 10, False, False
+    tabName = True  # = use class name
+    lastStdTab = None
     def __init__(self):
         self.creMsg = (self.reMsg is not None and re.compile(self.reMsg)) or None
-        self.stdTab = StdTab(self)
-        Share.raft.stdBook.widget.addTab(self.stdTab,
-                                         self.name or self.__class__.__name__)
+        if self.tabName is True:
+            self.tabName = self.__class__.__name__
+        if self.tabName:
+            External.lastStdTab = self.stdTab = StdTab(self)
+            Share.raft.stdBook.widget.addTab(self.stdTab, self.tabName)
+        elif self.tabName is None:
+            self.stdTab = External.lastStdTab
         Share.raft.stdBook.widget.setCurrentWidget(self.stdTab)
         Share.raft.editor.fileSaved.connect(self.process)
 
@@ -122,17 +126,12 @@ within abcraft.
             self.stdTab.setPlainText(error)
 
     def write(self, s):
-        self.stdTab.
+        self.stdTab.setFont(self.stdTab.font)  # to cope with stdout/stderr case.
         self.stdTab.appendPlainText(s)
 
 class StdOut(External):
-    name = 'raft'
+    tabName = None  # = hitch-hike with previously created sibling.
+    pass
 
-class StdErr:
-
-    def __init__(self, stdOut):
-        self.stdOut = stdOut
-
-    def write(self, s):
-#TODO: change colour to red to distinguish err from out
-        self.stdOut.write(s)
+class StdErr(StdOut):
+    stdFont = 'Courier New', 10, False, True

@@ -98,7 +98,7 @@ class Editor(QtGui.QPlainTextEdit):
 
     def handleTextChanged(self):
         self.book.counted = self.book.latency
-        print ('handleTextChanged', self.book.counted)
+        dbg_print ('handleTextChanged', self.book.counted)
 
     def handleLull(self):
         if 1:  # self.document().isModified():
