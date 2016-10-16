@@ -43,6 +43,7 @@ class SvgDigest:
     locatableTypes = ('N', None)
     gScaleXMultiplier = 1.0
     gScaleYMultiplier = 1.0
+    gScale = 1.0
     scene = None
 
     def __init__(self, filename):
@@ -86,7 +87,7 @@ class SvgDigest:
             sViewBox = root.get('viewBox')
             scene = self.scene
             if sViewBox and scene:
-                viewBox = map(float, sViewBox.split(' '))
+                viewBox = list(map(float, sViewBox.split(' ')))
                 
                 self.gScaleXMultiplier = ((viewBox[2] - viewBox[0])
                                                 / scene.width())
