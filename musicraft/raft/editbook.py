@@ -42,6 +42,7 @@ class EditBook(QtGui.QTabWidget):
             self.setMinimumHeight(self.minimumHeight)
         if self.minimumWidth:
             self.setMinimumWidth(self.minimumWidth)
+        #self.setWidth(640)
         self.timer = QtCore.QTimer()
         self.timer.timeout.connect(self.countDown)
         self.timer.start(self.interval)

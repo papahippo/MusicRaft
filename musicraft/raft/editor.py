@@ -309,6 +309,11 @@ class Editor(QtGui.QPlainTextEdit):
             #    editor.insert_text( source.text() )
         event.acceptProposedAction()
 
+    def mousePressEvent(self, mouseEvent):
+#        if (mouseEvent.button() != QtCore.Qt.LeftButton):
+        print (mouseEvent.button() )
+        return
+
 
     class LineNumberArea(QtGui.QWidget):
 
