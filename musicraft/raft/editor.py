@@ -105,7 +105,7 @@ class Editor(QtGui.QPlainTextEdit):
             dbg_print ("autoSave")
             split = os.path.split(self.fileName)
             fileName = 'autosave_'.join(split)
-            return self.saveFile(
+            self.saveFile(
                 fileName=temp_dir+ '/autosave_' + os.path.split(self.fileName)[1])
         tc = self.textCursor()
         position = tc.position()
