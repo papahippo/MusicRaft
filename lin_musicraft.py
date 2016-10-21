@@ -1,4 +1,5 @@
-#!/usr/bin/env python3
+#!/usr/bin/python3
+# -*- encoding: utf8 -*-
 """
 Copyright 2015 Hippos Technical Systems BV.
 
@@ -14,6 +15,6 @@ musicraft.abcraft.external.Abc2midi.reMsg = r'.*in\s+line-char\s(\d+)\-(\d+).*'
 musicraft.raft.main(
     Plugins=(musicraft.abcraft.AbcRaft,
              musicraft.pyraft.PyRaft,
-             # musicraft.freqraft.FreqRaft,
+      #       musicraft.freqraft.FreqRaft,
              )
 )

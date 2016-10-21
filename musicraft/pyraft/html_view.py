@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- encoding: utf8 -*-
 from __future__ import print_function
 """
 Copyright 2015 Hippos Technical Systems BV.
@@ -30,7 +31,7 @@ class HtmlView(QtWebKit.QWebView, WithMenu):
         WithMenu.__init__(self)
 
     def showOutput(self, html_bytes):
-        self.setContent(html_bytes)
+        self.setHtml(html_bytes)
 
     def showAtRowAndCol(self, row, col):
         pass  # for now!

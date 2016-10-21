@@ -1,19 +1,18 @@
 # syntax.py
 # gratefully taken from https://wiki.python.org/moin/PyQt/Python%20syntax%20highlighting
 
-from PySide.QtCore import QRegExp
-from PySide.QtGui import QColor, QTextCharFormat, QFont, QSyntaxHighlighter
+from ..share import (dbg_print, QtCore, QtGui)
 
 def format(color, style=''):
     """Return a QTextCharFormat with the given attributes.
     """
-    _color = QColor()
+    _color = QtGui.QColor()
     _color.setNamedColor(color)
 
-    _format = QTextCharFormat()
+    _format = QtGui.QTextCharFormat()
     _format.setForeground(_color)
     if 'bold' in style:
-        _format.setFontWeight(QFont.Bold)
+        _format.setFontWeight(QtGui.QFont.Bold)
     if 'italic' in style:
         _format.setFontItalic(True)
 
@@ -34,7 +33,7 @@ STYLES = {
 }
 
 
-class PythonHighlighter (QSyntaxHighlighter):
+class PythonHighlighter (QtGui.QSyntaxHighlighter):
     """Syntax highlighter for the Python language.
     """
     # Python keywords
@@ -65,13 +64,13 @@ class PythonHighlighter (QSyntaxHighlighter):
         '\{', '\}', '\(', '\)', '\[', '\]',
     ]
     def __init__(self, document):
-        QSyntaxHighlighter.__init__(self, document)
+        QtGui.QSyntaxHighlighter.__init__(self, document)
 
         # Multi-line strings (expression, flag, style)
         # FIXME: The triple-quotes in these two lines will mess up the
         # syntax highlighting from this point onward
-        self.tri_single = (QRegExp("'''"), 1, STYLES['string2'])
-        self.tri_double = (QRegExp('"""'), 2, STYLES['string2'])
+        self.tri_single = (QtCore.QRegExp("'''"), 1, STYLES['string2'])
+        self.tri_double = (QtCore.QRegExp('"""'), 2, STYLES['string2'])
 
         rules = []
 
@@ -108,7 +107,7 @@ class PythonHighlighter (QSyntaxHighlighter):
         ]
 
         # Build a QRegExp for each pattern
-        self.rules = [(QRegExp(pat), index, fmt)
+        self.rules = [(QtCore.QRegExp(pat), index, fmt)
             for (pat, index, fmt) in rules]
 
 
