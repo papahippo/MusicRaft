@@ -83,12 +83,15 @@ class Raft(QtGui.QMainWindow, WithMenu):
                     ('R&estart',       'Ctrl+E', self.editor.restart,),
                     ('&Save',          'Ctrl+S', self.editor.saveFile,),
                     ('Save &As',       'Ctrl+A', self.editor.saveFileAs,),
-                    ('E&xit',          'Ctrl+Q', self.editor.close,),
-#                    ('&Transpose',     'Ctrl+T', self.transpose,),
+                    ('E&xit',          'Ctrl+Q', self.exit_etc),
+                    #('E&xit', 'Ctrl+Q', self.editor.close,),
+            #                    ('&Transpose',     'Ctrl+T', self.transpose,),
 #                    ('&Undo Transpose','Ctrl+U', self.undoTranspose,),
 #                    ('Set &Font', 'F', self.changeMyFont,),
         ]
-
+    def exit_etc(self):
+        # quick fix;to be reviewed!
+        sys.exit()
 
 def main(Plugins=()):
     app = QtGui.QApplication(sys.argv)

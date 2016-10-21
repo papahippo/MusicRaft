@@ -72,7 +72,7 @@ class MidiPlayer(QtGui.QWidget):
 
     def __del__(self):
         dbg_print('MidiPlayer:__del__',)
-        self.output.reset()
+        #self.output.reset()
 
 if __name__ == '__main__':
     class MainWindow(QtGui.QMainWindow):
