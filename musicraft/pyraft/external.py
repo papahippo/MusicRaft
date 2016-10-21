@@ -1,4 +1,5 @@
 #!/usr/bin/python
+# -*- encoding: utf8 -*-
 """
 Copyright 2015 Hippos Technical Systems BV.
 Module 'external' within package 'abcraft' relates to the various
@@ -10,7 +11,7 @@ import os, re
 from ..share import (Share, dbg_print)
 from ..raft.external import External
 
-HTML_PREAMBLE = "Content-type: text/html;charset=UTF-8\n\n"
+HTML_PREAMBLE = "Content-type: text/html;charset=utf-8\n\n"
 
 
 class Python(External):

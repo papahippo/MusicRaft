@@ -87,8 +87,8 @@ class PitchPlot(pg.PlotItem):
             inf_line = pg.InfiniteLine(movable=False, angle=0, pos=ixPitch*self.pps,
                                        pen=dict(color=colour, width=width, style=style),
                                        # bounds = [-20, 20],
-                                       hoverPen=(0,240,0),
-                                       label=label, labelOpts=labelOpts)
+                                       # hoverPen=(0,240,0),
+                                       ) #label=label, labelOpts=labelOpts)
             self.addItem(inf_line)
 
     def interpret_burst(self, quiets, samples, believe=True, minFreq=10, maxFreq=1024, spread=3,

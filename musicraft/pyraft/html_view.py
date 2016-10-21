@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- encoding: utf8 -*-
 from __future__ import print_function
 """
 Copyright 2015 Hippos Technical Systems BV.
@@ -30,7 +31,7 @@ class HtmlView(QtWebKit.QWebView, WithMenu):
         WithMenu.__init__(self)
 
     def showOutput(self, html_bytes):
-        self.setContent(html_bytes)
+        self.setHtml(html_bytes)
 
     def showAtRowAndCol(self, row, col):
         pass  # for now!
@@ -39,12 +40,12 @@ class HtmlView(QtWebKit.QWebView, WithMenu):
         pass  # for now!
 
     def printAll(self, toPDF=False):
-        print("printAll!")
+        dbg_print("printAll!")
         self.printer.setPageSize(QtGui.QPrinter.A4)
         self.printer.setOutputFormat(QtGui.QPrinter.PdfFormat)
         #self.printer.setOutputFileName(toPDF and self.compositeName or '')
         # see quick fix in .external! ...
         printName = toPDF and (os.path.splitext(self.fileName)[0] + '.pdf') or ''
-        print("printing to file ", printName)
+        dbg_print("printing to file ", printName)
         self.printer.setOutputFileName(printName)
         self.print_(self.printer)

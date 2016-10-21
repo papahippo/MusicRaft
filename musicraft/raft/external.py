@@ -14,14 +14,13 @@ from ..share import (Share, dbg_print, QtGui)
 
 class StdTab(QtGui.QPlainTextEdit):
     """
-This now very bare looking class will be embellished with facilities for
+This once very bare looking class is gradually being embellished with facilities for
 error location helpers etc. in due course. It is the class behind the several
 tabs (Abcm2svg etc.) within the subprocess output notebook.
     """
     def __init__(self, commander):
         QtGui.QPlainTextEdit.__init__(self)
-        font = QtGui.QFont(*commander.stdFont)
-        self.setFont(font)
+        # self.setFont(commander.font)  # maybe unnecessary - see External.write
         dbg_print (self.__class__.__name__+':__init__... commander.reMsg =',
                commander.reMsg)
         self.creMsg = commander.creMsg
@@ -35,14 +34,14 @@ tabs (Abcm2svg etc.) within the subprocess output notebook.
         if self.quiet or self.creMsg is None:
             return
         match = self.creMsg.match(self.textCursor().block().text())
-        dbg_print (self.__class__.__name__+':handleCursorMove... match =', match)
+        # dbg_print (self.__class__.__name__+':handleCursorMove... match =', match)
         if match is None:
             return
         location = [o1+o2 for (o1, o2) in zip(
                         map(lambda s: int(s), match.groups()),
                        self.rowColOrigin)]
 
-        print ("Autolocating error in ABC", location )
+        # print ("Autolocating error in ABC", location )
         
         Share.raft.editor.moveToRowCol(*location)
 
@@ -65,16 +64,24 @@ within abcraft.
     exec_file = "base_class_stub_of_exec_file"
     outFileName = None
     errOnOut = False
-    reMsg = r'$^'  # default = don't match any lines.
+    reMsg = None  # r'$^'  # default = don't match any lines.
     rowColOrigin = (0, -1)
-    stdFont = 'Courier New', 10, False
-
+    stdFont = 'Courier New', 10, False, False
+    useItalic = False
+    tabName = True  # = use class name
+    lastStdTab = None
 
     def __init__(self):
+        self.font = QtGui.QFont(*self.stdFont)
         self.creMsg = (self.reMsg is not None and re.compile(self.reMsg)) or None
-        self.stdTab = StdTab(self)
-        Share.raft.stdBook.widget.addTab(self.stdTab,
-                                     self.__class__.__name__)
+        if self.tabName is True:
+            self.tabName = self.__class__.__name__
+        if self.tabName:
+            External.lastStdTab = self.stdTab = StdTab(self)
+            self.stdTab.setFont(self.font)
+            Share.raft.stdBook.widget.addTab(self.stdTab, self.tabName)
+        elif self.tabName is None:
+            self.stdTab = External.lastStdTab
         Share.raft.stdBook.widget.setCurrentWidget(self.stdTab)
         Share.raft.editor.fileSaved.connect(self.process)
 
@@ -84,11 +91,11 @@ within abcraft.
         return answer
 
     def handle_output(self, output):
-        print (output)
+        #dbg_print (output)
         return output
 
     def process(self, inFileName, **kw):
-        print(inFileName)
+        #dbg_print(inFileName)
         baseName = os.path.splitext(inFileName)[0]
         if inFileName != (self.fmtNameIn % baseName):
             #logger.warning("ignoring file {0} (doesn't conform to '{1}'".format(
@@ -120,3 +127,22 @@ within abcraft.
             dbg_print ("self.stdTab is None!")
         else:
             self.stdTab.setPlainText(error)
+
+    def write(self, s):
+        if s =='\n':  # unjustifiable kludge, perhaps .. but it has the desired effect!
+            return    # compensate for extra new line provided by appendPlainText.
+        self.stdTab.setFont(self.font)  # to cope with stdout/stderr case.
+        tc = self.stdTab.textCursor()
+        cf = tc.charFormat()
+        cf.setFontItalic(self.useItalic)
+        tc.setCharFormat(cf)
+        self.stdTab.setTextCursor(tc)
+        self.stdTab.appendPlainText(s)
+
+
+class StdOut(External):
+    tabName = 'System'
+
+class StdErr(StdOut):
+    tabName = None  # = hitch-hike with previously created sibling.
+    useItalic = True

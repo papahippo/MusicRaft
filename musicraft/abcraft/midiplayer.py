@@ -71,7 +71,7 @@ class MidiPlayer(QtGui.QWidget):
         QtCore.QTimer.singleShot(milliseconds, self.cueMessage)
 
     def __del__(self):
-        print('MidiPlayer:__del__',)
+        dbg_print('MidiPlayer:__del__',)
         self.output.reset()
 
 if __name__ == '__main__':
@@ -99,7 +99,7 @@ if __name__ == '__main__':
             #    80, 80 + self.menuBar().height()))
 
         def showLocation(self, lineNo, colNo):
-            print('showLocation(line, col)', lineNo, colNo)
+            dbg_print('showLocation(line, col)', lineNo, colNo)
 
     app = QtGui.QApplication(sys.argv)
     mainWindow = MainWindow()

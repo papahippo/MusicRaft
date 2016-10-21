@@ -46,6 +46,7 @@ class EditBook(QtGui.QTabWidget):
         self.timer.timeout.connect(self.countDown)
         self.timer.start(self.interval)
         self.filenamesDropped.connect(self.openThemAll)
+        self.currentChanged.connect(self.activateCurrent)
 
     def countDown(self, force=None):
         if force:
@@ -53,21 +54,32 @@ class EditBook(QtGui.QTabWidget):
         if self.counted==0:
             return
         self.counted -=1
-#        (dbg_print 'countDown', self.counted)
-        if self.counted:
-            self.editors[-1].handleLull()
+        # dbg_print('countDown', self.counted)
+        if not self.counted:
+            self.activeEdit.handleLull()
 
-    def newFile(self, fileName='new.abc'):
-        self.clear()
-        self.setFileName(fileName)
+    def newFile(self):
+        self.openThemAll(force=True)
 
-    def openThemAll(self, filenames=()): # False means already in place!
+    def openThemAll(self, filenames=(), force=False):
+        if not self.editors:
+            force=True
+        if force and not filenames:
+            filenames = ('new.abc',)
         dbg_print('openThemAll', filenames)
+        if not filenames:
+            return
         for fn in filenames:
             ed = Editor(book=self)
             self.editors.append(ed)
             self.addTab(ed, os.path.split(fn)[1])
             ed.loadFile(fn)
+        self.setActiveEdit(ed)
+
+    def setActiveEdit(self, ed):
+        self.activeEdit = ed
+        self.setCurrentWidget(ed)
+        ed.editBecomesActive.emit()
 
     def loadAnyFile(self):
         fileName = QtGui.QFileDialog.getOpenFileName(self,
@@ -75,24 +87,34 @@ class EditBook(QtGui.QTabWidget):
                                                          '.', '*.*')[0]
 #                                                         '.', '*.abc')[0]
         dbg_print ("loadAnyFile 2", fileName)
-        self.editors[-1].loadFile(fileName, newInstance=False)
+        self.openThemAll((fileName,))
 
-# temporary hacks while getting tabbed approach working:
+
+    def activateCurrent(self, ix):
+        dbg_print('activateCurrent', ix)
+        self.activeEdit = self.editors[ix]
+        self.activeEdit.editBecomesActive.emit()
+
+    # temporary hacks while getting tabbed approach working:
 
     def reloadFile(self):
-        self.editors[-1].reloadFile()
+        self.activeEdit.reloadFile()
 
     def saveFile(self):
-        self.editors[-1].saveFile()
+        self.activeEdit.saveFile()
 
     def saveFileAs(self):
-        self.editors[-1].saveFileAs()
+        self.activeEdit.saveFileAs()
 
     def closeFile(self):
-        self.editors[-1].closeFile()
+        self.activeEdit.closeFile()
+        self.editors.remove(self.activeEdit)
+        self.removeTab(self.currentIndex())
+        self.openThemAll()
 
     def restart(self):
-        self.editors[-1].restart()
+        self.activeEdit.restart()
 
     def moveToRowCol(self, *location):
-        self.editors[-1].moveToRowCol(*location)
+        self.activeEdit.moveToRowCol(*location)
+

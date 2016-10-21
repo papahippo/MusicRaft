@@ -1,3 +1,4 @@
+#!/usr/bin/python2.7
 from __future__ import print_function
 import sys, os, tempfile
 
@@ -9,17 +10,26 @@ class Share:
 image_dir = os.path.normpath(os.path.split(__file__)[0] + '/..') + '/images/'
 temp_dir = tempfile.gettempdir()
 
-abcraft_qt = os.getenv('ABCRAFT_QT', 'PySide')
-if abcraft_qt == 'PySide':
+qt_module_name = os.getenv('ABCRAFT_QT', 'PyQt4')
+if qt_module_name == 'PySide':
     from PySide import (QtCore, QtGui, QtSvg, QtWebKit)
     Signal = QtCore.Signal
     dbg_print ("using PySide!")
-elif abcraft_qt == 'PyQt4':
+    name_from_dialog = lambda x:x[0]
+elif qt_module_name == 'PyQt4':
     from PyQt4 import (QtCore, QtGui, QtSvg, QtWebKit)
+
     Signal = QtCore.pyqtSignal
-    dbg_print ("using Pyqt4!")
+    dbg_print("using Pyqt4!")
+    name_from_dialog = lambda x:x
+elif qt_module_name == 'PyQt5':
+    from PyQt5 import (QtCore, QtGui, QtSvg, QtWebKit)
+
+    Signal = QtCore.pyqtSignal
+    dbg_print("using Pyqt4!")
+    name_from_dialog = lambda x:x
 else:
-    raise NameError("bad value: ABCRAFT_QT = " + abcraft_qt)
+    raise NameError("bad value: ABCRAFT_QT = " + qt_module_name)
 
 
 class Printer(QtGui.QPrinter):
