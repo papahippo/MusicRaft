@@ -78,7 +78,7 @@ class Editor(QtGui.QPlainTextEdit):
         while col and ((col >= (l-1))
             or not (str(blockText[col]).lower() in 'abcdefg')):
             col -= 1
-        dbg_print ('AbcEditor.handleCursorMove: row =', blockNumber,
+        dbg_print ('editor.highlight: row =', blockNumber,
                                            'col =', col, col0)
         #if Common.score:
         #    Common.score.showAtRowAndCol(blockNumber+1, col)

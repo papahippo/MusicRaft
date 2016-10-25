@@ -9,7 +9,7 @@ from __future__ import print_function
 import sys
 import musicraft
 print ("imported musicraft package from", musicraft.__file__)
-musicraft.abcraft.external.Abcm2svg.exec_dir = '/away/larry/musicprogs/abcm2ps-6.6.22/'
+musicraft.abcraft.external.Abcm2svg.exec_dir = '/away/larry/musicprogs/abcm2ps-8.8.5/'
 musicraft.abcraft.external.Abc2midi.exec_dir = '/usr/local/bin/'
 musicraft.abcraft.external.Abc2midi.reMsg = r'.*in\s+line-char\s(\d+)\-(\d+).*'
 musicraft.raft.main(
