@@ -20,12 +20,12 @@ class AbcRaft(object):
 
     def __init__(self):
         Share.abcRaft = self
+        self.midiPlayer = MidiPlayer()
         self.score = Score()
         self.abc2abc = Abc2abc()
         self.abc2midi = Abc2midi()
         self.abcm2svg = Abcm2svg()
 
-        self.midiPlayer = MidiPlayer()
         self.printer = Printer()
 
         Share.raft.setWindowTitle("ABCraft")

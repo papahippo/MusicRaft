@@ -222,6 +222,7 @@ class Score(QtGui.QGraphicsView, WithMenu):
         self.which = 0  # default to show first generated svg until we know better.
         self.svgDigests = []
         Share.raft.editor.settledAt.connect(self.showAtRowAndCol)
+        Share.abcRaft.midiPlayer.lineAndCol.connect(self.showAtRowAndCol)
         dbg_print ("!Score.__init__")
 
     def drawBackground(self, p, rect):
@@ -246,7 +247,7 @@ class Score(QtGui.QGraphicsView, WithMenu):
 
 
     def showAtRowAndCol(self, row, col):
-        dbg_print ('showAtRowAndCol', row, col)
+        dbg_print ('showAtRowAndCol %d %d' %(row, col))
         l = len(self.svgDigests)        
         for i in range(l):
             j = (i +self.which) % l
@@ -261,7 +262,7 @@ class Score(QtGui.QGraphicsView, WithMenu):
 
     def locateXY(self, x, y):
         row, col = self.svgDigests[self.which].rowColAtXY(x, y)
-        dbg_print ("locateXY(", x, y, " > row,col", row, col)
+        dbg_print ("locateXY( %d,%d > row,col %d %d" %(x, y, row, col))
         Share.raft.editor.moveToRowCol(row, col)
 
     def showNextPage(self):

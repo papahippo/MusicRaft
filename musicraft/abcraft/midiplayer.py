@@ -57,9 +57,9 @@ class MidiPlayer(QtGui.QWidget):
                                  + self.accum[112])
                         colNo =  ((self.accum[113]<<7)
                                  + self.accum[114])
-                        self.lineAndCol.emit(lineNo, colNo)
+                        self.lineAndCol.emit(lineNo, colNo-1)
             try:
-                message = self.messages.next()
+                message = next(self.messages)
             except StopIteration:
                 dbg_print('cue_msg; StopIteration')
                 return
