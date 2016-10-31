@@ -31,7 +31,7 @@ class AbcRaft(object):
         Share.raft.setWindowTitle("ABCraft")
         Share.raft.displayBook.addTab(self.score, "Score")
 
-        if 0:  # problematic...
+        if 1:  # problematic...
             self.create_actions()
             self.create_menus()
 
@@ -49,14 +49,14 @@ class AbcRaft(object):
         self.start_midi_action = Share.raft.myQAction("Start &Midi",shortcut="Ctrl+M",
                 triggered=self.start_midi)
 
-        self.pause_midi_action = self.myQAction("Pause M&idi",shortcut="Ctrl+,",
+        self.pause_midi_action = Share.raft.myQAction("Pause M&idi",shortcut="Ctrl+,",
                 triggered=self.pause_midi)
 
     def create_menus(self):
 
-        self.midi_menu = QtGui.QMenu("&Midi", self)
+        self.midi_menu = QtGui.QMenu("&Midi")
         self.midi_menu.addAction(self.start_midi_action)
-        self.midi_menuMenu.addAction(self.pause_midi_action)
+        self.midi_menu.addAction(self.pause_midi_action)
 
         Share.raft.menuBar().addMenu(self.midi_menu)
         Share.raft.menuBar().show()

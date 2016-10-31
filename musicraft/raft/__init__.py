@@ -97,7 +97,13 @@ def main(Plugins=()):
     app = QtGui.QApplication(sys.argv)
     # app.setStyleSheet(qdarkstyle.load_stylesheet())
     Raft()
-    Share.plugins = [Plugin() for Plugin in Plugins]
+    Share.plugins = []
+    for Plugin in Plugins:
+        try:
+            Share.plugins.append(Plugin())
+        except TypeError as exc:
+            print(exc, file=sys.stderr)
+
     Share.raft.start()
     try:
         sys.exit(app.exec_())

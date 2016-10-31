@@ -246,7 +246,7 @@ class Editor(QtGui.QPlainTextEdit):
         plain = not (meta or ctrl or shift)
         if key == QtCore.Qt.Key_Insert and plain:
             self.setOverwriteMode(not self.overwriteMode())
-        if key == QtCore.Qt.Key_Tab and plain and Share.snippets:
+        if key == QtCore.Qt.Key_Tab and plain and self.snippets:
             return self.autoComplete(event)
         else:
             QtGui.QPlainTextEdit.keyPressEvent(self, event)
@@ -315,6 +315,29 @@ class Editor(QtGui.QPlainTextEdit):
         print (mouseEvent.button() )
         return
 
+    snippets = {
+        'V': ('V:', ' name="', '" sname="', '"\n',),  # new voice
+        'Q': ('Q:1/4',),  # new tempo indication
+        '12': ('[1 ', ' :| [2 ',),  # varied repeat ending coding
+        'cr': ('!<! ', ' !<!)',),  # hairpin dynamic
+        'dim': ('!>! ', ' !>!)',),  # hairpin dynamic
+        'CR': ('"_cresc."',),
+        'Cr': ('"^cresc."',),
+        'MR': ('"_molto rit."',),
+        'Mr': ('"^molto rit."',),
+        'PR': ('"_poco rit."',),
+        'Pr': ('"^poco rit."',),
+        'SB': ('"_steady beat"',),
+        'Sb': ('"^steady beat"',),
+        'm': ('[M:', '2/', '4]',),  # mid-line time-sig change
+        'tt': ('!tenuto!',),
+        'tp': ('!teepee!',),
+        'ac': ('!>!',),  # accent; '><TAB>' also works
+        'ro': ('!///!',),  # roll/roffel; '///<TAB>' also works
+        'st': ('!dot!',),  # staccato; 'dot<TAB>' also works
+        '.': ('!dot!',),  # staccato; 'dot<TAB>' also works
+        'gl': ('!-(!', '!-)!'),  # glissando
+    }
 
     class LineNumberArea(QtGui.QWidget):
 

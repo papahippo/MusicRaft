@@ -10,7 +10,7 @@ class Share:
 image_dir = os.path.normpath(os.path.split(__file__)[0] + '/..') + '/images/'
 temp_dir = tempfile.gettempdir()
 
-qt_module_name = os.getenv('ABCRAFT_QT', 'PyQt4')
+qt_module_name = os.getenv('ABCRAFT_QT', 'PySide')
 if qt_module_name == 'PySide':
     from PySide import (QtCore, QtGui, QtSvg, QtWebKit)
     Signal = QtCore.Signal

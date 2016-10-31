@@ -136,7 +136,7 @@ class PitchView(pg.GraphicsView):
     FRAMES_PER_BUFFER = 1024
     FORMAT = pyaudio.paInt16
     CHANNELS = 1
-    INPUT_DEVICE_INDEX = None  # i.e use default
+    INPUT_DEVICE_INDEX = 2 # None  # i.e use default
     MIN_SIG_VOLUME = 400
     MAX_BURST = AUDIO_SAMPLE_RATE * 0.2
     MAX_QUIETS = AUDIO_SAMPLE_RATE * 0.5
@@ -191,6 +191,7 @@ class PitchView(pg.GraphicsView):
             input=True,
             stream_callback = self.got_audio_block
         )
+        return
 
     def got_audio_block(self, raw_bytes, frame_count, time_info, status):
         dbg_print(frame_count, time_info, status)

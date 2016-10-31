@@ -11,7 +11,7 @@ import os, re
 from ..share import (Share, dbg_print)
 from ..raft.external import External
 
-HTML_PREAMBLE = "Content-type: text/html;charset=utf-8\n\n"
+HTML_PREAMBLE = "Content-type: text/html"
 
 
 class Python(External):
@@ -29,7 +29,7 @@ class Python -
 
     def handle_output(self, output):
         if output.startswith(HTML_PREAMBLE):
-            Share.pyRaft.htmlView.showOutput(output[len(HTML_PREAMBLE):])
+            Share.pyRaft.htmlView.showOutput(output[output.index('<html'):])
         else:
             Share.pyRaft.textView.showOutput(output)
         return output
