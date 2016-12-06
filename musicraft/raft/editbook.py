@@ -9,7 +9,6 @@ import sys, os, subprocess
 from ..share import (Signal, dbg_print, QtCore, QtGui, QtSvg, temp_dir)
 from .editor import Editor
 
-
 class EditBook(QtGui.QTabWidget):
     minimumWidth = 480
     minimumHeight = None
@@ -48,6 +47,10 @@ class EditBook(QtGui.QTabWidget):
         self.timer.start(self.interval)
         self.filenamesDropped.connect(self.openThemAll)
         self.currentChanged.connect(self.activateCurrent)
+        #self.fileLoaded.connect(self.fixTabName)
+
+    #def fixTabName(self, fileName):
+    #    pass
 
     def countDown(self, force=None):
         if force:
@@ -71,6 +74,7 @@ class EditBook(QtGui.QTabWidget):
         if not filenames:
             return
         for fn in filenames:
+            #ed = RaftEditor(book=self)
             ed = Editor(book=self)
             self.editors.append(ed)
             self.addTab(ed, os.path.split(fn)[1])
@@ -97,6 +101,9 @@ class EditBook(QtGui.QTabWidget):
         self.activeEdit.editBecomesActive.emit()
 
     # temporary hacks while getting tabbed approach working:
+
+    def transpose(self):
+        self.activeEdit.transpose()
 
     def reloadFile(self):
         self.activeEdit.reloadFile()

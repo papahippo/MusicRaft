@@ -5,7 +5,6 @@ Copyright 2016 Hippos Technical Systems BV.
 @author: larry
 """
 import sys
-from .rafteditor import RaftEditor
 from .editbook import EditBook
 from ..share import (Share, Signal, dbg_print, QtCore, QtGui, QtSvg, WithMenu)
 from .external import (StdOut, StdErr)
@@ -84,9 +83,8 @@ class Raft(QtGui.QMainWindow, WithMenu):
                     ('&Save',          'Ctrl+S', self.editor.saveFile,),
                     ('Save &As',       'Ctrl+A', self.editor.saveFileAs,),
                     ('E&xit',          'Ctrl+Q', self.exit_etc),
-                    #('E&xit', 'Ctrl+Q', self.editor.close,),
-            #                    ('&Transpose',     'Ctrl+T', self.transpose,),
-#                    ('&Undo Transpose','Ctrl+U', self.undoTranspose,),
+                    ('&Transpose',     'Ctrl+T', self.editor.transpose,),
+                    #('&Undo Transpose','Ctrl+U', self.editor.undoTranspose,),
 #                    ('Set &Font', 'F', self.changeMyFont,),
         ]
     def exit_etc(self):

@@ -113,6 +113,10 @@ class Editor(QtGui.QPlainTextEdit):
             self.prevCursorPos = position
             self.highlight(tc)
 
+    def newFile(self, fileName='new.abc'):
+        self.clear()
+        self.setFileName(fileName)
+        self.book.fileLoaded.emit(fileName)
 
     def closeFile(self):
         self.clear()
@@ -188,14 +192,16 @@ class Editor(QtGui.QPlainTextEdit):
                 "semitones (+/- for up/down:)", 0, -24, 24, 1)
         if not ok:
             return
-        fileName = 'original.abc'
-        self.originalText = self.toPlainText()
-        self.setFileName(fileName)
-        self.saveFile(fileName=fileName)
-        transposedText = Share.abcraft.abc2abc.process(fileName,
+        newFileName, ok  = QtGui.QFileDialog.getSaveFileName(self, "write tansposed to file",
+                            "transposed.abc",
+                            "(*.abc)")
+        if not ok:
+            return
+        transposedText = Share.abcRaft.abc2abc.process(self.fileName,
                                                 transpose=semitones)
-        self.newFile('transposed.abc')
-        self.setPlainText(transposedText)
+        with open(newFileName, 'w') as transposed_file:
+            transposed_file.write(transposedText)
+        self.book.openThemAll((newFileName,))
 
     def undoTranspose(self):
         if self.originalText:

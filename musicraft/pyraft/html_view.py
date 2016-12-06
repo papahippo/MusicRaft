@@ -35,7 +35,7 @@ class HtmlView(QtWebKit.QWebView, WithMenu):
         with open(self.fileName, 'w') as output:
             output.write(html_bytes)
 
-    def showAtRowAndCol(self, row, col):
+    def showAtRowAndCol(self, row, colhtml_bytes):
         pass  # for now!
 
     def locateXY(self, x, y):
