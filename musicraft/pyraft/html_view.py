@@ -32,6 +32,8 @@ class HtmlView(QtWebKit.QWebView, WithMenu):
 
     def showOutput(self, html_bytes):
         self.setHtml(html_bytes)
+        with open(self.fileName, 'w') as output:
+            output.write(html_bytes)
 
     def showAtRowAndCol(self, row, col):
         pass  # for now!
@@ -46,6 +48,7 @@ class HtmlView(QtWebKit.QWebView, WithMenu):
         #self.printer.setOutputFileName(toPDF and self.compositeName or '')
         # see quick fix in .external! ...
         printName = toPDF and (os.path.splitext(self.fileName)[0] + '.pdf') or ''
+        printName = printName.replace('autosave_', '')
         dbg_print("printing to file ", printName)
         self.printer.setOutputFileName(printName)
         self.print_(self.printer)

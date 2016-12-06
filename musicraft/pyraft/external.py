@@ -24,6 +24,7 @@ class Python -
     exec_file = 'python3'
 
     def cmd(self, inF, outF, **kw):
+        print(outF)
         Share.pyRaft.htmlView.fileName = outF  # quick and dirty fix!
         return External.cmd(self, inF)
 
