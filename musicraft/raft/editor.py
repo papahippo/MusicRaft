@@ -203,11 +203,6 @@ class Editor(QtGui.QPlainTextEdit):
             transposed_file.write(transposedText)
         self.book.openThemAll((newFileName,))
 
-    def undoTranspose(self):
-        if self.originalText:
-            self.setPlainText(self.originalText)
-            self.originalText = None
-
     def writeAll(self, out):
         text = self.toPlainText()
         # dbg_print('len(text)=', len(text))

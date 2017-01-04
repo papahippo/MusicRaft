@@ -84,7 +84,6 @@ class Raft(QtGui.QMainWindow, WithMenu):
                     ('Save &As',       'Ctrl+A', self.editor.saveFileAs,),
                     ('E&xit',          'Ctrl+Q', self.exit_etc),
                     ('&Transpose',     'Ctrl+T', self.editor.transpose,),
-                    #('&Undo Transpose','Ctrl+U', self.editor.undoTranspose,),
 #                    ('Set &Font', 'F', self.changeMyFont,),
         ]
     def exit_etc(self):
