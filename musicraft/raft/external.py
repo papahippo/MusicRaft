@@ -58,9 +58,9 @@ within abcraft.
     """
     fmtNameIn  = '%s.in'
     fmtNameOut = '%s.out'
-    exec_dir = os.path.normpath(os.path.split(__file__)[0] + '/../share/' + os.sys.platform + '/bin').replace(
-        'linux2', 'linux')
-    #exec_dir = os.path.normpath(os.path.split(__file__)[0] + '/../share/' + os.sys.platform + '/bin')
+    #exec_dir = os.path.normpath(os.path.split(__file__)[0] + '/../share/' + os.sys.platform + '/bin').replace(
+    #    'linux2', 'linux')
+    exec_dir = ''
     exec_file = "base_class_stub_of_exec_file"
     outFileName = None
     errOnOut = False
@@ -86,7 +86,7 @@ within abcraft.
         Share.raft.editor.fileSaved.connect(self.process)
 
     def cmd(self, *pp):
-        answer = ' '.join((os.path.sep.join((self.exec_dir, self.exec_file)),) + pp)
+        answer = ' '.join(((self.exec_dir + self.exec_file),) + pp)
         dbg_print ("External.cmd answer = ", answer)
         return answer
 
