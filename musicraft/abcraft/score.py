@@ -221,7 +221,7 @@ class Score(QtGui.QGraphicsView, WithMenu):
         self.setDragMode(QtGui.QGraphicsView.ScrollHandDrag)
         self.which = 0  # default to show first generated svg until we know better.
         self.svgDigests = []
-        Share.raft.editor.settledAt.connect(self.showAtRowAndCol)
+        Share.raft.editBook.settledAt.connect(self.showAtRowAndCol)
         Share.abcRaft.midiPlayer.lineAndCol.connect(self.showAtRowAndCol)
         dbg_print ("!Score.__init__")
 
@@ -263,7 +263,7 @@ class Score(QtGui.QGraphicsView, WithMenu):
     def locateXY(self, x, y):
         row, col = self.svgDigests[self.which].rowColAtXY(x, y)
         dbg_print ("locateXY( %d,%d > row,col %d %d" %(x, y, row, col))
-        Share.raft.editor.moveToRowCol(row, col)
+        Share.raft.editBook.moveToRowCol(row, col)
 
     def showNextPage(self):
         dbg_print ('showNextPage')

@@ -38,10 +38,10 @@ class Raft(QtGui.QMainWindow, WithMenu):
         self.stdBook = Dock(StdBook,  True)
         self.addDockWidget(QtCore.Qt.BottomDockWidgetArea, self.stdBook)
         self.stdBook.setMinimumHeight(140)
-        self.raftEditor = Dock(EditBook, True)
+        self.editBookDock = Dock(EditBook, True)
         # self.raftEditor.setMinimumWidth(320)
-        self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.raftEditor)
-        self.editor = self.raftEditor.widget
+        self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.editBookDock)
+        self.editBook = self.editBookDock.widget
         sys.stdout = StdOut()
         sys.stderr = StdErr()
         print ("testing stdout...", file=sys.stdout)
@@ -57,7 +57,7 @@ class Raft(QtGui.QMainWindow, WithMenu):
 
     def start(self):
         self.show()
-        self.editor.openThemAll(sys.argv[1:])
+        self.editBook.openThemAll(sys.argv[1:])
 
     def about(self):
         QtGui.QMessageBox.about(self, "About 'Raft'",
@@ -72,20 +72,25 @@ class Raft(QtGui.QMainWindow, WithMenu):
         self.helpMenu.addAction(self.aboutQtAct)
         self.helpAction = self.menuBar().addMenu(self.helpMenu)
 
+    def closeEvent(self, e):
+        self.editBook.exit_etc()
+
     def menuItems(self):
         return [
-                    ('&New',           'Ctrl+N', self.editor.newFile,),
-                    ('&Open',          'Ctrl+O', self.editor.loadAnyFile,),
-                    ('&Close',         'Ctrl+C', self.editor.closeFile,),
+                    ('&New',           'Ctrl+N', self.editBook.newFile,),
+                    ('&Open',          'Ctrl+O', self.editBook.loadAnyFile,),
+                    ('&Close',         'Ctrl+C', self.editBook.closeFile,),
                     #('Open in new &Instance', 'Ctrl+I', self.editor.cloneAnyFile,),
-                    ('&Reload',        'Ctrl+R', self.editor.reloadFile,),
-                    ('R&estart',       'Ctrl+E', self.editor.restart,),
-                    ('&Save',          'Ctrl+S', self.editor.saveFile,),
-                    ('Save &As',       'Ctrl+A', self.editor.saveFileAs,),
-                    ('E&xit',          'Ctrl+Q', self.editor.exit_etc),
-                    ('&Transpose',     'Ctrl+T', self.editor.transpose,),
+                    ('&Reload',        'Ctrl+R', self.editBook.reloadFile,),
+                    ('R&estart',       'Ctrl+E', self.editBook.restart,),
+                    ('&Save',          'Ctrl+S', self.editBook.saveFile,),
+                    ('Save &As',       'Ctrl+A', self.editBook.saveFileAs,),
+                    ('E&xit',          'Ctrl+Q', self.editBook.exit_etc),
+                    ('&Transpose',     'Ctrl+T', self.editBook.transpose,),
 #                    ('Set &Font', 'F', self.changeMyFont,),
+
         ]
+
 def main(Plugins=()):
     app = QtGui.QApplication(sys.argv)
     # app.setStyleSheet(qdarkstyle.load_stylesheet())

@@ -77,7 +77,7 @@ class WithMenu(object):
 
     def printAll(self, toPDF=False):
         # fileName = self.compositeName +'.pdf'
-        fileName = os.path.splitext(Share.raft.editor.activeEdit.fileName)[0] + '.pdf'
+        fileName = os.path.splitext(Share.raft.editBook.activeEdit.fileName)[0] + '.pdf'
         print(fileName)
         if toPDF:
             files = QtGui.QFileDialog.getSaveFileName(self,

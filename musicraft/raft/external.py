@@ -43,7 +43,7 @@ tabs (Abcm2svg etc.) within the subprocess output notebook.
 
         # print ("Autolocating error in ABC", location )
         
-        Share.raft.editor.moveToRowCol(*location)
+        Share.raft.editBook.moveToRowCol(*location)
 
     def setPlainText(self, text):
         self.quiet = True
@@ -83,7 +83,7 @@ within abcraft.
         elif self.tabName is None:
             self.stdTab = External.lastStdTab
         Share.raft.stdBook.widget.setCurrentWidget(self.stdTab)
-        Share.raft.editor.fileSaved.connect(self.process)
+        Share.raft.editBook.fileSaved.connect(self.process)
 
     def cmd(self, *pp):
         answer = ' '.join(((self.exec_dir + self.exec_file),) + pp)

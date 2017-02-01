@@ -22,10 +22,10 @@ class PyRaft(object):
         self.python = Python()
         Share.raft.displayBook.addTab(self.htmlView, "Html")
         Share.raft.displayBook.addTab(self.textView, "Text")
-        Share.raft.editor.fileLoaded.connect(self.checkLoadedFile)
+        Share.raft.editBook.fileLoaded.connect(self.checkLoadedFile)
 
     def checkLoadedFile(self, filename):
         dbg_print('checkLoadedFile', filename)
         if os.path.splitext(filename)[1] in ('.py', '.pyw'):
             dbg_print(filename + "  ... is one of mine!")
-            highlight = syntax.PythonHighlighter(Share.raft.editor.activeEdit.document())
+            highlight = syntax.PythonHighlighter(Share.raft.editBook.activeEdit.document())
