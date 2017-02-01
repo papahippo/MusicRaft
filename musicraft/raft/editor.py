@@ -12,6 +12,7 @@ class Editor(QtGui.QPlainTextEdit):
     prevCursorPos = -1
     currentLineColor = None
     editBecomesActive = Signal()
+    specialSaveFileName = None
 
     def __init__(self, book=None, **kw):
         self.book = book
@@ -101,7 +102,7 @@ class Editor(QtGui.QPlainTextEdit):
         dbg_print ('handleTextChanged', self.book.counted)
 
     def handleLull(self):
-        if 1:  # self.document().isModified():
+        if self.document().isModified():
             dbg_print ("autoSave")
             split = os.path.split(self.fileName)
             fileName = 'autosave_'.join(split)
@@ -153,7 +154,8 @@ class Editor(QtGui.QPlainTextEdit):
         f.close()
         dbg_print ("Loaded %s" % fileName)
         self.moveToRowCol(row, col)  # primarily to gain focus!
-        self.document().setModified(True) # force rewrite of Score
+        # self.document().setModified(True) # force rewrite of Score
+        self.book.fileSaved.emit(fileName)
         self.book.fileLoaded.emit(fileName)
 
     def setFileName(self, fileName=None):
@@ -171,6 +173,7 @@ class Editor(QtGui.QPlainTextEdit):
         self.setPlainText(text)
 
     def saveFile(self, fileName=None,):
+        self.specialSaveFileName = fileName # None if save is requested by user as opposed to temporary for score generation
         if fileName is None:
             fileName = self.fileName
         if fileName is None:

@@ -76,9 +76,17 @@ class WithMenu(object):
         return action
 
     def printAll(self, toPDF=False):
-        self.printer.setDocName(self.compositeName)
-        self.printer.setOutputFileName(
-            (toPDF and self.compositeName+'.pdf') or '')
+        # fileName = self.compositeName +'.pdf'
+        fileName = os.path.splitext(Share.raft.editor.activeEdit.fileName)[0] + '.pdf'
+        print(fileName)
+        if toPDF:
+            files = QtGui.QFileDialog.getSaveFileName(self,
+                "write PDF to file", fileName, '*.pdf')
+            if not files:
+                return
+            fileName = files[0]
+        self.printer.setDocName(fileName)
+        self.printer.setOutputFileName(toPDF and fileName or '')
         self.renderAll(QtGui.QPainter(self.printer))
 
     def renderAll(self, painter):

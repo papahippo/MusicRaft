@@ -126,3 +126,24 @@ class EditBook(QtGui.QTabWidget):
     def moveToRowCol(self, *location):
         self.activeEdit.moveToRowCol(*location)
 
+    def exit_etc(self):
+        while True:
+            unsaved = [(editor.specialSaveFileName is not None) for editor in self.editors]
+            print ('unsaved', unsaved)
+            n_unsaved = sum(unsaved)
+            if not n_unsaved:
+                break
+            ret = QtGui.QMessageBox.warning(self, "Application",
+                ("There are unsaved changes in %u document(s).\n" % n_unsaved) +
+                "Do you want to save your changes?",
+                QtGui.QMessageBox.SaveAll | QtGui.QMessageBox.Discard |
+                        QtGui.QMessageBox.Cancel)
+            if ret == QtGui.QMessageBox.Cancel:
+                return False
+            if ret == QtGui.QMessageBox.Discard:
+                break
+            for editor in self.editors:
+                if editor.specialSaveFileName is None:
+                    continue
+                editor.saveFile()
+        sys.exit()
