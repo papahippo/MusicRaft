@@ -82,9 +82,9 @@ class WithMenu(object):
         if toPDF:
             files = QtGui.QFileDialog.getSaveFileName(self,
                 "write PDF to file", fileName, '*.pdf')
-            if not files:
-                return
             fileName = files[0]
+            if not fileName:
+                return
         self.printer.setDocName(fileName)
         self.printer.setOutputFileName(toPDF and fileName or '')
         self.renderAll(QtGui.QPainter(self.printer))
