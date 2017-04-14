@@ -69,7 +69,7 @@ class EditBook(QtGui.QTabWidget):
         if not self.editors:
             force=True
         if force and not filenames:
-            filenames = ('new.abc',)
+            filenames = os.path.join(os.getcwd(),'new.abc'),
         dbg_print('openThemAll', filenames)
         if not filenames:
             return
