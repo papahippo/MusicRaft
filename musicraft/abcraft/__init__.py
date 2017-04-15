@@ -28,7 +28,7 @@ class AbcRaft(object):
 
         self.printer = Printer()
 
-        Share.raft.setWindowTitle("ABCraft")
+        Share.raft.setWindowTitle("Musicraft")
         Share.raft.displayBook.addTab(self.score, "Score")
 
         if 1:  # problematic...

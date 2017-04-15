@@ -13,6 +13,7 @@ class Editor(QtGui.QPlainTextEdit):
     currentLineColor = None
     editBecomesActive = Signal()
     specialSaveFileName = None
+    fileName = None
 
     def __init__(self, book=None, **kw):
         self.book = book
@@ -101,8 +102,8 @@ class Editor(QtGui.QPlainTextEdit):
         self.book.counted = self.book.latency
         dbg_print ('handleTextChanged', self.book.counted)
 
-    def handleLull(self):
-        if self.document().isModified():
+    def handleLull(self, force=False):
+        if force or self.document().isModified():
             dbg_print ("autoSave")
             split = os.path.split(self.fileName)
             fileName = 'autosave_'.join(split)

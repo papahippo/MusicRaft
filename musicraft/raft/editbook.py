@@ -98,7 +98,12 @@ class EditBook(QtGui.QTabWidget):
     def activateCurrent(self, ix):
         dbg_print('activateCurrent', ix)
         self.activeEdit = self.editors[ix]
-        self.activeEdit.editBecomesActive.emit()
+        # quick fix below needs to be improved!
+        if not self.activeEdit.fileName:
+            return
+        self.activeEdit.setFileName() # to force chdir!
+        self.activeEdit.handleLull(force=True)
+        # self.activeEdit.editBecomesActive.emit()
 
     # temporary hacks while getting tabbed approach working:
 
