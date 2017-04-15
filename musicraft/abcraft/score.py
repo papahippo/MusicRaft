@@ -14,7 +14,8 @@ import numpy as np
 from ..share import (Share, dbg_print, QtCore, QtGui, QtSvg, WithMenu, Printer)
 
 def abcHash(type_, row, col):
-   return (type_ and row and col) and ((ord(type_)<<24) + (row<<10) + col)
+   # return (type_ and row and col) and ((ord(type_)<<24) + (row<<10) + col)
+   return ((ord(type_)<<24) + (row<<10) + col)
 
 def abcUnhash(hash_):
     return ((hash_ and chr((hash_>>24)&0xff)),  # type
@@ -120,7 +121,8 @@ class SvgDigest:
                 dad = eltAbc.getparent()
             elif elt.tag.endswith('use'):
                 attr, val = elt.items()[-1]
-                if (attr.endswith('href') and val.lower() == '#hd'):
+                # look for normal note heads and also the special percussion note heads
+                if (attr.endswith('href') and val.lower() in ('#hd', '#dsh0', '#pshhd', '#pfthd', '#pdshhd', '#pdfthd')):
                     eltHead = elt # ready to be paired up with an 'abc' element
             else:
                 continue

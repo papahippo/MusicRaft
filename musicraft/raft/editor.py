@@ -77,7 +77,7 @@ class Editor(QtGui.QPlainTextEdit):
         dbg_print ("autoTrack", l)
         blockText = tc.block().text()
         while col and ((col >= (l-1))
-            or not (str(blockText[col]).lower() in 'abcdefg')):
+            or not (str(blockText[col]).lower() in 'abcdefg^_=')):
             col -= 1
         dbg_print ('editor.highlight: row =', blockNumber,
                                            'col =', col, col0)
