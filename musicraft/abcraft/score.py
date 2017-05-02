@@ -11,7 +11,7 @@ import sys, re
 import lxml.etree
 import numpy as np
 
-from ..share import (Share, dbg_print, QtCore, QtGui, QtSvg, WithMenu, Printer)
+from ..share import (Share, dbg_print, QtCore, QtGui, QtWebKit, WithMenu, Printer)
 
 def abcHash(type_, row, col):
    # return (type_ and row and col) and ((ord(type_)<<24) + (row<<10) + col)
@@ -213,19 +213,29 @@ class Score(QtGui.QGraphicsView, WithMenu):
         dbg_print ("Score.__init__")
         QtGui.QGraphicsView.__init__(self)
         WithMenu.__init__(self)
-        self.svgItem = None
-        self.backgroundItem = None
-        self.outlineItem = None
-        self.image = QtGui.QImage()
-
-        self.setScene(MyScene(self))
         self.setTransformationAnchor(QtGui.QGraphicsView.AnchorUnderMouse)
         self.setDragMode(QtGui.QGraphicsView.ScrollHandDrag)
         self.which = 0  # default to show first generated svg until we know better.
         self.svgDigests = []
         Share.raft.editBook.settledAt.connect(self.showAtRowAndCol)
         Share.abcRaft.midiPlayer.lineAndCol.connect(self.showAtRowAndCol)
+        scene = MyScene(self)
+        self.setScene(scene)
+        scene.clear()
+
+        self.svgView = QtWebKit.QGraphicsWebView()
+        self.svgView.setFlags(QtGui.QGraphicsItem.ItemClipsToShape)
+        self.svgView.setCacheMode(QtGui.QGraphicsItem.NoCache)
+        self.svgView.setZValue(0)
+        scene.addItem(self.svgView)
+        self.svgView.loadFinished.connect(self.svgLoaded)
         dbg_print ("!Score.__init__")
+
+    def svgLoaded(self):
+        frame = self.svgView.page().mainFrame()
+        fsize = frame.contentsSize()
+        self.svgView.resize(QtCore.QSizeF(fsize))
+        #self.resize(fsize.width() + 10, fsize.height() + 10)
 
     def drawBackground(self, p, rect):
         p.save()
@@ -284,42 +294,35 @@ class Score(QtGui.QGraphicsView, WithMenu):
         if not svg_file.exists():
             raise IOError("'%s' does not exist!" % svg_file.filename())
         self.which = which
+        self.svgView.load(QtCore.QUrl(svg_file.fileName()))
         scene = self.scene()
+        if 0:
+            self.backgroundItem = QtGui.QGraphicsRectItem(self.svgView.boundingRect())
+            self.backgroundItem.setBrush(QtCore.Qt.white)
+            self.backgroundItem.setPen(QtGui.QPen(QtCore.Qt.NoPen))
+            self.backgroundItem.setVisible(True)
+            self.backgroundItem.setZValue(-1)
 
-        scene.clear()
+            self.outlineItem = QtGui.QGraphicsRectItem(self.svgView.boundingRect())
+            outline = QtGui.QPen(QtCore.Qt.black, 2, QtCore.Qt.DashLine)
+            outline.setCosmetic(True)
+            self.outlineItem.setPen(outline)
+            self.outlineItem.setBrush(QtGui.QBrush(QtCore.Qt.NoBrush))
+            self.outlineItem.setVisible(True)
+            self.outlineItem.setZValue(1)
 
-        self.svgItem = QtSvg.QGraphicsSvgItem(svg_file.fileName())
-        self.svgItem.setFlags(QtGui.QGraphicsItem.ItemClipsToShape)
-        self.svgItem.setCacheMode(QtGui.QGraphicsItem.NoCache)
-        self.svgItem.setZValue(0)
+            scene.addItem(self.backgroundItem)
+            scene.addItem(self.outlineItem)
 
-        self.backgroundItem = QtGui.QGraphicsRectItem(self.svgItem.boundingRect())
-        self.backgroundItem.setBrush(QtCore.Qt.white)
-        self.backgroundItem.setPen(QtGui.QPen(QtCore.Qt.NoPen))
-        self.backgroundItem.setVisible(True)
-        self.backgroundItem.setZValue(-1)
+            rect = self.outlineItem.boundingRect()
+            #dbg_print ("before 'setSceneRect'...", scene.sceneRect())
+            scene.setSceneRect(rect) # .adjusted(-10, -10, 10, 10))
+            #dbg_print ("after 'setSceneRect'...", scene.sceneRect())
 
-        self.outlineItem = QtGui.QGraphicsRectItem(self.svgItem.boundingRect())
-        outline = QtGui.QPen(QtCore.Qt.black, 2, QtCore.Qt.DashLine)
-        outline.setCosmetic(True)
-        self.outlineItem.setPen(outline)
-        self.outlineItem.setBrush(QtGui.QBrush(QtCore.Qt.NoBrush))
-        self.outlineItem.setVisible(True)
-        self.outlineItem.setZValue(1)
+            self.setViewport(QtGui.QWidget())
 
-        scene.addItem(self.backgroundItem)
-        scene.addItem(self.svgItem)
-        scene.addItem(self.outlineItem)
-
-        rect = self.outlineItem.boundingRect()
-        #dbg_print ("before 'setSceneRect'...", scene.sceneRect())
-        scene.setSceneRect(rect) # .adjusted(-10, -10, 10, 10))
-        #dbg_print ("after 'setSceneRect'...", scene.sceneRect())
-
-        self.setViewport(QtGui.QWidget())
-
-        self.backgroundItem.setVisible(True)
-        self.outlineItem.setVisible(False)
+            self.backgroundItem.setVisible(True)
+            self.outlineItem.setVisible(False)
         
         self.svgDigests[which].AdjustForScene(scene)
 
