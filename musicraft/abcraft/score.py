@@ -296,34 +296,6 @@ class Score(QtGui.QGraphicsView, WithMenu):
         self.which = which
         self.svgView.load(QtCore.QUrl(svg_file.fileName()))
         scene = self.scene()
-        if 0:
-            self.backgroundItem = QtGui.QGraphicsRectItem(self.svgView.boundingRect())
-            self.backgroundItem.setBrush(QtCore.Qt.white)
-            self.backgroundItem.setPen(QtGui.QPen(QtCore.Qt.NoPen))
-            self.backgroundItem.setVisible(True)
-            self.backgroundItem.setZValue(-1)
-
-            self.outlineItem = QtGui.QGraphicsRectItem(self.svgView.boundingRect())
-            outline = QtGui.QPen(QtCore.Qt.black, 2, QtCore.Qt.DashLine)
-            outline.setCosmetic(True)
-            self.outlineItem.setPen(outline)
-            self.outlineItem.setBrush(QtGui.QBrush(QtCore.Qt.NoBrush))
-            self.outlineItem.setVisible(True)
-            self.outlineItem.setZValue(1)
-
-            scene.addItem(self.backgroundItem)
-            scene.addItem(self.outlineItem)
-
-            rect = self.outlineItem.boundingRect()
-            #dbg_print ("before 'setSceneRect'...", scene.sceneRect())
-            scene.setSceneRect(rect) # .adjusted(-10, -10, 10, 10))
-            #dbg_print ("after 'setSceneRect'...", scene.sceneRect())
-
-            self.setViewport(QtGui.QWidget())
-
-            self.backgroundItem.setVisible(True)
-            self.outlineItem.setVisible(False)
-        
         self.svgDigests[which].AdjustForScene(scene)
 
     def resetZoom(self):
