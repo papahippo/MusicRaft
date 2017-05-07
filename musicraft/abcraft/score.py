@@ -117,7 +117,13 @@ class SvgDigest:
                 if (attr.endswith('href') and val.lower() in ('#hd', '#dsh0', '#pshhd', '#pfthd', '#pdshhd', '#pdfthd')):
                     eltHead = elt # ready to be paired up with an 'abc' element
             elif tag_ == 'g':
-                print ('hurrah:', elt.get('transform') or 'huh?')
+                tf_ = elt.get('transform')
+                if not tf_:
+                    continue
+                scale_match = re.match('scale\((.*)\)', tf_)
+                if scale_match:
+                    scale_ = float(scale_match.group(1))
+                    dbg_print("SvgDigest: scale according to g ewncountered en passant =", scale_)
                 continue
             else:
                 continue
