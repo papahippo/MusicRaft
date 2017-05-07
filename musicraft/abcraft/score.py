@@ -42,14 +42,10 @@ class MyScene(QtGui.QGraphicsScene):
 
 class SvgDigest:
     locatableTypes = ('N', None)
-    gScaleXMultiplier = 1.0
-    gScaleYMultiplier = 1.0
-    gScale = 1.0
     scene = None
 
     def __init__(self, filename):
         self.svg_file = QtCore.QFile(filename)
-        #self.buildCribList()
         self.quickDic = {}
         self.svg_tree = self.cursorsDad = None
         #self.buildQuickDic()
@@ -130,32 +126,28 @@ class SvgDigest:
             if eltAbc is None or eltHead is None:
                 continue
 # we've 'paired' a note-head and an ABC note description; hurrah!
-            for attr in 'x','y':
-                self.quickDic[attr] = np.append(self.quickDic[attr], float(eltHead.get(attr)))
-                newHash = abcHash(eltAbc.get('type'), int(eltAbc.get('row')), int(eltAbc.get('col')))
+            sx_ = eltHead.get('x')
+            sy_ = eltHead.get('y')
+            self.quickDic['x'] = np.append(self.quickDic['x'], scale_ * float(sx_))
+            self.quickDic['y'] = np.append(self.quickDic['y'], scale_ * float(sy_))
+            newHash = abcHash(eltAbc.get('type'), int(eltAbc.get('row')), int(eltAbc.get('col')))
             self.quickDic['hash_'] = np.append(self.quickDic['hash_'], newHash)
             self.quickDic['scale_'] = np.append(self.quickDic['scale_'], scale_)
 
             if (newHash == hashToMatch):
-                dbg_print ('at cursor',
-                           [(attr, self.quickDic[attr][-1]) 
-                            for attr in ('x', 'y')])
+                #dbg_print ('at cursor',
+                #           [(attr, self.quickDic[attr][-1])
+                #            for attr in ('x', 'y')])
                 #, note head x,y, cx, cy =',
                 #          latest['x'], latest['y'],
                 #          latest['cx'], latest['cy'])
                 self.abcEltAtCursor = eltAbc
-                for coord in ('x', 'y'):
-                    eltCursor.set('c'+ coord, str(self.quickDic[coord][-1]))
+                eltCursor.set('cx', sx_)
+                eltCursor.set('cy', sy_)
             # avoid pairing the same notehead or abc note descripton again!
             eltAbc = eltHead = None
 
         self.cursorsDad = dad
-        transform = ((dad is not None) and dad.get('transform')) or None
-        #dbg_print (dad, transform)
-        scale_match = ((transform is not None)
-            and re.match('scale\((.*)\)', transform))
-        self.gScale = (scale_match and float(scale_match.group(1))) or 1.0 # 0.75
-        dbg_print ("SvgDigest: scale according to svg section =", self.gScale)
         if self.abcEltAtCursor is None:
             dbg_print ("can't find cursor position!")
             #print (hex(hashToMatch),
@@ -177,12 +169,6 @@ class SvgDigest:
     def rowColAtXY(self, x, y):
         if not self.quickDic:
             self.buildQuickDic()
-        x /= self.gScale
-        x *= self.gScaleXMultiplier
-        y /= self.gScale
-        y *= self.gScaleYMultiplier
-        #dbg_print('x,y', x, y, [(a, self.quickDic[a][:8])
-        #    for a in self.quickDic.keys()])
         x_dist = x - self.quickDic['x']
         y_dist = y - self.quickDic['y']
         a_dist = x_dist*x_dist + y_dist*y_dist
