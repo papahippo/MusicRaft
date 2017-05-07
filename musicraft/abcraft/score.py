@@ -73,11 +73,11 @@ class SvgDigest:
         if self.svg_tree is None:
             # dbg_print("building 'quick dictionary' from '%s'" % fileName)
             # dbg_print('self.eltCursor =', self.eltCursor)
-            for i, attr in enumerate(('x', 'y', 'hash_')):
-                if i==2:
-                    dtype = np.int32
-                else:
+            for i, attr in enumerate(('hash_', 'x', 'y', 'scale_')):
+                if i:
                     dtype = np.float_
+                else:
+                    dtype = np.int32
                 self.quickDic[attr] = np.array([], dtype=dtype)
             self.svg_tree = lxml.etree.parse(fileName)
             root = self.svg_tree.getroot()
@@ -87,15 +87,6 @@ class SvgDigest:
             #    for s in sInchByInch]
             sViewBox = root.get('viewBox')
             scene = self.scene
-            if sViewBox and scene:
-                viewBox = list(map(float, sViewBox.split(' ')))
-                
-                self.gScaleXMultiplier = ((viewBox[2] - viewBox[0])
-                                                / scene.width())
-                self.gScaleYMultiplier = ((viewBox[3] - viewBox[1])
-                                                / scene.height())
-                dbg_print("Multipliers =", self.gScaleXMultiplier, 
-                                           self.gScaleYMultiplier)
         else:
             self.removeCursor()
         eltCursor = lxml.etree.Element('circle', r='7', stroke='red', 
@@ -103,7 +94,7 @@ class SvgDigest:
         eltCursor.set('stroke-width', '2')            
         self.abcEltAtCursor = self.eltCursor = dad = None
         eltHead = eltAbc = None
-
+        scale_ = 1.0
         for elt in self.svg_tree.iter():
             # dbg_print (i, elt.tag, type(elt.tag), str(elt.tag))
             if callable(elt.tag):
@@ -111,7 +102,8 @@ class SvgDigest:
             if ((elt.get("stroke-width") is not None) and
                         (elt.get("stroke") is None)):
                 elt.set("stroke", "black")
-            if (elt.tag.endswith('abc')
+            tag_ = elt.tag.split('}')[1]
+            if (tag_=='abc'
             and (elt.get('type') in self.locatableTypes)):
                 eltAbc = elt # ready to be paired up with a notehead element
                 # use any old ABC record to determine parent ('dad').
@@ -119,27 +111,26 @@ class SvgDigest:
                 # yet found a cursor location!
                 #
                 dad = eltAbc.getparent()
-            elif elt.tag.endswith('use'):
+            elif tag_=='use':
                 attr, val = elt.items()[-1]
                 # look for normal note heads and also the special percussion note heads
                 if (attr.endswith('href') and val.lower() in ('#hd', '#dsh0', '#pshhd', '#pfthd', '#pdshhd', '#pdfthd')):
                     eltHead = elt # ready to be paired up with an 'abc' element
+            elif tag_ == 'g':
+                print ('hurrah:', elt.get('transform') or 'huh?')
+                continue
             else:
                 continue
             if eltAbc is None or eltHead is None:
-                continue  # haven't got a note-head/abc pair yet.
-                
+                continue
 # we've 'paired' a note-head and an ABC note description; hurrah!
-            for i,attr in enumerate(('x','y', 'hash_')):
-                if i==2:
-                    newVal = abcHash(eltAbc.get('type'),
-                                     int(eltAbc.get('row')),
-                                     int(eltAbc.get('col')))
-                    # dbg_print ('newVal =', hex(newVal))
-                else:
-                    newVal = float(eltHead.get(attr))
-                self.quickDic[attr] = np.append(self.quickDic[attr], newVal)
-            if (newVal == hashToMatch):
+            for attr in 'x','y':
+                self.quickDic[attr] = np.append(self.quickDic[attr], float(eltHead.get(attr)))
+                newHash = abcHash(eltAbc.get('type'), int(eltAbc.get('row')), int(eltAbc.get('col')))
+            self.quickDic['hash_'] = np.append(self.quickDic['hash_'], newHash)
+            self.quickDic['scale_'] = np.append(self.quickDic['scale_'], scale_)
+
+            if (newHash == hashToMatch):
                 dbg_print ('at cursor',
                            [(attr, self.quickDic[attr][-1]) 
                             for attr in ('x', 'y')])
