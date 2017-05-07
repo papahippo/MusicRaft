@@ -15,7 +15,7 @@ from ..share import (Share, dbg_print, QtCore, QtGui, QtWebKit, WithMenu, Printe
 
 def abcHash(type_, row, col):
    # return (type_ and row and col) and ((ord(type_)<<24) + (row<<10) + col)
-   return ((ord(type_)<<24) + (row<<10) + col)
+   return type_ is not None and row is not None and ((ord(type_)<<24) + (row<<10) + col)
 
 def abcUnhash(hash_):
     return ((hash_ and chr((hash_>>24)&0xff)),  # type
@@ -144,16 +144,16 @@ class SvgDigest:
                 self.abcEltAtCursor = eltAbc
                 eltCursor.set('cx', sx_)
                 eltCursor.set('cy', sy_)
+                self.cursorsDad = dad
             # avoid pairing the same notehead or abc note descripton again!
             eltAbc = eltHead = None
 
-        self.cursorsDad = dad
         if self.abcEltAtCursor is None:
             dbg_print ("can't find cursor position!")
             #print (hex(hashToMatch),
             #       [hex(self.quickDic['hash_'][i]) for i in range(2)])
         else:
-            dad.insert(0, eltCursor)
+            self.cursorsDad.insert(0, eltCursor)
             # test only: self.cursorsDad.remove(eltCursor)
             outFile = open(fileName, 'wb')
             dbg_print ('written', fileName)
