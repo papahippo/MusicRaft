@@ -167,7 +167,8 @@ class Editor(QtGui.QPlainTextEdit):
         # self.book.dock.setWindowTitle(title)
         self.haveLoadedFile = True
         _dirname, _endname = os.path.split(self.fileName)
-        os.chdir(_dirname)
+        if _dirname:
+            os.chdir(_dirname)
 
     def readAll(self, f):
         dbg_print ('readAll', self, f)
