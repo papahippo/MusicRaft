@@ -48,6 +48,7 @@ class SvgDigest:
         self.svg_file = QtCore.QFile(filename)
         self.quickDic = {}
         self.svg_tree = self.cursorsDad = None
+        self.row_col_dict = {}
         #self.buildQuickDic()
 
     def AdjustForScene(self, scene):
@@ -57,6 +58,8 @@ class SvgDigest:
         """ extract the all-imortant information from the .svg
             file which enables us to correlate locations within the
             image with locations within the source abc file.
+            N.B. row/col/cursor related stuff is being gradually phased
+            out from this function.
         """
         if type_ not in self.locatableTypes:
             raise TypeError (
@@ -106,12 +109,12 @@ class SvgDigest:
                 # we may need this for scale information even if we haven't
                 # yet found a cursor location!
                 #
-                dad = eltAbc.getparent()
             elif tag_=='use':
                 attr, val = elt.items()[-1]
                 # look for normal note heads and also the special percussion note heads
                 if (attr.endswith('href') and val.lower() in ('#hd', '#dsh0', '#pshhd', '#pfthd', '#pdshhd', '#pdfthd')):
                     eltHead = elt # ready to be paired up with an 'abc' element
+                    dad = eltHead.getparent()
             elif tag_ == 'g':
                 tf_ = elt.get('transform')
                 if not tf_:
@@ -119,7 +122,7 @@ class SvgDigest:
                 scale_match = re.match('scale\((.*)\)', tf_)
                 if scale_match:
                     scale_ = float(scale_match.group(1))
-                    dbg_print("SvgDigest: scale according to g ewncountered en passant =", scale_)
+                    dbg_print("SvgDigest: scale according to g encountered en passant =", scale_)
                 continue
             else:
                 continue
@@ -128,11 +131,18 @@ class SvgDigest:
 # we've 'paired' a note-head and an ABC note description; hurrah!
             sx_ = eltHead.get('x')
             sy_ = eltHead.get('y')
+            row_ = int(eltAbc.get('row'))
+            col_ = int(eltAbc.get('col'))
+            type_ = eltAbc.get('type')
+
             self.quickDic['x'] = np.append(self.quickDic['x'], scale_ * float(sx_))
             self.quickDic['y'] = np.append(self.quickDic['y'], scale_ * float(sy_))
-            newHash = abcHash(eltAbc.get('type'), int(eltAbc.get('row')), int(eltAbc.get('col')))
-            self.quickDic['hash_'] = np.append(self.quickDic['hash_'], newHash)
             self.quickDic['scale_'] = np.append(self.quickDic['scale_'], scale_)
+# obsolescent...
+            newHash = abcHash(type_, row_, col_)
+            self.quickDic['hash_'] = np.append(self.quickDic['hash_'], newHash)
+# being superseded by...
+            self.row_col_dict.setdefault(row_, {})[col_] = (eltAbc, eltHead)
 
             if (newHash == hashToMatch):
                 #dbg_print ('at cursor',
@@ -161,6 +171,8 @@ class SvgDigest:
             self.eltCursor = eltCursor
         return self.abcEltAtCursor
 
+    def insertCursor(self):
+        pass
     def removeCursor(self):
         if self.eltCursor is not None and self.cursorsDad is not None:
             self.cursorsDad.remove(self.eltCursor)
@@ -241,6 +253,15 @@ class Score(QtGui.QGraphicsView, WithMenu):
         self.compositeName = path.split('_page_')[0].replace('autosave_', '')
 
 
+    def getRowDict(self, row):
+        """
+            Cater for output from one source row straddling multiple (surely 1 or 2!) output pages.
+        """
+        rowDict = {}
+        for dig in self.svgDigests:
+            rowDict.update(dig.row_col_dict.setdefault(row, {}))
+        return rowDict
+
     def showAtRowAndCol(self, row, col):
         dbg_print ('showAtRowAndCol %d %d' %(row, col))
         l = len(self.svgDigests)        
@@ -248,6 +269,20 @@ class Score(QtGui.QGraphicsView, WithMenu):
             j = (i +self.which) % l
             abcEltAtCursor = self.svgDigests[j].buildQuickDic(row, col)
             if abcEltAtCursor is not None:
+                break
+        else:
+            dbg_print ("can't find svg graphics correspond to row : col...",
+                   row, ':', col)
+            return
+        self.showWhichPage(j, force=True)
+
+    def newShowAtRowAndCol(self, row, col):
+        dbg_print ('newShowAtRowAndCol %d %d' %(row, col))
+        l = len(self.svgDigests)
+        for i in range(l):
+            j = (i +self.which) % l
+            eltAbc, eltHead = self.svgDigests[j].row_col_dict.setdefault(row, {}).get(col, (None, None))
+            if eltAbc is not None:
                 break
         else:
             dbg_print ("can't find svg graphics correspond to row : col...",
