@@ -13,15 +13,7 @@ import numpy as np
 
 from ..share import (Share, dbg_print, QtCore, QtGui, QtWebKit, WithMenu, Printer)
 
-def abcHash(type_, row, col):
-   # return (type_ and row and col) and ((ord(type_)<<24) + (row<<10) + col)
-   return type_ is not None and row is not None and ((ord(type_)<<24) + (row<<10) + col)
 
-def abcUnhash(hash_):
-    return ((hash_ and chr((hash_>>24)&0xff)),  # type
-            (hash_ and (hash_>>10)&0x3fff),     # row
-            (hash_ and hash_&0x3ff))            # col
-    
 class MyScene(QtGui.QGraphicsScene):
         
     def mousePressEvent(self, event):
@@ -49,46 +41,34 @@ class SvgDigest:
         self.quickDic = {}
         self.svg_tree = self.cursorsDad = None
         self.row_col_dict = {}
-        #self.buildQuickDic()
+        self.buildQuickDic()
 
     def AdjustForScene(self, scene):
         self.scene = scene
 
-    def buildQuickDic(self, row=None, col=None, type_='N'):
+    def buildQuickDic(self):
         """ extract the all-imortant information from the .svg
             file which enables us to correlate locations within the
             image with locations within the source abc file.
             N.B. row/col/cursor related stuff is being gradually phased
             out from this function.
         """
-        if type_ not in self.locatableTypes:
-            raise TypeError (
-"only types " + self.locatableTypes + " can be autolocated in this version."
-             )
-        # maybe need to use row numbers starting from 1 everywhere(?)
-        hashToMatch = abcHash(type_, row, col)
-        #dbg_print ('hashToMatch =', hashToMatch and hex(hashToMatch))
         fileName = str(self.svg_file.fileName())
-        if self.svg_tree is None:
-            # dbg_print("building 'quick dictionary' from '%s'" % fileName)
-            # dbg_print('self.eltCursor =', self.eltCursor)
-            for i, attr in enumerate(('hash_', 'x', 'y', 'scale_')):
-                if i:
-                    dtype = np.float_
-                else:
-                    dtype = np.int32
-                self.quickDic[attr] = np.array([], dtype=dtype)
-            self.svg_tree = lxml.etree.parse(fileName)
-            root = self.svg_tree.getroot()
-            #sInchByInch = [root.get(dim) for dim in ('width', 'height')]
-            #dbg_print ('inchByInch =', sInchByInch,)
-            #self.inchByInch = [((s.endswith('in') and float(s[:-2])) or None)
-            #    for s in sInchByInch]
-            sViewBox = root.get('viewBox')
-            scene = self.scene
-        else:
-            self.removeCursor()
-        eltCursor = lxml.etree.Element('circle', r='7', stroke='red', 
+
+        for attr, dtype in (('row',   np.int32), ('col',   np.int32),
+                            ('x',     np.float), ('y',     np.float),
+                            ('scale', np.float )):
+            self.quickDic[attr] = np.array([], dtype=dtype)
+
+        self.svg_tree = lxml.etree.parse(fileName)
+        root = self.svg_tree.getroot()
+        #sInchByInch = [root.get(dim) for dim in ('width', 'height')]
+        #dbg_print ('inchByInch =', sInchByInch,)
+        #self.inchByInch = [((s.endswith('in') and float(s[:-2])) or None)
+        #    for s in sInchByInch]
+        sViewBox = root.get('viewBox')
+        scene = self.scene
+        eltCursor = lxml.etree.Element('circle', r='7', stroke='red',
                           fill="none")
         eltCursor.set('stroke-width', '2')            
         self.abcEltAtCursor = self.eltCursor = dad = None
@@ -137,40 +117,16 @@ class SvgDigest:
 
             self.quickDic['x'] = np.append(self.quickDic['x'], scale_ * float(sx_))
             self.quickDic['y'] = np.append(self.quickDic['y'], scale_ * float(sy_))
-            self.quickDic['scale_'] = np.append(self.quickDic['scale_'], scale_)
-# obsolescent...
-            newHash = abcHash(type_, row_, col_)
-            self.quickDic['hash_'] = np.append(self.quickDic['hash_'], newHash)
-# being superseded by...
+            self.quickDic['scale'] = np.append(self.quickDic['scale'], scale_)
+
+            self.quickDic['row'] = np.append(self.quickDic['row'], row_)
+            self.quickDic['col'] = np.append(self.quickDic['col'], col_)
+
             self.row_col_dict.setdefault(row_, {})[col_] = (eltAbc, eltHead)
 
-            if (newHash == hashToMatch):
-                #dbg_print ('at cursor',
-                #           [(attr, self.quickDic[attr][-1])
-                #            for attr in ('x', 'y')])
-                #, note head x,y, cx, cy =',
-                #          latest['x'], latest['y'],
-                #          latest['cx'], latest['cy'])
-                self.abcEltAtCursor = eltAbc
-                eltCursor.set('cx', sx_)
-                eltCursor.set('cy', sy_)
-                self.cursorsDad = dad
             # avoid pairing the same notehead or abc note descripton again!
             eltAbc = eltHead = None
-
-        if self.abcEltAtCursor is None:
-            dbg_print ("can't find cursor position!")
-            #print (hex(hashToMatch),
-            #       [hex(self.quickDic['hash_'][i]) for i in range(2)])
-        else:
-            self.cursorsDad.insert(0, eltCursor)
-            # test only: self.cursorsDad.remove(eltCursor)
-            fileName = str(self.svg_file.fileName())
-            outFile = open(fileName, 'wb')
-            dbg_print ('written', fileName)
-            self.svg_tree.write(outFile)
-            self.eltCursor = eltCursor
-        return self.abcEltAtCursor
+        return
 
     def insertCursor(self, eltHead):
         self.cursorsDad = eltHead.getparent()
@@ -192,14 +148,13 @@ class SvgDigest:
             self.eltCursor = None
 
     def rowColAtXY(self, x, y):
-        if not self.quickDic:
-            self.buildQuickDic()
         x_dist = x - self.quickDic['x']
         y_dist = y - self.quickDic['y']
         a_dist = x_dist*x_dist + y_dist*y_dist
         # dbg_print('a_dist', a_dist[:8])
         am = np.argmin(a_dist)
-        type_, row, col = abcUnhash(self.quickDic['hash_'][am])
+        row = self.quickDic['row'][am]
+        col = self.quickDic['col'][am]
         #dbg_print(am, row, col, self.quickDic['x'][am],
         #                        self.quickDic['y'][am], )
         return row, col  # not sure this is the best place for the '-1'!
@@ -225,8 +180,8 @@ class Score(QtGui.QGraphicsView, WithMenu):
         self.setDragMode(QtGui.QGraphicsView.ScrollHandDrag)
         self.which = 0  # default to show first generated svg until we know better.
         self.svgDigests = []
-        Share.raft.editBook.settledAt.connect(self.newShowAtRowAndCol)
-        Share.abcRaft.midiPlayer.lineAndCol.connect(self.newShowAtRowAndCol)
+        Share.raft.editBook.settledAt.connect(self.showAtRowAndCol)
+        Share.abcRaft.midiPlayer.lineAndCol.connect(self.showAtRowAndCol)
         scene = MyScene(self)
         self.setScene(scene)
         scene.clear()
@@ -265,23 +220,8 @@ class Score(QtGui.QGraphicsView, WithMenu):
         #
         # self.compositeName = path.split('_page_')[0].replace('autosave_', '')
 
-
     def showAtRowAndCol(self, row, col):
         dbg_print ('showAtRowAndCol %d %d' %(row, col))
-        l = len(self.svgDigests)        
-        for i in range(l):
-            j = (i +self.which) % l
-            abcEltAtCursor = self.svgDigests[j].buildQuickDic(row, col)
-            if abcEltAtCursor is not None:
-                break
-        else:
-            dbg_print ("can't find svg graphics correspond to row : col...",
-                   row, ':', col)
-            return
-        self.showWhichPage(j, force=True)
-
-    def newShowAtRowAndCol(self, row, col):
-        dbg_print ('newShowAtRowAndCol %d %d' %(row, col))
         l = len(self.svgDigests)
         for i in range(l):
             j = (i +self.which) % l
@@ -345,6 +285,9 @@ class Score(QtGui.QGraphicsView, WithMenu):
 if __name__ == '__main__':
 
     class MainWindow(QtGui.QMainWindow):
+        """
+        warning: not used this in months: probably not working!
+        """
         def __init__(self):
             super(MainWindow, self).__init__()
     
