@@ -165,14 +165,27 @@ class SvgDigest:
         else:
             self.cursorsDad.insert(0, eltCursor)
             # test only: self.cursorsDad.remove(eltCursor)
+            fileName = str(self.svg_file.fileName())
             outFile = open(fileName, 'wb')
             dbg_print ('written', fileName)
             self.svg_tree.write(outFile)
             self.eltCursor = eltCursor
         return self.abcEltAtCursor
 
-    def insertCursor(self):
-        pass
+    def insertCursor(self, eltHead):
+        self.cursorsDad = eltHead.getparent()
+        self.eltCursor = lxml.etree.Element('circle', r='7', stroke='red',
+                          fill="none")
+        self.eltCursor.set('stroke-width', '2')
+        self.eltCursor.set('cx', eltHead.get('x'))
+        self.eltCursor.set('cy', eltHead.get('y'))
+        self.cursorsDad.insert(0, self.eltCursor)
+
+        fileName = str(self.svg_file.fileName())
+        outFile = open(fileName, 'wb')
+        dbg_print('written', fileName)
+        self.svg_tree.write(outFile)
+
     def removeCursor(self):
         if self.eltCursor is not None and self.cursorsDad is not None:
             self.cursorsDad.remove(self.eltCursor)
@@ -212,8 +225,8 @@ class Score(QtGui.QGraphicsView, WithMenu):
         self.setDragMode(QtGui.QGraphicsView.ScrollHandDrag)
         self.which = 0  # default to show first generated svg until we know better.
         self.svgDigests = []
-        Share.raft.editBook.settledAt.connect(self.showAtRowAndCol)
-        Share.abcRaft.midiPlayer.lineAndCol.connect(self.showAtRowAndCol)
+        Share.raft.editBook.settledAt.connect(self.newShowAtRowAndCol)
+        Share.abcRaft.midiPlayer.lineAndCol.connect(self.newShowAtRowAndCol)
         scene = MyScene(self)
         self.setScene(scene)
         scene.clear()
@@ -250,17 +263,8 @@ class Score(QtGui.QGraphicsView, WithMenu):
         #
         # would be nice to have a descriptive composite name, but for now...
         #
-        self.compositeName = path.split('_page_')[0].replace('autosave_', '')
+        # self.compositeName = path.split('_page_')[0].replace('autosave_', '')
 
-
-    def getRowDict(self, row):
-        """
-            Cater for output from one source row straddling multiple (surely 1 or 2!) output pages.
-        """
-        rowDict = {}
-        for dig in self.svgDigests:
-            rowDict.update(dig.row_col_dict.setdefault(row, {}))
-        return rowDict
 
     def showAtRowAndCol(self, row, col):
         dbg_print ('showAtRowAndCol %d %d' %(row, col))
@@ -288,6 +292,8 @@ class Score(QtGui.QGraphicsView, WithMenu):
             dbg_print ("can't find svg graphics correspond to row : col...",
                    row, ':', col)
             return
+        self.svgDigests[j].removeCursor()
+        self.svgDigests[j].insertCursor(eltHead)
         self.showWhichPage(j, force=True)
 
     def locateXY(self, x, y):
