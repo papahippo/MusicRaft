@@ -61,13 +61,6 @@ class SvgDigest:
             self.quickDic[attr] = np.array([], dtype=dtype)
 
         self.svg_tree = lxml.etree.parse(fileName)
-        root = self.svg_tree.getroot()
-        #sInchByInch = [root.get(dim) for dim in ('width', 'height')]
-        #dbg_print ('inchByInch =', sInchByInch,)
-        #self.inchByInch = [((s.endswith('in') and float(s[:-2])) or None)
-        #    for s in sInchByInch]
-        sViewBox = root.get('viewBox')
-        scene = self.scene
         eltCursor = lxml.etree.Element('circle', r='7', stroke='red',
                           fill="none")
         eltCursor.set('stroke-width', '2')            
@@ -75,13 +68,12 @@ class SvgDigest:
         eltHead = eltAbc = None
         scale_ = 1.0
         for elt in self.svg_tree.iter():
-            # dbg_print (i, elt.tag, type(elt.tag), str(elt.tag))
             if callable(elt.tag):
                 continue
             if ((elt.get("stroke-width") is not None) and
                         (elt.get("stroke") is None)):
                 elt.set("stroke", "black")
-            tag_ = elt.tag.split('}')[1]
+            tag_ = elt.tag.split('}')[1]  # get rid of pesky namespace prefix
             if (tag_=='abc'
             and (elt.get('type') in self.locatableTypes)):
                 eltAbc = elt # ready to be paired up with a notehead element
@@ -101,7 +93,10 @@ class SvgDigest:
                     continue
                 scale_match = re.match('scale\((.*)\)', tf_)
                 if scale_match:
-                    scale_ = float(scale_match.group(1))
+                    try:
+                        scale_ = float(scale_match.group(1))
+                    except ValueError:
+                        continue
                     dbg_print("SvgDigest: scale according to g encountered en passant =", scale_)
                 continue
             else:
@@ -114,7 +109,8 @@ class SvgDigest:
             row_ = int(eltAbc.get('row'))
             col_ = int(eltAbc.get('col'))
             type_ = eltAbc.get('type')
-
+            if not (sx_ and sy_):
+                continue
             self.quickDic['x'] = np.append(self.quickDic['x'], scale_ * float(sx_))
             self.quickDic['y'] = np.append(self.quickDic['y'], scale_ * float(sy_))
             self.quickDic['scale'] = np.append(self.quickDic['scale'], scale_)
@@ -215,17 +211,21 @@ class Score(QtGui.QGraphicsView, WithMenu):
                 QtGui.QMessageBox.critical(self, "Open SVG File",
                         "Could not open file '%s'." % path)
         self.showWhichPage(self.which, force=True)
-        #
-        # would be nice to have a descriptive composite name, but for now...
-        #
-        # self.compositeName = path.split('_page_')[0].replace('autosave_', '')
+
+    def getEltsOnRow(self, row, which=None):
+        if not self.svgDigests:
+            return {}
+        if which is None:
+            which = self.which
+        return self.svgDigests[which].row_col_dict.setdefault(row, {})
 
     def showAtRowAndCol(self, row, col):
+
         dbg_print ('showAtRowAndCol %d %d' %(row, col))
         l = len(self.svgDigests)
         for i in range(l):
             j = (i +self.which) % l
-            eltAbc, eltHead = self.svgDigests[j].row_col_dict.setdefault(row, {}).get(col, (None, None))
+            eltAbc, eltHead = self.getEltsOnRow(row, which=j).get(col, (None, None))
             if eltAbc is not None:
                 break
         else:
@@ -286,7 +286,7 @@ if __name__ == '__main__':
 
     class MainWindow(QtGui.QMainWindow):
         """
-        warning: not used this in months: probably not working!
+        warning: not used this '__main__' in months: probably not working!
         """
         def __init__(self):
             super(MainWindow, self).__init__()

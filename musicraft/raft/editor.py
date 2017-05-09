@@ -14,6 +14,7 @@ class Editor(QtGui.QPlainTextEdit):
     editBecomesActive = Signal()
     specialSaveFileName = None
     fileName = None
+    highlighter = None
 
     def __init__(self, book=None, **kw):
         self.book = book
@@ -69,8 +70,11 @@ class Editor(QtGui.QPlainTextEdit):
         tc.setPosition(desiredPosition)
         self.setTextCursor(tc)
         self.setFocus()
+        if self.highlighter:
+            self.highlighter.rehighlight()
 
     def highlight(self, tc):
+        # n.b. unfortunate name - no relation to highlighter!
         blockNumber = tc.blockNumber()
         # Common.blockNumber = blockNumber
         col0 =  col = tc.positionInBlock()
@@ -97,7 +101,6 @@ class Editor(QtGui.QPlainTextEdit):
         self.setExtraSelections([hi_selection])
         hi_selection.cursor.clearSelection()
 
-
     def handleTextChanged(self):
         self.book.counted = self.book.latency
         dbg_print ('handleTextChanged', self.book.counted)
@@ -114,11 +117,13 @@ class Editor(QtGui.QPlainTextEdit):
         if position != self.prevCursorPos:
             self.prevCursorPos = position
             self.highlight(tc)
+        if self.highlighter:
+            self.highlighter.rehighlight()
 
     def newFile(self, fileName='new.abc'):
         self.clear()
         self.setFileName(fileName)
-        self.book.fileLoaded.emit(fileName)
+        self.book.fileLoaded.emit(self, fileName)
 
     def closeFile(self):
         self.clear()
@@ -151,13 +156,13 @@ class Editor(QtGui.QPlainTextEdit):
         if not f.open(QtCore.QFile.ReadOnly | QtCore.QFile.Text):
             return
 
+        self.book.fileLoaded.emit(self, fileName)
         self.readAll(f)
         f.close()
         dbg_print ("Loaded %s" % fileName)
         self.moveToRowCol(row, col)  # primarily to gain focus!
         # self.document().setModified(True) # force rewrite of Score
-        self.book.fileSaved.emit(fileName)
-        self.book.fileLoaded.emit(fileName)
+        self.book.fileSaved.emit(fileName)  # ???
 
     def setFileName(self, fileName=None):
         if fileName is not None:

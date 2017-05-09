@@ -23,7 +23,7 @@ print ("imported musicraft package from", musicraft.__file__)
 #
 musicraft.raft.main(
     Plugins=(musicraft.abcraft.AbcRaft,
-           # musicraft.pyraft.PyRaft,
+             musicraft.pyraft.PyRaft,
            #  musicraft.freqraft.FreqRaft,
              )
 )

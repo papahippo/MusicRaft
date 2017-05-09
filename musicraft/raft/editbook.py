@@ -18,7 +18,7 @@ class EditBook(QtGui.QTabWidget):
     filenamesDropped = Signal(list)
     settledAt = Signal(int, int)
     fileSaved = Signal(str)
-    fileLoaded = Signal(str)
+    fileLoaded = Signal(QtGui.QPlainTextEdit, str)
 
 # hastily rescued from widgetWithMenu mix-in:
 #

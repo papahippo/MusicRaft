@@ -6,8 +6,9 @@ Copyright 2015 Hippos Technical Systems BV.
 """
 from __future__ import print_function
 import sys, os, re, subprocess
-from ..share import (Share, QtCore, QtGui, Printer)
+from ..share import (Share, QtCore, QtGui, Printer, dbg_print)
 from .score import Score
+from .syntax import AbcHighlighter
 
 from .external import (Abc2midi, Abcm2svg, Abc2abc)
 
@@ -30,6 +31,13 @@ class AbcRaft(object):
 
         Share.raft.setWindowTitle("Musicraft")
         Share.raft.displayBook.addTab(self.score, "Score")
+        Share.raft.editBook.fileLoaded.connect(self.checkLoadedFile)
+
+    def checkLoadedFile(self, editor, filename):
+        dbg_print('checkLoadedFile', filename)
+        if os.path.splitext(filename)[1] in ('.abc', '.ABC'):
+            dbg_print("we expect ABC syntax in " + filename)
+            editor.highlighter = syntax.AbcHighlighter(editor.document())
 
         if 1:  # problematic...
             self.create_actions()
