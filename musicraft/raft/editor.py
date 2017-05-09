@@ -15,6 +15,7 @@ class Editor(QtGui.QPlainTextEdit):
     specialSaveFileName = None
     fileName = None
     highlighter = None
+    pointSizeF = 11.0
 
     def __init__(self, book=None, **kw):
         self.book = book
@@ -36,7 +37,7 @@ class Editor(QtGui.QPlainTextEdit):
         self.setStyleSheet(css)
 
         font = self.font()
-        font.setPointSize(10)
+        font.setPointSize(self.pointSizeF)
         self.setFont(font)
         self.setCursorWidth(2)
         self.setWindowTitle('title')
@@ -351,6 +352,16 @@ class Editor(QtGui.QPlainTextEdit):
         '.': ('!dot!',),  # staccato; 'dot<TAB>' also works
         'gl': ('!-(!', '!-)!'),  # glissando
     }
+
+
+    def wheelEvent(self, event):
+        dbg_print ("Editor.wheelEvent, delta = ", event.delta())
+        new_sizeF = self.pointSizeF + (event.delta() / 100.0)
+        if new_sizeF > 0:
+            self.pointSizeF = new_sizeF
+            self.font().setPointSizeF(new_sizeF)
+        event.accept()
+
 
     class LineNumberArea(QtGui.QWidget):
 

@@ -37,14 +37,16 @@ class AbcHighlighter (QtGui.QSyntaxHighlighter):
     """Syntax highlighter for the abc(plus) music description language.
     """
     # Python keywords
-    def __init__(self, document):
+    def __init__(self, document, editor):
         QtGui.QSyntaxHighlighter.__init__(self, document)
-
+        self.editor = editor
     def highlightBlock(self, text):
         """Apply syntax highlighting to the given block of text.
         """
         # I seem to have acquiesced to abcm2ps's scheme of counting rows from 1:
         elts_on_cols_in_row = Share.abcRaft.score.getEltsOnRow(1+self.currentBlock().blockNumber())
+        for key_ in STYLES.keys():
+            STYLES[key_].setFontPointSize(self.editor.pointSizeF)
         for ix in range(len(text)):
             style_name = 'default'
             eltAbc, eltHead = elts_on_cols_in_row.get(ix, (None, None))

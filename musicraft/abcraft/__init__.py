@@ -37,8 +37,7 @@ class AbcRaft(object):
         dbg_print('checkLoadedFile', filename)
         if os.path.splitext(filename)[1] in ('.abc', '.ABC'):
             dbg_print("we expect ABC syntax in " + filename)
-            editor.highlighter = syntax.AbcHighlighter(editor.document())
-
+            editor.highlighter = syntax.AbcHighlighter(editor.document(), editor)
         if 1:  # problematic...
             self.create_actions()
             self.create_menus()

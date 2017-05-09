@@ -70,7 +70,7 @@ class SvgDigest:
         for elt in self.svg_tree.iter():
             if callable(elt.tag):
                 continue
-            if ((elt.get("stroke-width") is not None) and
+            if 0 and ((elt.get("stroke-width") is not None) and
                         (elt.get("stroke") is None)):
                 elt.set("stroke", "black")
             tag_ = elt.tag.split('}')[1]  # get rid of pesky namespace prefix
