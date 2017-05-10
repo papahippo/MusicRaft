@@ -33,6 +33,8 @@ class MyScene(QtGui.QGraphicsScene):
 
 
 class SvgDigest:
+    ringColour = 'green'
+
     locatableTypes = ('N', None)
     scene = None
 
@@ -61,32 +63,21 @@ class SvgDigest:
             self.quickDic[attr] = np.array([], dtype=dtype)
 
         self.svg_tree = lxml.etree.parse(fileName)
-        eltCursor = lxml.etree.Element('circle', r='7', stroke='red',
-                          fill="none")
-        eltCursor.set('stroke-width', '2')            
         self.abcEltAtCursor = self.eltCursor = dad = None
         eltHead = eltAbc = None
         scale_ = 1.0
         for elt in self.svg_tree.iter():
             if callable(elt.tag):
                 continue
-            if 0 and ((elt.get("stroke-width") is not None) and
-                        (elt.get("stroke") is None)):
-                elt.set("stroke", "black")
             tag_ = elt.tag.split('}')[1]  # get rid of pesky namespace prefix
             if (tag_=='abc'
             and (elt.get('type') in self.locatableTypes)):
                 eltAbc = elt # ready to be paired up with a notehead element
-                # use any old ABC record to determine parent ('dad').
-                # we may need this for scale information even if we haven't
-                # yet found a cursor location!
-                #
             elif tag_=='use':
                 attr, val = elt.items()[-1]
                 # look for normal note heads and also the special percussion note heads
                 if (attr.endswith('href') and val.lower() in ('#hd', '#dsh0', '#pshhd', '#pfthd', '#pdshhd', '#pdfthd')):
                     eltHead = elt # ready to be paired up with an 'abc' element
-                    dad = eltHead.getparent()
             elif tag_ == 'g':
                 tf_ = elt.get('transform')
                 if not tf_:
@@ -124,9 +115,9 @@ class SvgDigest:
             eltAbc = eltHead = None
         return
 
-    def insertCursor(self, eltHead):
+    def insertCursor(self, eltHead, colour='green'):
         self.cursorsDad = eltHead.getparent()
-        self.eltCursor = lxml.etree.Element('circle', r='7', stroke='red',
+        self.eltCursor = lxml.etree.Element('circle', r='7', stroke=colour,
                           fill="none")
         self.eltCursor.set('stroke-width', '2')
         self.eltCursor.set('cx', eltHead.get('x'))
@@ -147,16 +138,17 @@ class SvgDigest:
         x_dist = x - self.quickDic['x']
         y_dist = y - self.quickDic['y']
         a_dist = x_dist*x_dist + y_dist*y_dist
-        # dbg_print('a_dist', a_dist[:8])
         am = np.argmin(a_dist)
         row = self.quickDic['row'][am]
         col = self.quickDic['col'][am]
-        #dbg_print(am, row, col, self.quickDic['x'][am],
-        #                        self.quickDic['y'][am], )
-        return row, col  # not sure this is the best place for the '-1'!
+        return row, col
         
 class Score(QtGui.QGraphicsView, WithMenu):
+
+    ringColour = 'red'
+
     menuTag = '&Score'
+
 
     def menuItems(self):
         return [
@@ -233,7 +225,7 @@ class Score(QtGui.QGraphicsView, WithMenu):
                    row, ':', col)
             return
         self.svgDigests[j].removeCursor()
-        self.svgDigests[j].insertCursor(eltHead)
+        self.svgDigests[j].insertCursor(eltHead, colour=self.ringColour)
         self.showWhichPage(j, force=True)
 
     def locateXY(self, x, y):

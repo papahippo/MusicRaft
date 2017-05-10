@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-###!/home/gill/python/fromGit/abcraft/venv.python3.4/bin/python
 """
 Copyright 2015 Hippos Technical Systems BV.
 
