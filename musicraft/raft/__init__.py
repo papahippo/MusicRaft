@@ -19,6 +19,7 @@ class StdBook(QtGui.QTabWidget):
 
 class DisplayBook(QtGui.QTabWidget):
     pass  # for now
+
 class Dock(QtGui.QDockWidget):
     def __init__(self, widgetClass, visible=True):
         QtGui.QDockWidget.__init__(self, widgetClass.headerText)
@@ -34,13 +35,13 @@ class Raft(QtGui.QMainWindow, WithMenu):
     def __init__(self):
         QtGui.QMainWindow.__init__(self)
         Share.raft = self
-        self.resize(1280, 1024)
+        #self.resize(1280, 1024)
         self.stdBook = Dock(StdBook,  True)
         self.addDockWidget(QtCore.Qt.BottomDockWidgetArea, self.stdBook)
         self.stdBook.setMinimumHeight(140)
         self.editBookDock = Dock(EditBook, True)
         # self.raftEditor.setMinimumWidth(320)
-        self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.editBookDock)
+        self.addDockWidget(QtCore.Qt.LeftDockWidgetArea, self.editBookDock)
         self.editBook = self.editBookDock.widget
         sys.stdout = StdOut()
         sys.stderr = StdErr()

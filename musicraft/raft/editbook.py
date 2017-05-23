@@ -10,7 +10,7 @@ from ..share import (Signal, dbg_print, QtCore, QtGui, QtSvg, temp_dir)
 from .editor import Editor
 
 class EditBook(QtGui.QTabWidget):
-    minimumWidth = 480
+    minimumWidth = None
     minimumHeight = None
     interval = 100
     latency = 3
@@ -28,8 +28,6 @@ class EditBook(QtGui.QTabWidget):
     latency = 8
     counted =0
     fileName = None
-    minimumWidth = 640
-    minimumHeight = None # 800
 
     headerText = 'Edit'
 
