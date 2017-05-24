@@ -7,19 +7,17 @@ Copyright 2015 Hippos Technical Systems BV.
 from __future__ import print_function
 import sys, os, re, subprocess
 from ..share import (Share, dbg_print, PlugRaft, QtCore, QtGui, Printer)
-from .html_view import HtmlView
-from .text_view import TextView
-from .external import Python
-from .syntax import PythonHighlighter
+from .player_view import PlayerView
+from .external import Mplayer
 
 
-class PyRaft(PlugRaft):
+class PlayRaft(PlugRaft):
 
-    myExtensions = ['.py', '.pyw']
+    myExtensions = ['.mp3', '.mp4', '.wav', '.wma', '.ogg', '.mpg', '.mpeg', '.avi' '.wmv']
 
     def __init__(self):
         PlugRaft.__init__(self)
-        Share.pyRaft = self
+        Share.playyRaft = self
         self.htmlView = HtmlView()
         self.textView = TextView()
         self.python = Python()

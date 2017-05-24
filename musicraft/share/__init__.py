@@ -95,3 +95,21 @@ class WithMenu(object):
     def printAllToPDF(self):
         self.printAll(toPDF=True)
 
+class PlugRaft(object):
+    """Model class for plug-ins to musicraft"""
+    myExtensions = []
+
+    def __init__(self):
+        if self.myExtensions:
+            Share.raft.editBook.fileLoaded.connect(self.checkLoadedFile)
+        # Share.plugRaft = self  # just a model of one thing that sub-classes must usually do.
+
+    def isMyType(self, filename):
+        rump, ext =  os.path.splitext(filename)
+        # desiigned ultiamtely to handle e.g test_mp4.py etc.
+        return (ext in self.myExtensions and rump)
+
+    def checkLoadedFile(self, editor, filename):
+        dbg_print(filename + " reached the default 'checkLoadedFile'; this is not supposed to happen!")
+        # if self.isMyType(filename):
+        #     etc...
