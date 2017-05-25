@@ -13,20 +13,17 @@ from .external import Mplayer
 
 class PlayRaft(PlugRaft):
 
-    myExtensions = ['.mp3', '.mp4', '.wav', '.wma', '.ogg', '.mpg', '.mpeg', '.avi' '.wmv']
+    #myExtensions = ['.mp3', '.mp4', '.wav', '.wma', '.ogg', '.mpg', '.mpeg', '.avi' '.wmv']
+    myExtensions = ['.mpl',]
 
     def __init__(self):
         PlugRaft.__init__(self)
-        Share.playyRaft = self
-        self.htmlView = HtmlView()
-        self.textView = TextView()
-        self.python = Python()
-        Share.raft.displayBook.addTab(self.htmlView, "Html")
-        Share.raft.displayBook.addTab(self.textView, "Text")
-        Share.raft.editBook.fileLoaded.connect(self.checkLoadedFile)
+        Share.playRaft = self
+        self.playerView = PlayerView()
+        self.mplayer = Mplayer()
+        Share.raft.displayBook.addTab(self.playerView, "Player")
 
     def checkLoadedFile(self, editor, filename):
         dbg_print('checkLoadedFile', filename)
         if self.isMyType(filename):
-            dbg_print(filename + "  ... is one of mine!")
-            editor.highlighter = syntax.PythonHighlighter(editor.document())
+            dbg_print(filename + "  ... is a playlist so one of mine!")

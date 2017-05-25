@@ -2,7 +2,7 @@
 from __future__ import print_function
 import sys, os, tempfile
 
-dbg_print = (int(os.getenv('ABCRAFT_DBG', 0)) and print) or (lambda *pp, **kw: None)
+dbg_print = (int(os.getenv('ABCRAFT_DBG', 1)) and print) or (lambda *pp, **kw: None)
 
 class Share:
     pass

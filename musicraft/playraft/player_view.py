@@ -9,22 +9,23 @@ Copyright 2015 Hippos Technical Systems BV.
 """
 
 import sys, os, re
-import lxml.etree
-import numpy as np
 
 from ..share import (Share, dbg_print, QtCore, QtGui, QtWebKit, WithMenu, Printer)
+from mplayer.core import Player
+
+try:
+    _Container =QtGui.QX11EmbedContainer
+except ImportError:
+    _Container = QtGui
 
 
-class PlayView(QtGui.QWidget, WithMenu):
+class PlayerView(_Container, WithMenu):
 
     def __init__(self):
-        dbg_print ("PlayView.__init__")
-        QtGui.QWidget.__init__(self)
+        dbg_print ("PlayerView.__init__")
+        _Container.__init__(self)
         WithMenu.__init__(self)
-
-    #def showOutput(self, html_bytes):
-    # .. pending!
-
+        self.resize(640, 480)
     def showAtRowAndCol(self, row, colhtml_bytes):
         pass  # for now!
 

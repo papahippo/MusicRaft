@@ -169,7 +169,8 @@ class Score(QtGui.QGraphicsView, WithMenu):
         self.which = 0  # default to show first generated svg until we know better.
         self.svgDigests = []
         Share.raft.editBook.settledAt.connect(self.showAtRowAndCol)
-        Share.abcRaft.midiPlayer.lineAndCol.connect(self.showAtRowAndCol)
+        if Share.abcRaft.midiPlayer:
+            Share.abcRaft.midiPlayer.lineAndCol.connect(self.showAtRowAndCol)
         scene = MyScene(self)
         self.setScene(scene)
         scene.clear()

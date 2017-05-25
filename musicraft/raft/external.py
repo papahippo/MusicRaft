@@ -70,6 +70,7 @@ within abcraft.
     useItalic = False
     tabName = True  # = use class name
     lastStdTab = None
+    _process = None
 
     def __init__(self):
         self.font = QtGui.QFont(*self.stdFont)
@@ -101,15 +102,21 @@ within abcraft.
             #logger.warning("ignoring file {0} (doesn't conform to '{1}'".format(
             #                            inFileName,             self.fmtNameIn))
             return
+        if self._process is not None:
+            return
         self.outFileName = self.fmtNameOut % baseName
         if self.cmd is None:
             return
         cmd1 = self.cmd(inFileName, self.outFileName, **kw)
         dbg_print (cmd1)
-        process = subprocess.Popen(cmd1, stdout=subprocess.PIPE, shell=True,
+        self._process = subprocess.Popen(cmd1, stdout=subprocess.PIPE, shell=True,
+            stdin=subprocess.PIPE,
             stderr= subprocess.STDOUT if self.errOnOut else subprocess.PIPE)
-        process.wait()
-        output_bytes, error_bytes = process.communicate()
+        self.manage()
+
+    def manage(self):
+        output_bytes, error_bytes = self._process.communicate()
+        self._process = None
         output = output_bytes.decode()
         error = (error_bytes or bytes()).decode()
         if self.errOnOut:
