@@ -105,9 +105,9 @@ class PlugRaft(object):
         # Share.plugRaft = self  # just a model of one thing that sub-classes must usually do.
 
     def isMyType(self, filename):
+        # maybe simplify this back some time!
         rump, ext =  os.path.splitext(filename)
-        # desiigned ultiamtely to handle e.g test_mp4.py etc.
-        return (ext in self.myExtensions and rump)
+        return (ext.lower() in self.myExtensions and rump)
 
     def checkLoadedFile(self, editor, filename):
         dbg_print(filename + " reached the default 'checkLoadedFile'; this is not supposed to happen!")

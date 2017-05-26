@@ -6,7 +6,7 @@ Copyright 2015 Hippos Technical Systems BV.
 """
 from __future__ import print_function
 import sys, os, re, subprocess
-from ..share import (Share, QtCore, QtGui, Printer, dbg_print)
+from ..share import (Share, QtCore, QtGui, Printer, dbg_print, PlugRaft)
 from .score import Score
 from .syntax import AbcHighlighter
 
@@ -15,11 +15,14 @@ from .external import (Abc2midi, Abcm2svg, Abc2abc)
 from .midiplayer import MidiPlayer
 
 
-class AbcRaft(object):
+class AbcRaft(PlugRaft):
+
+    myExtensions = ['.py', '.pyw']
 
     midiPlayerExe = 'timidity'
 
     def __init__(self):
+        PlugRaft.__init__(self)
         Share.abcRaft = self
         self.midiPlayer = MidiPlayer()
         self.score = Score()
@@ -35,7 +38,7 @@ class AbcRaft(object):
 
     def checkLoadedFile(self, editor, filename):
         dbg_print('checkLoadedFile', filename)
-        if os.path.splitext(filename)[1] in ('.abc', '.ABC'):
+        if self.isMyType(filename):
             dbg_print("we expect ABC syntax in " + filename)
             editor.highlighter = syntax.AbcHighlighter(editor.document(), editor)
         if 1:  # problematic...

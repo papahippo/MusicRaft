@@ -9,6 +9,7 @@ import sys, os, re, subprocess
 from ..share import (Share, dbg_print, PlugRaft, QtCore, QtGui, Printer)
 from .player_view import PlayerView
 from .external import Mplayer
+from .control import PlayerControl
 
 
 class PlayRaft(PlugRaft):
@@ -20,8 +21,10 @@ class PlayRaft(PlugRaft):
         PlugRaft.__init__(self)
         Share.playRaft = self
         self.playerView = PlayerView()
+        self.playerControl = PlayerControl()
         self.mplayer = Mplayer()
         Share.raft.displayBook.addTab(self.playerView, "Player")
+        Share.raft.controlBook.addTab(self.playerControl, "Player")
 
     def checkLoadedFile(self, editor, filename):
         dbg_print('checkLoadedFile', filename)
