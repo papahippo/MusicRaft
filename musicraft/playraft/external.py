@@ -59,6 +59,8 @@ class Python -
         QtCore.QTimer.singleShot(self.msPoll, self.poll_output)
 
     def feed_input(self, s):
+        if not self._process:
+            return
         self._process.stdin.write(bytes(s +"\n", 'utf8'))
         self._process.stdin.flush()
 

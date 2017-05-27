@@ -41,6 +41,11 @@ class SliderPlus(QtGui.QGroupBox):
         slidersLayout.addWidget(self.slider)
         self.setLayout(slidersLayout)
 
+    def write_to_client(self, s):
+        if not self._client:
+            return
+        self._client.feed_input(s)
+
     def reactToSlide(self, value):
         print('slid to', value)
         self.adjust(value)
@@ -55,9 +60,10 @@ class SliderPlus(QtGui.QGroupBox):
 
 class SpeedChanger(SliderPlus):
     def adjust(self, value):
-        if self._client:
-            self._client.speed = value / 100.0
-
+        #if self._client:
+        #    # self._client.speed = value / 100.0
+        speed =  value / 100.0
+        self.write_to_client("speed_set %.2f" % speed)
 
 class PosSeeker(SliderPlus):
     _minimum = 0
