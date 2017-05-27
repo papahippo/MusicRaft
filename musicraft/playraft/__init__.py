@@ -24,7 +24,7 @@ class PlayRaft(PlugRaft):
         self.playerControl = PlayerControl()
         self.mplayer = Mplayer()
         Share.raft.displayBook.addTab(self.playerView, "Player")
-        Share.raft.controlBook.addTab(self.playerControl, "Player")
+        # Share.raft.controlBook.widget.addTab(self.playerControl, "Player")
 
     def checkLoadedFile(self, editor, filename):
         dbg_print('checkLoadedFile', filename)

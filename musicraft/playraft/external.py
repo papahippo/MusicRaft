@@ -36,7 +36,7 @@ class Python -
     exec_dir = '/usr/bin/'
     exec_file = 'mplayer'
     errOnOut = True
-    msPoll   = 20
+    msPoll   = 2000
 
     def cmd(self, inF, outF, **kw):
         self._inF = inF
@@ -55,7 +55,7 @@ class Python -
             print (self._process.poll())
             return External.manage(self)
         for line in self.non_blocking_pipe.readlines():
-            self.stdTab.appendPlainText(line.decode())
+            self.stdTab.appendPlainText(line.decode('utf8', 'ignore'))
         QtCore.QTimer.singleShot(self.msPoll, self.poll_output)
 
     def feed_input(self, s):
