@@ -36,14 +36,14 @@ class Python -
     exec_dir = '/usr/bin/'
     exec_file = 'mplayer'
     errOnOut = True
-    msPoll   = 2000
+    msPoll   = 200
 
     def cmd(self, inF, outF, **kw):
         self._inF = inF
         return External.cmd(self, '-slave', '-idle', # '-really-quiet', '-msglevel', 'global=4',
-                  '-input', 'nodefault-bindings', '-noconfig', 'all',)
-                  #'-msglevel', 'global=6', '-fixed-vo', '-fs',)
-                  #'-wid', str(Share.playRaft.playerView.winId()))
+                  '-input', 'nodefault-bindings', '-noconfig', 'all',
+                  '-msglevel', 'global=6', '-fixed-vo', '-fs',
+                  '-wid', str(Share.playRaft.playerView.winId()))
 
     def manage(self):
         self.non_blocking_pipe = NonblockingReader(self._process.stdout)
