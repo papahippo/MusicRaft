@@ -102,16 +102,15 @@ within abcraft.
             #logger.warning("ignoring file {0} (doesn't conform to '{1}'".format(
             #                            inFileName,             self.fmtNameIn))
             return
-        if self._process is not None:
-            return
         self.outFileName = self.fmtNameOut % baseName
         if self.cmd is None:
             return
         cmd1 = self.cmd(inFileName, self.outFileName, **kw)
         dbg_print (cmd1)
-        self._process = subprocess.Popen(cmd1, stdout=subprocess.PIPE, shell=True,
-            stdin=subprocess.PIPE,
-            stderr= subprocess.STDOUT if self.errOnOut else subprocess.PIPE)
+        if self._process is None:
+            self._process = subprocess.Popen(cmd1, stdout=subprocess.PIPE, shell=True,
+                stdin=subprocess.PIPE,
+                stderr= subprocess.STDOUT if self.errOnOut else subprocess.PIPE)
         self.manage()
 
     def manage(self):
