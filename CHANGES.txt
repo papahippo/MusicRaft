@@ -1,0 +1,12 @@
+v0.3.0, 2017-01-24 -- First release as package MusicRaft
+v0.3.2, 2017-01-25 -- relaxed version requirements while investigating conda problems
+v0.3.3, 2017-01-26 -- little change?
+v0.3.4, 2017-01-26 -- include missing sub-packages
+v0.3.5  2017-01-27 -- comment out (linux-only) setting overrules
+v0.3.6  2017-01-31 -- begining to look like better than alpha code!
+v0.3.7  2017-02-01 -- finally remembered to depend on pyqtgraph
+v0.3.9  2017-04-14 -- minor improvements
+v0.4.0  2017-05-09 -- introduced abc highlighting; major rework to 'score.py'
+v0.4.1  2017-05-09 -- introduced resizing of editor text by scroll wheel
+v0.4.2  2017-05-09 -- minor cleanup + don't require /usr/bin/python3
+
