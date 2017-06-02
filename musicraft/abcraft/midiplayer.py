@@ -21,7 +21,7 @@ class MidiPlayer(QtGui.QWidget):
         QtGui.QWidget.__init__(self)
         try:
             self.output = mido.open_output(self.outputPort)
-        except IOError as exc:
+        except (IOError, ImportError, AttributeError) as exc:
             print ("sorry; couldn't setup MIDI player; exception details follow <<<")
             print (exc)
             print (">>>. Perhaps overruling outputPort (currently {0}) will help".format(self.outputPort))

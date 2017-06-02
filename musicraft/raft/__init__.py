@@ -21,7 +21,7 @@ class DisplayBook(QtGui.QTabWidget):
     pass  # for now
 
 class ControlBook(QtGui.QTabWidget):
-    headerText = 'control panels'
+    headerText = 'control (work in progress!)'
     whereDockable   = QtCore.Qt.AllDockWidgetAreas
 
     def __init__(self, dock=None):
@@ -47,6 +47,7 @@ class Raft(QtGui.QMainWindow, WithMenu):
         self.stdBook = Dock(StdBook,  True)
         self.addDockWidget(QtCore.Qt.BottomDockWidgetArea, self.stdBook)
         self.controlBook = Dock(ControlBook,  True)
+        self.controlBook.setMaximumWidth(240)
         self.addDockWidget(QtCore.Qt.BottomDockWidgetArea, self.controlBook)
         self.stdBook.setMinimumHeight(140)
         self.editBookDock = Dock(EditBook, True)
