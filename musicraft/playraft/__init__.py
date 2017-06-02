@@ -8,7 +8,7 @@ from __future__ import print_function
 import sys, os, re, subprocess
 from ..share import (Share, dbg_print, PlugRaft, QtCore, QtGui, Printer)
 from .player_view import PlayerView
-from .external import Mplayer
+from .external import Mplayer, PlayItem
 from .control import PlayerControl
 
 
