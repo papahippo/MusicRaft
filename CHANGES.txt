@@ -9,4 +9,4 @@ v0.3.9  2017-04-14 -- minor improvements
 v0.4.0  2017-05-09 -- introduced abc highlighting; major rework to 'score.py'
 v0.4.1  2017-05-09 -- introduced resizing of editor text by scroll wheel
 v0.4.2  2017-05-09 -- minor cleanup + don't require /usr/bin/python3
-
+v0.4.3  2017-06-03 -- specify explicit version of mido package (latest seems to give problems)
