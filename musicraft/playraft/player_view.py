@@ -11,7 +11,6 @@ Copyright 2015 Hippos Technical Systems BV.
 import sys, os, re
 
 from ..share import (Share, dbg_print, QtCore, QtGui, QtWebKit, WithMenu, Printer)
-from mplayer.core import Player
 
 try:
     _Container =QtGui.QX11EmbedContainer
