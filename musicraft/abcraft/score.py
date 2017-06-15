@@ -185,12 +185,16 @@ class Score(QtGui.QGraphicsView, WithMenu):
         self.svgView.resize(QtCore.QSizeF(fsize))
         if not self.prainter:
             return
-
+        print ("'prainting' page", self.which)
         if self.which:
             self.printer.newPage()
+        else:
+            self.prainter.begin(self)
         self.scene().render(self.prainter)
         self.showNextPage()
         if  not self.which:
+            self.prainter.end()
+            del self.prainter
             self.prainter = None
         #self.resize(fsize.width() + 10, fsize.height() + 10)
 
@@ -270,7 +274,7 @@ class Score(QtGui.QGraphicsView, WithMenu):
 
     def renderAll(self, painter):
         self.prainter = painter
-        self.showWhichPage(0)
+        self.showWhichPage(0, force=True)
 
     def wheelEvent(self, event):
         factor = 1.2**( event.delta() / 120.0)
