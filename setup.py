@@ -6,7 +6,7 @@ MusicRaft
 from setuptools import setup
 
 setup(name = 'MusicRaft',
-    version = '0.4.2',
+    version = '0.4.5',
     author = "Larry Myerscough",
     author_email='hippostech@gmail.com',
     packages=['musicraft', 'musicraft.abcraft', 'musicraft.freqraft', 'musicraft.pyraft', 'musicraft.raft', 'musicraft.share', ],
@@ -17,7 +17,7 @@ setup(name = 'MusicRaft',
     long_description=open('README.txt').read(),
     install_requires=[
         "numpy >= 1.1.1",
-        "mido >= 1.1.1",
+        "mido == 1.1.14",
         "pyqtgraph >= 0.10.0",
 # problematic!        "PySide >= 1.1.1",
 

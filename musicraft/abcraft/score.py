@@ -11,7 +11,7 @@ import sys, re
 import lxml.etree
 import numpy as np
 
-from ..share import (Share, dbg_print, QtCore, QtGui, QtWebKit, WithMenu, Printer)
+from ..share import (Share, dbg_print, QtCore, QtGui, QtWebKit, WithMenu, Signal)
 
 
 class MyScene(QtGui.QGraphicsScene):
@@ -170,15 +170,12 @@ class Score(QtGui.QGraphicsView, WithMenu):
         self.svgDigests = []
         Share.raft.editBook.settledAt.connect(self.showAtRowAndCol)
         Share.abcRaft.midiPlayer.lineAndCol.connect(self.showAtRowAndCol)
-        scene = MyScene(self)
-        self.setScene(scene)
-        scene.clear()
 
         self.svgView = QtWebKit.QGraphicsWebView()
         self.svgView.setFlags(QtGui.QGraphicsItem.ItemClipsToShape)
         self.svgView.setCacheMode(QtGui.QGraphicsItem.NoCache)
         self.svgView.setZValue(0)
-        scene.addItem(self.svgView)
+        self.prainter = None
         self.svgView.loadFinished.connect(self.svgLoaded)
         dbg_print ("!Score.__init__")
 
@@ -186,6 +183,15 @@ class Score(QtGui.QGraphicsView, WithMenu):
         frame = self.svgView.page().mainFrame()
         fsize = frame.contentsSize()
         self.svgView.resize(QtCore.QSizeF(fsize))
+        if not self.prainter:
+            return
+
+        if self.which:
+            self.printer.newPage()
+        self.scene().render(self.prainter)
+        self.showNextPage()
+        if  not self.which:
+            self.prainter = None
         #self.resize(fsize.width() + 10, fsize.height() + 10)
 
     def drawBackground(self, p, rect):
@@ -251,20 +257,20 @@ class Score(QtGui.QGraphicsView, WithMenu):
             raise IOError("'%s' does not exist!" % svg_file.filename())
         self.which = which
         self.svgView.load(QtCore.QUrl(svg_file.fileName()))
-        scene = self.scene()
+        scene = MyScene(self)
+        self.setScene(scene)
+        scene.clear()
+        scene.addItem(self.svgView)
+        scene.update()
         self.svgDigests[which].AdjustForScene(scene)
+        self.update()
 
     def resetZoom(self):
         self.resetTransform()
 
     def renderAll(self, painter):
-        thatPage = self.which
-        for i in range(len(self.svgDigests)):
-            self.showWhichPage(i)
-            if i:
-                self.printer.newPage()
-            self.scene().render(painter)
-        self.showWhichPage(thatPage)
+        self.prainter = painter
+        self.showWhichPage(0)
 
     def wheelEvent(self, event):
         factor = 1.2**( event.delta() / 120.0)
