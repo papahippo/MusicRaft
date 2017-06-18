@@ -6,7 +6,7 @@ MusicRaft
 from setuptools import setup
 
 setup(name = 'MusicRaft',
-    version = '0.4.5',
+    version = '0.4.7',
     author = "Larry Myerscough",
     author_email='hippostech@gmail.com',
     packages=['musicraft', 'musicraft.abcraft', 'musicraft.freqraft', 'musicraft.pyraft', 'musicraft.raft', 'musicraft.share', ],

@@ -355,6 +355,10 @@ class Editor(QtGui.QPlainTextEdit):
 
 
     def wheelEvent(self, event):
+        modifiers = QtGui.QApplication.keyboardModifiers()
+        if modifiers != QtCore.Qt.ControlModifier:
+            return QtGui.QPlainTextEdit.wheelEvent(self, event)
+
         dbg_print ("Editor.wheelEvent, delta = ", event.delta())
         new_sizeF = self.pointSizeF + (event.delta() / 100.0)
         if new_sizeF > 0:

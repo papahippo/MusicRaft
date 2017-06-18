@@ -31,6 +31,16 @@ class MyScene(QtGui.QGraphicsScene):
         else:
             event.ignore()
 
+    def wheelEvent1(self, event):
+        modifiers = QtGui.QApplication.keyboardModifiers()
+        if not (modifiers & QtCore.Qt.ControlModifier):
+            return  QtGui.QGraphicsScene.wheelEvent(self, event)
+        factor = 1.2**( event.delta() / 120.0)
+        # self.scale(factor, factor)
+        # self.mustApplyTransform = self.transform()
+        dbg_print ("MyScene.wheelEvent, delta = ", event.delta())
+        event.accept()
+
 
 class SvgDigest:
     ringColour = 'green'
@@ -277,10 +287,23 @@ class Score(QtGui.QGraphicsView, WithMenu):
         self.showWhichPage(0, force=True)
 
     def wheelEvent(self, event):
+        print ("Score.wheelEvent, delta = ", event.delta())
+        modifiers = QtGui.QApplication.keyboardModifiers()
+        if not (modifiers & QtCore.Qt.ControlModifier):
+            # return  self.scrollContentsBy(0, event.delta()*20)
+            sbar = self.verticalScrollBar()
+            value = sbar.value() + event.delta()
+            if event.delta()<0:
+                value = max(sbar.minimum(), value)
+            else:
+                value = min(sbar.maximum(), value)
+            sbar.setValue(value)
+            self.update()
+            event.accept()
+            return
         factor = 1.2**( event.delta() / 120.0)
         self.scale(factor, factor)
         # self.mustApplyTransform = self.transform()
-        dbg_print ("Score.wheelEvent, delta = ", event.delta())
         event.accept()
 
 

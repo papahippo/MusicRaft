@@ -12,4 +12,7 @@ v0.4.2  2017-05-09 -- minor cleanup + don't require /usr/bin/python3
 v0.4.3  2017-06-03 -- specify explicit version of mido package (latest seems to give problems)
 v0.4.4  2017-06-03 -- reverting from branch player to master for pypi
 v0.4.5  2017-06-03 -- fix master contamination with mplayer branch
+v0.4.6  2017-06-15 -- Fix  printing / exporting to PDF; this had been undetectedly broken for a while.
+v0.4.7  2017-06-17 -- correct above fix; require control key with wheel for window resize
+
 
