@@ -292,8 +292,8 @@ class Score(QtGui.QGraphicsView, WithMenu):
         if not (modifiers & QtCore.Qt.ControlModifier):
             # return  self.scrollContentsBy(0, event.delta()*20)
             sbar = self.verticalScrollBar()
-            value = sbar.value() + event.delta()
-            if event.delta()<0:
+            value = sbar.value() - event.delta()
+            if event.delta()>0:
                 value = max(sbar.minimum(), value)
             else:
                 value = min(sbar.maximum(), value)
