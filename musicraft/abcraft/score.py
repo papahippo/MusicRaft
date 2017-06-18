@@ -195,7 +195,7 @@ class Score(QtGui.QGraphicsView, WithMenu):
         self.svgView.resize(QtCore.QSizeF(fsize))
         if not self.prainter:
             return
-        print ("'prainting' page", self.which)
+        dbg_print ("'prainting' page", self.which)
         if self.which:
             self.printer.newPage()
         else:
@@ -290,7 +290,7 @@ class Score(QtGui.QGraphicsView, WithMenu):
         self.showWhichPage(0, force=True)
 
     def wheelEvent(self, event):
-        print ("Score.wheelEvent, delta = ", event.delta())
+        dbg_print ("Score.wheelEvent, delta = ", event.delta())
         modifiers = QtGui.QApplication.keyboardModifiers()
         if not (modifiers & QtCore.Qt.ControlModifier):
             # return  self.scrollContentsBy(0, event.delta()*20)
