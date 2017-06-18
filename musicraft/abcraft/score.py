@@ -225,11 +225,14 @@ class Score(QtGui.QGraphicsView, WithMenu):
         self.showWhichPage(self.which, force=True)
 
     def getEltsOnRow(self, row, which=None):
-        if not self.svgDigests:
-            return {}
-        if which is None:
+        if which is True:
             which = self.which
-        return self.svgDigests[which].row_col_dict.setdefault(row, {})
+        answer = {}
+        for wh, dig in enumerate(self.svgDigests):
+            if (which is not None) and (wh!= which):
+                continue
+            answer.update (self.svgDigests[wh].row_col_dict.setdefault(row, {}))
+        return answer
 
     def showAtRowAndCol(self, row, col):
 
