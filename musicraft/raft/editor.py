@@ -82,25 +82,25 @@ class Editor(QtGui.QPlainTextEdit):
         l = tc.block().length()
         dbg_print ("autoTrack", l)
         blockText = tc.block().text()
-        while col and ((col >= (l-1))
-            or not (str(blockText[col]).lower() in 'abcdefg^_=')):
-            col -= 1
-        dbg_print ('editor.highlight: row =', blockNumber,
-                                           'col =', col, col0)
-        #if Common.score:
-        #    Common.score.showAtRowAndCol(blockNumber+1, col)
+        if 0:  # under review sine new approach to syntqx highlighting:
+            while col and ((col >= (l-1))
+                or not (str(blockText[col]).lower() in 'abcdefg^_=')):
+                col -= 1
+        dbg_print ('editor.highlight: row=%d, col=%d' %(blockNumber, col))
         self.book.settledAt.emit(blockNumber+1, col)
-        hi_selection = QtGui.QTextEdit.ExtraSelection()
 
-        hi_selection.format.setBackground(self.palette().alternateBase())
-        hi_selection.format.setProperty(QtGui.QTextFormat.FullWidthSelection,
-                                        True)
-        if self.currentLineColor is not None:
-            hi_selection.format.setBackground(self.currentLineColor)
-        #setFontUnderline(True)
-        hi_selection.cursor = tc
-        self.setExtraSelections([hi_selection])
-        hi_selection.cursor.clearSelection()
+        if 0:  # under review sine new approach to syntqx highlighting:
+            hi_selection = QtGui.QTextEdit.ExtraSelection()
+
+            hi_selection.format.setBackground(self.palette().alternateBase())
+            hi_selection.format.setProperty(QtGui.QTextFormat.FullWidthSelection,
+                                            True)
+            if self.currentLineColor is not None:
+                hi_selection.format.setBackground(self.currentLineColor)
+            #setFontUnderline(True)
+            hi_selection.cursor = tc
+            self.setExtraSelections([hi_selection])
+            hi_selection.cursor.clearSelection()
 
     def handleTextChanged(self):
         self.book.counted = self.book.latency

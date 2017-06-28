@@ -16,9 +16,13 @@ class MidiPlayer(QtGui.QWidget):
     lineAndCol = Signal(int, int)
 
     outputPort = 'TiMidity port 0'
+    output = None
 
     def __init__(self):
         QtGui.QWidget.__init__(self)
+        # self.open_output()
+
+    def open_output(self):
         try:
             self.output = mido.open_output(self.outputPort)
         except IOError as exc:
@@ -29,7 +33,10 @@ class MidiPlayer(QtGui.QWidget):
         dbg_print('MidiPlayer:__init__', self.output)
 
     def play(self, filename):
-        self.output.reset()
+        if self.output:
+            self.output.reset()
+        else:
+            self.open_output()
         self.accum = dict([(i, 0) for i in range(110, 115)])
         self.midiFile = mido.MidiFile(filename)
         self.messages = self.midiFile.__iter__() # self.midiFile.play()
