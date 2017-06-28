@@ -225,11 +225,14 @@ class Score(QtGui.QGraphicsView, WithMenu):
         self.showWhichPage(self.which, force=True)
 
     def getEltsOnRow(self, row, which=None):
-        if not self.svgDigests:
-            return {}
-        if which is None:
+        if which is True:
             which = self.which
-        return self.svgDigests[which].row_col_dict.setdefault(row, {})
+        answer = {}
+        for wh, dig in enumerate(self.svgDigests):
+            if (which is not None) and (wh!= which):
+                continue
+            answer.update (self.svgDigests[wh].row_col_dict.setdefault(row, {}))
+        return answer
 
     def showAtRowAndCol(self, row, col):
 
@@ -292,8 +295,8 @@ class Score(QtGui.QGraphicsView, WithMenu):
         if not (modifiers & QtCore.Qt.ControlModifier):
             # return  self.scrollContentsBy(0, event.delta()*20)
             sbar = self.verticalScrollBar()
-            value = sbar.value() + event.delta()
-            if event.delta()<0:
+            value = sbar.value() - event.delta()
+            if event.delta()>0:
                 value = max(sbar.minimum(), value)
             else:
                 value = min(sbar.maximum(), value)
