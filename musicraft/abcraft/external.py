@@ -41,18 +41,21 @@ class Abcm2svg(External):
         return External.cmd(self, '-v -A -O', outF, inF)
 
     def handle_output(self, output):
-        return output
-
-    def process_error(self, error):
-        External.process_error(self, error)
+        # just look for the output file nnames:
         svgList = []
-        for line in error.split('\n'):
+        for line in output.split('\n'):
             match = self.outFile_CRE.match(line)
             if match:
                 svgList.append(match.group(1))
         dbg_print (svgList)
         if svgList:
             Share.abcRaft.score.useFiles(svgList)
+        return output
+
+    def process_error(self, error):
+        External.process_error(self, error)
+# older versionsof abcm2ps write names of output files to stderr!
+        self.handle_output(error)
             # Share.abcRaft.score.showWhichPage(0)
 
 

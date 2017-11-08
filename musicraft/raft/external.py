@@ -8,7 +8,7 @@ their assocated widgets and methods.
 from __future__ import print_function
 import logging
 logger = logging.getLogger()
-import os, re, subprocess
+import sys, os, re, subprocess
 from ..share import (Share, dbg_print, QtGui)
 
 
@@ -110,8 +110,8 @@ within abcraft.
             stderr= subprocess.STDOUT if self.errOnOut else subprocess.PIPE)
         process.wait()
         output_bytes, error_bytes = process.communicate()
-        output = output_bytes.decode()
-        error = (error_bytes or bytes()).decode()
+        output = output_bytes.decode(encoding='UTF-8')  # sys.stdout.encoding)
+        error = (error_bytes or bytes()).decode(encoding='UTF-8')  # sys.stderr.encoding)
         if self.errOnOut:
             #dbg_print ('output = \n', output)
             return self.process_error(output)
