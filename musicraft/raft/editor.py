@@ -307,6 +307,9 @@ class Editor(QtGui.QPlainTextEdit):
         else:
             event.ignore()
 
+    def dragMoveEvent(self, event):
+        event.acceptProposedAction()
+
     def dropEvent(self, event):
         """Reimplement Qt method
         Unpack dropped data and handle it"""
