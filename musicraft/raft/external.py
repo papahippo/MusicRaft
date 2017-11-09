@@ -126,7 +126,7 @@ within abcraft.
         if self.stdTab is None:
             dbg_print ("self.stdTab is None!")
         else:
-            self.stdTab.setPlainText(error)
+            self.stdTab.appendPlainText(error)
 
     def write(self, s):
         if s =='\n':  # unjustifiable kludge, perhaps .. but it has the desired effect!

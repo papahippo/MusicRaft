@@ -41,7 +41,8 @@ class Abcm2svg(External):
         return External.cmd(self, '-v -A -O', outF, inF)
 
     def handle_output(self, output):
-        # just look for the output file nnames:
+        External.process_error(self, output)
+        # just look for the output file names:
         svgList = []
         for line in output.split('\n'):
             match = self.outFile_CRE.match(line)
@@ -53,7 +54,6 @@ class Abcm2svg(External):
         return output
 
     def process_error(self, error):
-        External.process_error(self, error)
 # older versionsof abcm2ps write names of output files to stderr!
         self.handle_output(error)
             # Share.abcRaft.score.showWhichPage(0)
