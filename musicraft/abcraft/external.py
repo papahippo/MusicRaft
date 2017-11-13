@@ -38,7 +38,7 @@ class Abcm2svg(External):
         self.outFile_CRE = re.compile("Output written on\s+(\S.*)\s\(.*")
 
     def cmd(self, inF, outF, **kw):
-        return External.cmd(self, '-v -A -O', outF, inF)
+        return External.cmd(self, '-k 640 -v -A -O', outF, inF)
 
     def handle_output(self, output):
         External.process_error(self, output)
