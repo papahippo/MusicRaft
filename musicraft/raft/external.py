@@ -8,7 +8,7 @@ their assocated widgets and methods.
 from __future__ import print_function
 import logging
 logger = logging.getLogger()
-import sys, os, re, subprocess
+import sys, os, re, subprocess, tempfile
 from ..share import (Share, dbg_print, QtGui)
 
 
@@ -106,21 +106,20 @@ within abcraft.
             return
         cmd1 = self.cmd(inFileName, self.outFileName, **kw)
         dbg_print (cmd1)
-        process = subprocess.Popen(cmd1, stdout=subprocess.PIPE, shell=True,
-            stderr= subprocess.STDOUT if self.errOnOut else subprocess.PIPE)
+        outfile, errfile = [
+            tempfile.NamedTemporaryFile(mode='r+', encoding='utf-8', suffix='.'+self.exec_file+'-'+suffix)
+                            for suffix in ('out', 'err')]
+        process = subprocess.Popen(cmd1, stdout=outfile, stderr=errfile, shell=True)
         process.wait()
-        output_bytes, error_bytes = process.communicate()
-        output = output_bytes.decode(encoding='UTF-8')  # sys.stdout.encoding)
-        error = (error_bytes or bytes()).decode(encoding='UTF-8')  # sys.stderr.encoding)
+        outfile.seek(0), errfile.seek(0)
+        output, error  = outfile.read(), errfile.read()
+        outfile.close(), errfile.close()
         if self.errOnOut:
             #dbg_print ('output = \n', output)
             return self.process_error(output)
         else:
             self.process_error(error)
             return self.handle_output(output)
-            # Share.pyRaft.htmlView.showOutput(output)
-            #print(len(answer), dir(self))
-            #return answer
 
     def process_error(self, error):
         if self.stdTab is None:
