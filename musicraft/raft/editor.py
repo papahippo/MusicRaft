@@ -274,7 +274,7 @@ class Editor(QtGui.QPlainTextEdit):
         print ("autoComplete", l)
         blockText = block.text()
         while col and ((col >= (l-1))
-            or not (str(blockText[col-1]) in ' |!')):
+            or not (str(blockText[col-1]) in ' |!]')):
             tc.deletePreviousChar()
             col -= 1
         key = blockText[col:col0]
@@ -336,8 +336,8 @@ class Editor(QtGui.QPlainTextEdit):
         'V': ('V:', ' name="', '" sname="', '"\n',),  # new voice
         'Q': ('Q:1/4',),  # new tempo indication
         '12': ('[1 ', ' :| [2 ',),  # varied repeat ending coding
-        'cr': ('!<! ', ' !<!)',),  # hairpin dynamic
-        'dim': ('!>! ', ' !>!)',),  # hairpin dynamic
+        'cr': ('!<(!', ' !<)!',),  # hairpin dynamic
+        'di': ('!>(!', '!>)!',),  # hairpin dynamic
         'CR': ('"_cresc."',),
         'Cr': ('"^cresc."',),
         'MR': ('"_molto rit."',),
