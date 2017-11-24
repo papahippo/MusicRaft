@@ -354,6 +354,9 @@ class Editor(QtGui.QPlainTextEdit):
         'st': ('!dot!',),  # staccato; 'dot<TAB>' also works
         '.': ('!dot!',),  # staccato; 'dot<TAB>' also works
         'gl': ('!-(!', '!-)!'),  # glissando
+        'sd': ('[I:pos stem down]',),
+        'su': ('[I:pos stem up]',),
+        'sa': ('[I:pos stem auto]',),
     }
 
 
