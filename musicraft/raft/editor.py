@@ -268,20 +268,7 @@ class Editor(QtGui.QPlainTextEdit):
     def autoComplete(self, event):
         print ('autoComplete')
         tc = self.textCursor()
-        col0 =  col = tc.positionInBlock()
-        block = tc.block()
-        l = block.length()
-        print ("autoComplete", l)
-        blockText = block.text()
-        while col and ((col >= (l-1))
-            or not (str(blockText[col-1]) in ' |!]')):
-            tc.deletePreviousChar()
-            col -= 1
-        key = blockText[col:col0]
-        print ("autoComplete key %d:%d '%s'" % (col, col0, key))
-        snippet = self.snippets.get(key, ("!%s!" % key,))
-        
-        # rough and ready starter implementation:
+        snippet = self.getSnippet(tc)
         for i, piece in enumerate(snippet):
             tc.insertText(piece)
             if i==0:
@@ -289,7 +276,20 @@ class Editor(QtGui.QPlainTextEdit):
         tc.setPosition(pos)
         self.setTextCursor(tc) 
 
-    #------ Drag and drop
+    def getSnippet(self, tc):    #------ Drag and drop
+        col0 = col = tc.positionInBlock()
+        block = tc.block()
+        l = block.length()
+        print("ABC get snippet", l)
+        blockText = block.text()
+        while col and ((col >= (l - 1))
+                       or not (str(blockText[col - 1]) in ' |!]')):
+            tc.deletePreviousChar()
+            col -= 1
+        key = blockText[col:col0]
+        print("autoComplete key %d:%d '%s'" % (col, col0, key))
+        return self.snippets.get(key, ("!%s!" % key,))
+
     def dragEnterEvent(self, event):
         """Reimplement Qt method
         Inform Qt about the types of data that the widget accepts"""
