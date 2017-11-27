@@ -33,14 +33,14 @@ class AbcRaft(object):
         Share.raft.displayBook.addTab(self.score, "Score")
         Share.raft.editBook.fileLoaded.connect(self.checkLoadedFile)
 
+        self.create_actions()
+        self.create_menus()
+
     def checkLoadedFile(self, editor, filename):
         dbg_print('checkLoadedFile', filename)
         if os.path.splitext(filename)[1] in ('.abc', '.ABC'):
             dbg_print("we expect ABC syntax in " + filename)
             editor.highlighter = syntax.AbcHighlighter(editor.document(), editor)
-        if 1:  # problematic...
-            self.create_actions()
-            self.create_menus()
 
     def start_midi(self):
         if not (self.abc2midi and self.abc2midi.outFileName):
