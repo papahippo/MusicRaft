@@ -41,8 +41,6 @@ class AbcRaft(object):
         if os.path.splitext(filename)[1] in ('.abc', '.ABC'):
             dbg_print("we expect ABC syntax in " + filename)
             editor.highlighter = syntax.AbcHighlighter(editor.document(), editor)
-            # monkey-patch this editor's snippet provider:
-            editor.getSnippet = syntax.getSnippet
 
     def start_midi(self):
         if not (self.abc2midi and self.abc2midi.outFileName):

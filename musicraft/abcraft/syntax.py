@@ -40,6 +40,7 @@ class AbcHighlighter (QtGui.QSyntaxHighlighter):
     def __init__(self, document, editor):
         QtGui.QSyntaxHighlighter.__init__(self, document)
         self.editor = editor
+
     def highlightBlock(self, text):
         """Apply syntax highlighting to the given block of text.
         """
@@ -55,18 +56,44 @@ class AbcHighlighter (QtGui.QSyntaxHighlighter):
             self.setFormat(ix, 1, STYLES[style_name])
         self.setCurrentBlockState(0)
 
-# monkey-patch for handling of TAB key in *.abc:
-def getSnippet(self, tc):    #------ Drag and drop
-    col0 = col = tc.positionInBlock()
-    block = tc.block()
-    l = block.length()
-    print("ABC get snippet", l)
-    blockText = block.text()
-    while col and ((col >= (l - 1))
-                   or not (str(blockText[col - 1]) in ' |!]')):
-        tc.deletePreviousChar()
-        col -= 1
-    key = blockText[col:col0]
-    print("autoComplete key %d:%d '%s'" % (col, col0, key))
-    return self.snippets.get(key, ("!%s!" % key,))
+    snippets = {
+        'V': ('V:', ' name="', '" sname="', '"\n',),  # new voice
+        'Q': ('Q:1/4',),  # new tempo indication
+        '12': ('[1 ', ' :| [2 ',),  # varied repeat ending coding
+        'cr': ('!<(!', ' !<)!',),  # hairpin dynamic
+        'di': ('!>(!', '!>)!',),  # hairpin dynamic
+        'CR': ('"_cresc."',),
+        'Cr': ('"^cresc."',),
+        'MR': ('"_molto rit."',),
+        'Mr': ('"^molto rit."',),
+        'PR': ('"_poco rit."',),
+        'Pr': ('"^poco rit."',),
+        'SB': ('"_steady beat"',),
+        'Sb': ('"^steady beat"',),
+        'm': ('[M:', '2/', '4]',),  # mid-line time-sig change
+        'tt': ('!tenuto!',),
+        'tp': ('!teepee!',),
+        'ac': ('!>!',),  # accent; '><TAB>' also works
+        'ro': ('!///!',),  # roll/roffel; '///<TAB>' also works
+        'st': ('!dot!',),  # staccato; 'dot<TAB>' also works
+        '.': ('!dot!',),  # staccato; 'dot<TAB>' also works
+        'gl': ('!-(!', '!-)!'),  # glissando
+        'sd': ('[I:pos stem down]',),
+        'su': ('[I:pos stem up]',),
+        'sa': ('[I:pos stem auto]',),
+    }
+
+    def getSnippet(self, tc):    #------ Drag and drop
+        col0 = col = tc.positionInBlock()
+        block = tc.block()
+        l = block.length()
+        print("ABC get snippet", l)
+        blockText = block.text()
+        while col and ((col >= (l - 1))
+                       or not (str(blockText[col - 1]) in ' |!]')):
+            tc.deletePreviousChar()
+            col -= 1
+        key = blockText[col:col0]
+        print("autoComplete key %d:%d '%s'" % (col, col0, key))
+        return self.snippets.get(key, ("!%s!" % key,))
 

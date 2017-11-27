@@ -156,7 +156,7 @@ class Editor(QtGui.QPlainTextEdit):
 
         if not f.open(QtCore.QFile.ReadOnly | QtCore.QFile.Text):
             return
-
+        self.highlighter = None
         self.book.fileLoaded.emit(self, fileName)
         self.readAll(f)
         f.close()
@@ -260,7 +260,7 @@ class Editor(QtGui.QPlainTextEdit):
         plain = not (meta or ctrl or shift)
         if key == QtCore.Qt.Key_Insert and plain:
             self.setOverwriteMode(not self.overwriteMode())
-        if key == QtCore.Qt.Key_Tab and plain and self.snippets:
+        if key == QtCore.Qt.Key_Tab and plain and self.highlighter:
             return self.autoComplete(event)
         else:
             QtGui.QPlainTextEdit.keyPressEvent(self, event)
@@ -268,7 +268,7 @@ class Editor(QtGui.QPlainTextEdit):
     def autoComplete(self, event):
         print ('autoComplete')
         tc = self.textCursor()
-        snippet = self.getSnippet(tc)
+        snippet = self.highlighter.getSnippet(tc)
         for i, piece in enumerate(snippet):
             tc.insertText(piece)
             if i==0:
@@ -331,33 +331,6 @@ class Editor(QtGui.QPlainTextEdit):
             QtGui.QPlainTextEdit.mousePressEvent(self, mouseEvent)
         print (mouseEvent.button() )
         return
-
-    snippets = {
-        'V': ('V:', ' name="', '" sname="', '"\n',),  # new voice
-        'Q': ('Q:1/4',),  # new tempo indication
-        '12': ('[1 ', ' :| [2 ',),  # varied repeat ending coding
-        'cr': ('!<(!', ' !<)!',),  # hairpin dynamic
-        'di': ('!>(!', '!>)!',),  # hairpin dynamic
-        'CR': ('"_cresc."',),
-        'Cr': ('"^cresc."',),
-        'MR': ('"_molto rit."',),
-        'Mr': ('"^molto rit."',),
-        'PR': ('"_poco rit."',),
-        'Pr': ('"^poco rit."',),
-        'SB': ('"_steady beat"',),
-        'Sb': ('"^steady beat"',),
-        'm': ('[M:', '2/', '4]',),  # mid-line time-sig change
-        'tt': ('!tenuto!',),
-        'tp': ('!teepee!',),
-        'ac': ('!>!',),  # accent; '><TAB>' also works
-        'ro': ('!///!',),  # roll/roffel; '///<TAB>' also works
-        'st': ('!dot!',),  # staccato; 'dot<TAB>' also works
-        '.': ('!dot!',),  # staccato; 'dot<TAB>' also works
-        'gl': ('!-(!', '!-)!'),  # glissando
-        'sd': ('[I:pos stem down]',),
-        'su': ('[I:pos stem up]',),
-        'sa': ('[I:pos stem auto]',),
-    }
 
 
     def wheelEvent(self, event):

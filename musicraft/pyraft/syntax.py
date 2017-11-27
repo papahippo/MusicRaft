@@ -175,3 +175,8 @@ class PythonHighlighter (QtGui.QSyntaxHighlighter):
             return True
         else:
             return False
+
+    def getSnippet(self, tc):
+        col = tc.positionInBlock()
+        spaces_reqd = ((col-1) % 4) + 1
+        return (' '*spaces_reqd,)
