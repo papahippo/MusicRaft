@@ -10,7 +10,7 @@ from ..share import (dbg_print, QtCore, QtGui, Share)
 import sys
 
 
-def format(color, style=''):
+def format(color, style='', size=None):
     """Return a QtGui.QTextCharFormat with the given attributes.
     """
     _color = QtGui.QColor()
@@ -22,7 +22,8 @@ def format(color, style=''):
         _format.setFontWeight(QtGui.QFont.Bold)
     if 'italic' in style:
         _format.setFontItalic(True)
-
+    if size is not None:
+        _format.setFontPointSize(size)
     return _format
 
 
@@ -30,6 +31,7 @@ def format(color, style=''):
 STYLES = {
     'default': format('blue'),
     'notename': format('black', 'bold'),
+    'header':  format('red', 'italic'),
 }
 
 
@@ -48,12 +50,29 @@ class AbcHighlighter (QtGui.QSyntaxHighlighter):
         elts_on_cols_in_row = Share.abcRaft.score.getEltsOnRow(1+self.currentBlock().blockNumber())
         for key_ in STYLES.keys():
             STYLES[key_].setFontPointSize(self.editor.pointSizeF)
-        for ix in range(len(text)):
+        ix =0
+        while ix < len(text):
             style_name = 'default'
+            span = 1
             eltAbc, eltHead = elts_on_cols_in_row.get(ix, (None, None))
             if eltAbc is not None:
                 style_name = 'notename'
-            self.setFormat(ix, 1, STYLES[style_name])
+            else:
+                for startChar, endChar, maybe_style_name in (
+                    ('[', ']', 'header'),
+                ):
+                    if text[ix]!=startChar:
+                        continue
+                    try:
+                        jx = text[ix+1:].index(endChar)
+                    except ValueError:
+                        break
+                    #  broken for now! if jx>2 and text[ix+2]==':':  # distinguish embedded commands from chords
+                    style_name = maybe_style_name
+                    span = jx + 2
+                    break
+            self.setFormat(ix, span, STYLES[style_name])
+            ix += span
         self.setCurrentBlockState(0)
 
     snippets = {

@@ -142,7 +142,7 @@ class Editor(QtGui.QPlainTextEdit):
         sys.exit(0)
 
     def loadFile(self, fileName, newInstance=None, row=1, col=0):
-        dbg_print ("AbcEditor.loadFile", fileName, newInstance, row, col)
+        dbg_print ("Editor.loadFile", fileName, newInstance, row, col)
         if newInstance is None:
             newInstance = False # self.haveLoadedFile
         if newInstance:
@@ -156,7 +156,7 @@ class Editor(QtGui.QPlainTextEdit):
 
         if not f.open(QtCore.QFile.ReadOnly | QtCore.QFile.Text):
             return
-        self.highlighter = None
+        self.highlighter = None  # default, half-expecting to be overwritten by per-extension handler
         self.book.fileLoaded.emit(self, fileName)
         self.readAll(f)
         f.close()
