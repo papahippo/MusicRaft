@@ -20,10 +20,10 @@ class MyScene(QtGui.QGraphicsScene):
         scP = event.scenePos()
         x = scP.x()
         y = scP.y()
-        dbg_print ("MyScene.mousePressEvent",
+        print ("MyScene.mousePressEvent: "+
                #event.pos(), event.scenePos(), event.screenPos()
-               'scenePos x,y =', x, y, 'button =', event.button(),
-               'scene width =', self.width(), 'scene height =', self.height(),
+               'scenePos x,y =' + str(x) + ',' + str(y), '  button =' + str(event.button()),
+               'scene width =' + str(self.width()) + ' scene height ='+ str(self.height()),
         )
         if event.button() == 1:
             self.parent().locateXY(x, y)
@@ -197,7 +197,7 @@ class Score(QtGui.QGraphicsView, WithMenu):
             return
         dbg_print ("'prainting' page", self.which)
         if self.which:
-            self.printer.newPage()
+            self.prainter.newPage()
         else:
             self.prainter.begin(self)
         self.scene().render(self.prainter)
@@ -240,9 +240,14 @@ class Score(QtGui.QGraphicsView, WithMenu):
         l = len(self.svgDigests)
         for i in range(l):
             j = (i +self.which) % l
-            eltAbc, eltHead = self.getEltsOnRow(row, which=j).get(col, (None, None))
-            if eltAbc is not None:
-                break
+            dictOfRow = self.getEltsOnRow(row, which=j)
+            for approx in range(4):
+                eltAbc, eltHead = dictOfRow.get(col-approx, (None, None))
+                if eltAbc is not None:
+                    break
+            else:
+                continue
+            break
         else:
             dbg_print ("can't find svg graphics correspond to row : col...",
                    row, ':', col)
@@ -250,6 +255,12 @@ class Score(QtGui.QGraphicsView, WithMenu):
         self.svgDigests[j].removeCursor()
         self.svgDigests[j].insertCursor(eltHead, colour=self.ringColour)
         self.showWhichPage(j, force=True)
+        x, y = [float(eltAbc.get(a)) for a in ('x', 'y')]
+        point = self.mapFromScene(x,y)
+        print('ensureVisible %d %d -> %d  %d'  %(x, y, point.x(), point.y()))
+        self.svgView.ensureVisible(x, y, 1.0, 1.0)
+        #  ... self.ensureVisible(point.x(), point.y(), 1.0, 1.0)
+        self.update()
 
     def locateXY(self, x, y):
         row, col = self.svgDigests[self.which].rowColAtXY(x, y)
@@ -265,7 +276,7 @@ class Score(QtGui.QGraphicsView, WithMenu):
         return self.showWhichPage(self.which - 1)
 
     def showWhichPage(self, which=0, force=False):
-        dbg_print ('----- showWhichPage', which)
+        print ('----- showWhichPage', which)
         which %= len(self.svgDigests)
         if (not force) and (which==self.which):
             return

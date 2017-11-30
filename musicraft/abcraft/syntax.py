@@ -31,7 +31,11 @@ def format(color, style='', size=None):
 STYLES = {
     'default': format('blue'),
     'notename': format('black', 'bold'),
-    'header':  format('red', 'italic'),
+    'string':  format('cyan', 'italic'),
+    'comment':  format('green', 'italic'),
+    'header': format('red', 'italic'),
+    'decorator': format('black', 'italic'),
+    'command': format('black', 'italic'),
 }
 
 
@@ -46,33 +50,45 @@ class AbcHighlighter (QtGui.QSyntaxHighlighter):
     def highlightBlock(self, text):
         """Apply syntax highlighting to the given block of text.
         """
+
         # I seem to have acquiesced to abcm2ps's scheme of counting rows from 1:
         elts_on_cols_in_row = Share.abcRaft.score.getEltsOnRow(1+self.currentBlock().blockNumber())
         for key_ in STYLES.keys():
             STYLES[key_].setFontPointSize(self.editor.pointSizeF)
-        ix =0
-        while ix < len(text):
-            style_name = 'default'
-            span = 1
-            eltAbc, eltHead = elts_on_cols_in_row.get(ix, (None, None))
-            if eltAbc is not None:
-                style_name = 'notename'
-            else:
-                for startChar, endChar, maybe_style_name in (
-                    ('[', ']', 'header'),
-                ):
-                    if text[ix]!=startChar:
-                        continue
-                    try:
-                        jx = text[ix+1:].index(endChar)
-                    except ValueError:
+        span = len(text)
+        if text[1:2]==':':
+            style_name = "header"
+        elif text[0:2] == '%%':
+            style_name = "command"
+        else:
+            ix =0
+            while ix < len(text):
+                style_name = 'default'
+                span = 1
+                eltAbc, eltHead = elts_on_cols_in_row.get(ix, (None, None))
+                if eltAbc is not None:
+                    style_name = 'notename'
+                elif text[ix]=='%':
+                    style_name = 'comment'
+                    span = len(text)-ix
+                else:
+                    for startChar, endChar, maybe_style_name in (
+                        ('"', '"', 'string'),
+                        ('[', ']', 'header'),
+                        ('!', '!', 'decorator'),
+                    ):
+                        if text[ix]!=startChar:
+                            continue
+                        try:
+                            jx = text[ix+1:].index(endChar)
+                        except ValueError:
+                            break
+                        #  broken for now! if jx>2 and text[ix+2]==':':  # distinguish embedded commands from chords
+                        style_name = maybe_style_name
+                        span = jx + 2
                         break
-                    #  broken for now! if jx>2 and text[ix+2]==':':  # distinguish embedded commands from chords
-                    style_name = maybe_style_name
-                    span = jx + 2
-                    break
-            self.setFormat(ix, span, STYLES[style_name])
-            ix += span
+                self.setFormat(ix, span, STYLES[style_name])
+                ix += span
         self.setCurrentBlockState(0)
 
     snippets = {
