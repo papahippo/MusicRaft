@@ -241,20 +241,23 @@ class Score(QtGui.QGraphicsView, WithMenu):
         for i in range(l):
             j = (i +self.which) % l
             dictOfRow = self.getEltsOnRow(row, which=j)
-            for approx in range(4):
-                eltAbc, eltHead = dictOfRow.get(col-approx, (None, None))
-                if eltAbc is not None:
-                    break
-            else:
-                continue
-            break
+            if dictOfRow:
+                break
         else:
-            dbg_print ("can't find svg graphics correspond to row : col...",
-                   row, ':', col)
+            dbg_print("can't find page containing svg graphics for row %d"
+                      % row)
+            return
+        self.showWhichPage(j, force=True)
+        for col_ in range(col, -1, -1):
+            eltAbc, eltHead = dictOfRow.get(col_, (None, None))
+            if eltAbc is not None:
+                break
+        else:
+            dbg_print("can't find svg graphics correspond to row %d: col %d (page %d)"
+                      % (row, col, j))
             return
         self.svgDigests[j].removeCursor()
         self.svgDigests[j].insertCursor(eltHead, colour=self.ringColour)
-        self.showWhichPage(j, force=True)
         x, y = [float(eltAbc.get(a)) for a in ('x', 'y')]
         point = self.mapFromScene(x,y)
         print('ensureVisible %d %d -> %d  %d'  %(x, y, point.x(), point.y()))
