@@ -20,7 +20,7 @@ class MyScene(QtGui.QGraphicsScene):
         scP = event.scenePos()
         x = scP.x()
         y = scP.y()
-        print ("MyScene.mousePressEvent: "+
+        dbg_print ("MyScene.mousePressEvent: "+
                #event.pos(), event.scenePos(), event.screenPos()
                'scenePos x,y =' + str(x) + ',' + str(y), '  button =' + str(event.button()),
                'scene width =' + str(self.width()) + ' scene height ='+ str(self.height()),
@@ -177,6 +177,7 @@ class Score(QtGui.QGraphicsView, WithMenu):
         self.setTransformationAnchor(QtGui.QGraphicsView.AnchorUnderMouse)
         self.setDragMode(QtGui.QGraphicsView.ScrollHandDrag)
         self.which = 0  # default to show first generated svg until we know better.
+        self.fx = self.fy = 0.0
         self.svgDigests = []
         Share.raft.editBook.settledAt.connect(self.showAtRowAndCol)
         Share.abcRaft.midiPlayer.lineAndCol.connect(self.showAtRowAndCol)
@@ -193,6 +194,8 @@ class Score(QtGui.QGraphicsView, WithMenu):
         frame = self.svgView.page().mainFrame()
         fsize = frame.contentsSize()
         self.svgView.resize(QtCore.QSizeF(fsize))
+        self.ensureVisible(self.fx, self.fy, 1.0, 1.0)
+        self.update()
         if not self.prainter:
             return
         dbg_print ("'prainting' page", self.which)
@@ -206,7 +209,6 @@ class Score(QtGui.QGraphicsView, WithMenu):
             self.prainter.end()
             del self.prainter
             self.prainter = None
-        #self.resize(fsize.width() + 10, fsize.height() + 10)
 
     def drawBackground(self, p, rect):
         p.save()
@@ -236,6 +238,7 @@ class Score(QtGui.QGraphicsView, WithMenu):
 
     def showAtRowAndCol(self, row, col):
 
+        Share.eltAbcCursor = None
         dbg_print ('showAtRowAndCol %d %d' %(row, col))
         l = len(self.svgDigests)
         for i in range(l):
@@ -258,12 +261,15 @@ class Score(QtGui.QGraphicsView, WithMenu):
             return
         self.svgDigests[j].removeCursor()
         self.svgDigests[j].insertCursor(eltHead, colour=self.ringColour)
-        x, y = [float(eltAbc.get(a)) for a in ('x', 'y')]
-        point = self.mapFromScene(x,y)
-        print('ensureVisible %d %d -> %d  %d'  %(x, y, point.x(), point.y()))
-        self.svgView.ensureVisible(x, y, 1.0, 1.0)
-        #  ... self.ensureVisible(point.x(), point.y(), 1.0, 1.0)
+
+        # experimental and ugly!
+        self.fx, self.fy = [float(eltAbc.get(a)) for a in ('x', 'y')]
+        #point = self.mapFromScene(x,y)
+        #print('ensureVisible %d %d -> %d  %d'  %(x, y, point.x(), point.y()))
+        self.svgView.ensureVisible(self.fx, self.fy, 1.0, 1.0)
+        # ... self.ensureVisible(point.x(), point.y(), 1.0, 1.0)
         self.update()
+        Share.eltAbcCursor = eltAbc
 
     def locateXY(self, x, y):
         row, col = self.svgDigests[self.which].rowColAtXY(x, y)
@@ -279,7 +285,7 @@ class Score(QtGui.QGraphicsView, WithMenu):
         return self.showWhichPage(self.which - 1)
 
     def showWhichPage(self, which=0, force=False):
-        print ('----- showWhichPage', which)
+        dbg_print ('----- showWhichPage', which)
         which %= len(self.svgDigests)
         if (not force) and (which==self.which):
             return
@@ -315,6 +321,7 @@ class Score(QtGui.QGraphicsView, WithMenu):
             else:
                 value = min(sbar.maximum(), value)
             sbar.setValue(value)
+            dbg_print("%d <= vsbar=%d <= %d" %(sbar.minimum(), value, sbar.maximum()))
             self.update()
             event.accept()
             return

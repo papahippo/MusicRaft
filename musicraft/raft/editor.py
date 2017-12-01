@@ -16,6 +16,7 @@ class Editor(QtGui.QPlainTextEdit):
     fileName = None
     highlighter = None
     pointSizeF = 11.0
+    cursorWidth = 8
 
     def __init__(self, book=None, **kw):
         self.book = book
@@ -39,7 +40,7 @@ class Editor(QtGui.QPlainTextEdit):
         font = self.font()
         font.setPointSize(self.pointSizeF)
         self.setFont(font)
-        self.setCursorWidth(2)
+        self.setCursorWidth(self.cursorWidth)
         self.setWindowTitle('title')
         self.textChanged.connect(self.handleTextChanged)
         self.editBecomesActive.connect(self.handleTextChanged)

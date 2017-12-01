@@ -5,7 +5,7 @@ import sys, os, tempfile
 dbg_print = (int(os.getenv('ABCRAFT_DBG', 0)) and print) or (lambda *pp, **kw: None)
 
 class Share:
-    pass
+    eltAbcCursor = None
 
 image_dir = os.path.normpath(os.path.split(__file__)[0] + '/..') + '/images/'
 temp_dir = tempfile.gettempdir()
