@@ -190,6 +190,10 @@ class Score(QtGui.QGraphicsView, WithMenu):
         self.svgView.setZValue(0)
         self.prainter = None
         self.svgView.loadFinished.connect(self.svgLoaded)
+        self.setScene(MyScene(self))
+        self.scene().clear()
+        self.scene().addItem(self.svgView)
+        self.scene().update()
         dbg_print ("!Score.__init__")
 
     def svgLoaded(self):
@@ -253,19 +257,19 @@ class Score(QtGui.QGraphicsView, WithMenu):
             print("can't find page containing svg graphics for row %d"
                       % row)
             return
+        self.svgDigests[j].removeCursor()
         for col_ in range(col, -1, -1):
             eltAbc, eltHead = dictOfRow.get(col_, (None, None))
-            if eltAbc is not None:
+            if eltHead is not None:
+                self.fx, self.fy = [float(eltAbc.get(a)) for a in ('x', 'y')]
+                self.svgDigests[j].insertCursor(eltHead, colour=self.ringColour)
                 break
         else:
             print("can't find svg graphics correspond to row %d: col %d (page %d)"
                       % (row, col, j))
-            return
-        self.svgDigests[j].removeCursor()
-        self.svgDigests[j].insertCursor(eltHead, colour=self.ringColour)
+            self.fx, self.fy = 0.0, 0.0
 
         # experimental and ugly!
-        self.fx, self.fy = [float(eltAbc.get(a)) for a in ('x', 'y')]
         print('ensureVisible1 %d %d'  %(self.fx, self.fy))
         self.ensureVisible(self.fx, self.fy, 20.0, 20.0)
         #self.ensureVisible(point.x(), point.y(), 1.0, 1.0)
@@ -295,12 +299,7 @@ class Score(QtGui.QGraphicsView, WithMenu):
             raise IOError("'%s' does not exist!" % svg_file.filename())
         self.which = which
         self.svgView.load(QtCore.QUrl(svg_file.fileName()))
-        scene = MyScene(self)
-        self.setScene(scene)
-        scene.clear()
-        scene.addItem(self.svgView)
-        scene.update()
-        self.svgDigests[which].AdjustForScene(scene)
+        #self.svgDigests[which].AdjustForScene(self.scene())
         self.update()
 
     def resetZoom(self):
