@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-from __future__ import print_function
+#!/usr/bin/env python3
 """
 Copyright 2015 Hippos Technical Systems BV.
 (but borrows some code from the painting/svgviewer example of PyQt v4.x)
@@ -11,7 +10,7 @@ import sys, re
 import lxml.etree
 import numpy as np
 from collections import OrderedDict
-from ..share import (Share, dbg_print, QtCore, QtGui, QtWebKit, WithMenu, Signal)
+from ..share import (Share, dbg_print, QtCore, QtGui, QtWebKit, WithMenu)
 
 
 class MyScene(QtGui.QGraphicsScene):
@@ -20,7 +19,7 @@ class MyScene(QtGui.QGraphicsScene):
         scP = event.scenePos()
         x = scP.x()
         y = scP.y()
-        print ("MyScene.mousePressEvent: "+
+        dbg_print ("MyScene.mousePressEvent: "+
                #event.pos(), event.scenePos(), event.screenPos()
                'scenePos x,y =' + str(x) + ',' + str(y), '  button =' + str(event.button()),
                'scene width =' + str(self.width()) + ' scene height ='+ str(self.height()),
@@ -205,7 +204,7 @@ class Score(QtGui.QGraphicsView, WithMenu):
             return
         dbg_print ("'prainting' page", self.which)
         if self.which:
-            self.prainter.newPage()
+            self.printer.newPage()
         else:
             self.prainter.begin(self)
         self.scene().render(self.prainter)
@@ -252,7 +251,7 @@ class Score(QtGui.QGraphicsView, WithMenu):
             if dictOfRow:
                 break
         else:
-            print("can't find page containing svg graphics for row %d"
+            dbg_print("can't find page containing svg graphics for row %d"
                       % row)
             return
         self.svgDigests[j].removeCursor()
@@ -263,12 +262,12 @@ class Score(QtGui.QGraphicsView, WithMenu):
                 self.svgDigests[j].insertCursor(eltHead, colour=self.ringColour)
                 break
         else:
-            print("can't find svg graphics correspond to row %d: col %d (page %d)"
+            dbg_print("can't find svg graphics correspond to row %d: col %d (page %d)"
                       % (row, col, j))
             self.fx, self.fy = 0.0, 0.0
 
         # experimental and ugly!
-        print('ensureVisible1 %d %d'  %(self.fx, self.fy))
+        dbg_print('ensureVisible1 %d %d'  %(self.fx, self.fy))
         self.ensureVisible(self.fx, self.fy, 20.0, 20.0)
         #self.ensureVisible(point.x(), point.y(), 1.0, 1.0)
         self.showWhichPage(j, force=True)
