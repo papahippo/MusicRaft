@@ -260,7 +260,7 @@ class Score(QtGui.QGraphicsView, WithMenu):
         self.svgDigests[j].removeCursor()
         for col_ in range(col, -1, -1):
             eltAbc, eltHead = dictOfRow.get(col_, (None, None))
-            if eltHead is not None:
+            if isinstance(eltHead, lxml.etree._Element):
                 self.fx, self.fy = [float(eltAbc.get(a)) for a in ('x', 'y')]
                 self.svgDigests[j].insertCursor(eltHead, colour=self.ringColour)
                 break
