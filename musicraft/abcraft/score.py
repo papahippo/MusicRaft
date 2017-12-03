@@ -27,7 +27,7 @@ class MyScene(QtGui.QGraphicsScene):
                 self.parent())
 # VERY temporary and experimental!
         self.parent().ensureVisible(x, y+50., 1., 1.)
-        if event.button() == 421:
+        if event.button() == 1:
             self.parent().locateXY(x, y)
             event.accept()
         else:
@@ -200,9 +200,9 @@ class Score(QtGui.QGraphicsView, WithMenu):
         frame = self.svgView.page().mainFrame()
         fsize = frame.contentsSize()
         self.svgView.resize(QtCore.QSizeF(fsize))
-        print('ensureVisible2 %d %d'  %(self.fx, self.fy))
-        self.ensureVisible(self.fx, self.fy, 1.0, 1.0)
-        self.update()
+        #print('ensureVisible2 %d %d'  %(self.fx, self.fy))
+        #self.ensureVisible(self.fx, self.fy, 1.0, 1.0)
+        #self.update()
         if not self.prainter:
             return
         dbg_print ("'prainting' page", self.which)
