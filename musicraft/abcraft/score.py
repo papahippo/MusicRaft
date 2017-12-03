@@ -20,12 +20,14 @@ class MyScene(QtGui.QGraphicsScene):
         scP = event.scenePos()
         x = scP.x()
         y = scP.y()
-        dbg_print ("MyScene.mousePressEvent: "+
+        print ("MyScene.mousePressEvent: "+
                #event.pos(), event.scenePos(), event.screenPos()
                'scenePos x,y =' + str(x) + ',' + str(y), '  button =' + str(event.button()),
                'scene width =' + str(self.width()) + ' scene height ='+ str(self.height()),
-        )
-        if event.button() == 1:
+                self.parent())
+# VERY temporary and experimental!
+        self.parent().ensureVisible(x, y+50., 1., 1.)
+        if event.button() == 421:
             self.parent().locateXY(x, y)
             event.accept()
         else:
@@ -194,6 +196,7 @@ class Score(QtGui.QGraphicsView, WithMenu):
         frame = self.svgView.page().mainFrame()
         fsize = frame.contentsSize()
         self.svgView.resize(QtCore.QSizeF(fsize))
+        print('ensureVisible2 %d %d'  %(self.fx, self.fy))
         self.ensureVisible(self.fx, self.fy, 1.0, 1.0)
         self.update()
         if not self.prainter:
@@ -210,7 +213,7 @@ class Score(QtGui.QGraphicsView, WithMenu):
             del self.prainter
             self.prainter = None
 
-    def drawBackground(self, p, rect):
+    def drawBackground42(self, p, rect):
         p.save()
         p.resetTransform()
         p.drawTiledPixmap(self.viewport().rect(),
@@ -247,16 +250,15 @@ class Score(QtGui.QGraphicsView, WithMenu):
             if dictOfRow:
                 break
         else:
-            dbg_print("can't find page containing svg graphics for row %d"
+            print("can't find page containing svg graphics for row %d"
                       % row)
             return
-        self.showWhichPage(j, force=True)
         for col_ in range(col, -1, -1):
             eltAbc, eltHead = dictOfRow.get(col_, (None, None))
             if eltAbc is not None:
                 break
         else:
-            dbg_print("can't find svg graphics correspond to row %d: col %d (page %d)"
+            print("can't find svg graphics correspond to row %d: col %d (page %d)"
                       % (row, col, j))
             return
         self.svgDigests[j].removeCursor()
@@ -264,11 +266,10 @@ class Score(QtGui.QGraphicsView, WithMenu):
 
         # experimental and ugly!
         self.fx, self.fy = [float(eltAbc.get(a)) for a in ('x', 'y')]
-        #point = self.mapFromScene(x,y)
-        #print('ensureVisible %d %d -> %d  %d'  %(x, y, point.x(), point.y()))
-        self.svgView.ensureVisible(self.fx, self.fy, 1.0, 1.0)
-        # ... self.ensureVisible(point.x(), point.y(), 1.0, 1.0)
-        self.update()
+        print('ensureVisible1 %d %d'  %(self.fx, self.fy))
+        self.ensureVisible(self.fx, self.fy, 20.0, 20.0)
+        #self.ensureVisible(point.x(), point.y(), 1.0, 1.0)
+        self.showWhichPage(j, force=True)
         Share.eltAbcCursor = eltAbc
 
     def locateXY(self, x, y):
