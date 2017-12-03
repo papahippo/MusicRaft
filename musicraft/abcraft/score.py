@@ -44,7 +44,7 @@ class MyScene(QtGui.QGraphicsScene):
 class SvgDigest:
     ringColour = 'green'
 
-    locatableTypes = ('N', None)
+    locatableTypes = ('N', 'R', 'Z')
     scene = None
 
     def __init__(self, filename):
@@ -85,7 +85,7 @@ class SvgDigest:
             elif tag_=='use':
                 attr, val = elt.items()[-1]
                 # look for normal note heads and also the special percussion note heads
-                if (attr.endswith('href') and val.lower() in ('#hd', '#dsh0', '#pshhd', '#pfthd', '#pdshhd', '#pdfthd')):
+                if attr.endswith('href'): #  and val.lower() in ('#hd', '#dsh0', '#pshhd', '#pfthd', '#pdshhd', '#pdfthd'):
                     eltHead = elt # ready to be paired up with an 'abc' element
             elif tag_ == 'g':
                 tf_ = elt.get('transform')
