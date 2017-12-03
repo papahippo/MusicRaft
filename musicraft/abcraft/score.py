@@ -10,7 +10,7 @@ Copyright 2015 Hippos Technical Systems BV.
 import sys, re
 import lxml.etree
 import numpy as np
-
+from collections import OrderedDict
 from ..share import (Share, dbg_print, QtCore, QtGui, QtWebKit, WithMenu, Signal)
 
 
@@ -25,8 +25,6 @@ class MyScene(QtGui.QGraphicsScene):
                'scenePos x,y =' + str(x) + ',' + str(y), '  button =' + str(event.button()),
                'scene width =' + str(self.width()) + ' scene height ='+ str(self.height()),
                 self.parent())
-# VERY temporary and experimental!
-        self.parent().ensureVisible(x, y+50., 1., 1.)
         if event.button() == 1:
             self.parent().locateXY(x, y)
             event.accept()
@@ -54,7 +52,7 @@ class SvgDigest:
         self.svg_file = QtCore.QFile(filename)
         self.quickDic = {}
         self.svg_tree = self.cursorsDad = None
-        self.row_col_dict = {}
+        self.row_col_dict = OrderedDict()
         self.buildQuickDic()
 
     def AdjustForScene(self, scene):
@@ -121,7 +119,7 @@ class SvgDigest:
             self.quickDic['row'] = np.append(self.quickDic['row'], row_)
             self.quickDic['col'] = np.append(self.quickDic['col'], col_)
 
-            self.row_col_dict.setdefault(row_, {})[col_] = (eltAbc, eltHead)
+            self.row_col_dict.setdefault(row_, OrderedDict())[col_] = (eltAbc, eltHead)
 
             # avoid pairing the same notehead or abc note descripton again!
             eltAbc = eltHead = None
