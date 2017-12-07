@@ -63,7 +63,7 @@ within abcraft.
     exec_dir = ''
     exec_file = "base_class_stub_of_exec_file"
     outFileName = None
-    errOnOut = False
+    showOut = True
     reMsg = None  # r'$^'  # default = don't match any lines.
     rowColOrigin = (0, -1)
     stdFont = 'Courier New', 10, False, False
@@ -91,7 +91,7 @@ within abcraft.
         return answer
 
     def handle_output(self, output):
-        #dbg_print (output)
+        # maybe don't need this function if it never gets overridden?
         return output
 
     def process(self, inFileName, **kw):
@@ -106,37 +106,37 @@ within abcraft.
             return
         cmd1 = self.cmd(inFileName, self.outFileName, **kw)
         dbg_print (cmd1)
-        outfile, errfile = [
+        outputfile, errorfile = [
             tempfile.NamedTemporaryFile(mode='r+', encoding='utf-8', suffix='.'+self.exec_file+'-'+suffix)
                             for suffix in ('out', 'err')]
-        process = subprocess.Popen(cmd1, stdout=outfile, stderr=errfile, shell=True)
+        process = subprocess.Popen(cmd1, stdout=outputfile, stderr=errorfile, shell=True)
         process.wait()
-        outfile.seek(0), errfile.seek(0)
-        output, error  = outfile.read(), errfile.read()
-        outfile.close(), errfile.close()
-        if self.errOnOut:
-            #dbg_print ('output = \n', output)
-            return self.process_error(output)
-        else:
-            self.process_error(error)
-            return self.handle_output(output)
+        outputfile.seek(0), errorfile.seek(0)
+        output, error  = outputfile.read(), errorfile.read()
+        outputfile.close(), errorfile.close()
+        output, error = self.fixup(output, error)
+        self.write(out=self.showOut and output or '', err=error, append=False)
+        return output
 
-    def process_error(self, error):
+    def fixup(self, output, error):
+        return output, error    # hook function for 're-arranging between output and error.. etc.!
+
+    def write(self, out='', err='', append=True):
         if self.stdTab is None:
             dbg_print ("self.stdTab is None!")
-        else:
-            self.stdTab.appendPlainText(error)
-
-    def write(self, s):
-        if s =='\n':  # unjustifiable kludge, perhaps .. but it has the desired effect!
-            return    # compensate for extra new line provided by appendPlainText.
+            return
+        if not append:
+            self.stdTab.setPlainText('')
         self.stdTab.setFont(self.font)  # to cope with stdout/stderr case.
         tc = self.stdTab.textCursor()
         cf = tc.charFormat()
-        cf.setFontItalic(self.useItalic)
-        tc.setCharFormat(cf)
-        self.stdTab.setTextCursor(tc)
-        self.stdTab.appendPlainText(s)
+        for blurb, useItalic in ((out, False),(err, True)):
+            if blurb in ('', '\n'): # unjustifiable kludge, perhaps .. but it has the desired effect!
+                continue            # compensate for extra new line provided by appendPlainText.
+            cf.setFontItalic(useItalic)
+            tc.setCharFormat(cf)
+            self.stdTab.setTextCursor(tc)
+            self.stdTab.appendPlainText(blurb)
 
 
 class StdOut(External):
@@ -144,4 +144,6 @@ class StdOut(External):
 
 class StdErr(StdOut):
     tabName = None  # = hitch-hike with previously created sibling.
-    useItalic = True
+
+    def write(self, out='', err='', append=True):
+        return StdOut.write(self, out=err, err=out, append=append)

@@ -30,7 +30,8 @@ class Abcm2svg(External):
     fmtNameIn  = '%s.abc'
     fmtNameOut = '%s_page_.svg'
     exec_file = 'abcm2ps'
-    reMsg = r'.*in\s+line\s(\d+)\.(\d+).*'
+    reMsg = r'.*\:(\d+)\:(\d+)\:\s\.*'
+    #reMsg = r'.*in\s+line\s(\d+)\.(\d+).*'
     rowColOrigin = (0, 0)
 
     def __init__(self):
@@ -40,37 +41,33 @@ class Abcm2svg(External):
     def cmd(self, inF, outF, **kw):
         return External.cmd(self, '-k 640 -v -A -O', outF, inF)
 
-    def handle_output(self, output):
-        External.process_error(self, output)
+    def fixup(self, output, error):
         # just look for the output file names:
         svgList = []
-        for line in output.split('\n'):
-            match = self.outFile_CRE.match(line)
-            if match:
-                svgList.append(match.group(1))
+        for either in (output, error):
+            for line in either.split('\n'):
+                match = self.outFile_CRE.match(line)
+                if match:
+                    svgList.append(match.group(1))
         dbg_print (svgList)
         if svgList:
             Share.abcRaft.score.useFiles(svgList)
-        return output
-
-    def process_error(self, error):
-# older versionsof abcm2ps write names of output files to stderr!
-        self.handle_output(error)
-            # Share.abcRaft.score.showWhichPage(0)
-
+        return output, error
 
 class Abc2midi(External):
 
     fmtNameIn  = '%s.abc'
     fmtNameOut = '%s.midi'
     exec_file = 'abc2midi'
-    errOnOut = True
+    showOut = False
     reMsg = r'.*in\s+line-char\s(\d+)\-(\d+).*'
     rowColOrigin = (0, 0)
     
     def cmd(self, inF, outF, **kw):
         return External.cmd(self, inF, '-v', '-EA', '-o', outF)
 
+    def fixup(self, output, error):
+        return '', output+error
 
 class Abc2abc(External):
     
@@ -86,19 +83,16 @@ class Abc2abc(External):
             pp += ['-t', str(transpose)]
         return External.cmd(self, *pp)
 
-    def process_error(self, output_and_error):
-        error = ''
-        output = ''
-        for line in output_and_error.split('\n'):
+    def fixup(self, output, error):
+        new_error = ''
+        new_output = ''
+        for line in output.split('\n'):
             if self.creMsg.match(line):
-                output = output[:-1]
-                output_and_error = output_and_error[1:]
-                error += ('line %d: ' % output.count('\n') + line + '\n')
+                new_output = new_output[:-1]
+                new_output = new_output[1:]
+                new_error += ('line %d: ' % (1+new_output.count('\n')) + line + '\n')
                 
             else:
-                output += (line + '\n')
+                new_output += (line + '\n')
         self.stdTab.creMsg = re.compile(r'.*line\s+(\d+)\:.*')
-        # print ('error = \n', error)
-        External.process_error(self, error)
-        # print ('output = \n', output)
-        return output
+        return new_output, new_error
