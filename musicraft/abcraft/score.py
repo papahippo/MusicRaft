@@ -255,7 +255,7 @@ class Score(QtGui.QGraphicsView, WithMenu):
                       % row)
             return
         self.svgDigests[j].removeCursor()
-        for col_ in range(col, -1, -1):
+        for col_ in list(range(col, 0, -1)) + list(range(col, col+5, 1)):
             eltAbc, eltHead = dictOfRow.get(col_, (None, None))
             if isinstance(eltHead, lxml.etree._Element):
                 self.fx, self.fy = [float(eltAbc.get(a)) for a in ('x', 'y')]

@@ -74,7 +74,7 @@ class Abc2abc(External):
     fmtNameIn  = '%s.abc'
     fmtNameOut = '%.0stransposed.abc'  # sneakily don't use basename at all!
     exec_file = 'abc2abc'
-    errOnOut = True
+    showOut = False
     reMsg = r'(%Warning|%Error).*'
 
     def cmd(self, inF, outF, transpose=None, **kw):
