@@ -14,5 +14,7 @@ v0.4.4  2017-06-03 -- reverting from branch player to master for pypi
 v0.4.5  2017-06-03 -- fix master contamination with mplayer branch
 v0.4.6  2017-06-15 -- Fix  printing / exporting to PDF; this had been undetectedly broken for a while.
 v0.4.7  2017-06-17 -- correct above fix; require control key with wheel for window resize
+v0.5.0  2017-12-12 -- lots of improvements accumulated in got before I got round to this.
+v0.5.1  2017-12-12 -- removed numpy dependency, pending understanding why it always seems to want to rebuild it..
 
 
