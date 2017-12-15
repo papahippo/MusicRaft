@@ -28,9 +28,9 @@ class Python -
         Share.pyRaft.htmlView.fileName = outF  # quick and dirty fix!
         return External.cmd(self, inF)
 
-    def handle_output(self, output):
+    def fixup(self, output, error):
         if output.startswith(HTML_PREAMBLE):
             Share.pyRaft.htmlView.showOutput(output[output.index('<html'):])
         else:
             Share.pyRaft.textView.showOutput(output)
-        return output
+        return '', error

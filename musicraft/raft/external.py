@@ -90,10 +90,6 @@ within abcraft.
         dbg_print ("External.cmd answer = ", answer)
         return answer
 
-    def handle_output(self, output):
-        # maybe don't need this function if it never gets overridden?
-        return output
-
     def process(self, inFileName, **kw):
         #dbg_print(inFileName)
         baseName = os.path.splitext(inFileName)[0]
