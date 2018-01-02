@@ -743,6 +743,8 @@ class Parser:
         s.dirtov1 = options.v1  # all directions to first voice of staff
         s.ped = options.ped     # render pedal directions
         s.pedVce = None   # voice for pedal directions
+        s.repeatingElement = None
+        s.clumpSize = 0 # no repeating [clumps of] bar[s] in force
 
     def matchSlur (s, type2, n, v2, note2, grace, stopgrace): # match slur number n in voice v2, add abc code to before/after
         if type2 not in ['start', 'stop']: return   # slur type continue has no abc equivalent
@@ -908,6 +910,19 @@ class Parser:
             if first: abcOut.mtr = mtr          # first measure -> header
             else: s.msr.attr += '[M:%s]' % mtr # otherwise -> voice
             s.msr.mdur = (s.msr.divs * int (beats) * 4) // int (unit)    # duration of measure in xml-divisions
+        for ms in e.findall('measure-style'):
+            for mr in ms.findall('measure-repeat'):
+                ty = mr.get('type')
+                if ty == 'start':
+                    s.clumpSize = int(mr.text or '1')
+                    print('<<<<<start repeat! clumpSize=%d' % s.clumpSize)
+                    s.repeatBarCount = 0
+                    # count from -1 becauseit is the second clump that needs to be annotated in .abc.
+                    s.clumpCount = -1
+                elif ty == 'stop':
+                    print('stop repeat!>>>> clumpCount = %d' % s.clumpCount)
+                    s.clumpSize = 0
+
         toct = e.findtext ('transpose/octave-change', '')
         if toct: steps += 12 * int (toct)       # extra transposition of toct octaves
         for clef in e.findall ('clef'):         # a part can have multiple staves
@@ -1248,7 +1263,18 @@ class Parser:
                     elif e.tag == 'forward':
                         dt = int (e.findtext ('duration'))
                         s.msc.incTime (dt)
-                    elif e.tag == 'print':  lbrk = s.doPrint (e)
+                    elif e.tag == 'print': lbrk = s.doPrint(e)
+                # we must deal with repeated measures here (except for start and stop which we pick up during doAttr)
+                if s.clumpSize:
+                    s.repeatBarCount +=1
+                    if s.repeatBarCount == s.clumpSize:
+                        s.repeatBarCount = 0
+                        s.clumpCount += 1
+                        if s.clumpCount == 0:
+                        # this is the bar that needs to be annotated with [I:repeat...
+                            print("need to include [I:repeat...] in maat %d" % s.msr.ixm)
+                    print('continuing repeat, clumpCount = %d' % s.clumpCount)
+
                 s.msc.addBar (lbrk, s.msr)
                 if   herhaal == 1:
                     herhaalMaat = s.msr.ixm
