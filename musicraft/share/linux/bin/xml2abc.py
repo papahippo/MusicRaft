@@ -743,7 +743,7 @@ class Parser:
         s.dirtov1 = options.v1  # all directions to first voice of staff
         s.ped = options.ped     # render pedal directions
         s.pedVce = None   # voice for pedal directions
-        s.repeatingElement = None
+        s.repeatingMeasure = None
         s.clumpSize = 0 # no repeating [clumps of] bar[s] in force
 
     def matchSlur (s, type2, n, v2, note2, grace, stopgrace): # match slur number n in voice v2, add abc code to before/after
@@ -920,7 +920,9 @@ class Parser:
                     # count from -1 becauseit is the second clump that needs to be annotated in .abc.
                     s.clumpCount = -1
                 elif ty == 'stop':
-                    print('stop repeat!>>>> clumpCount = %d' % s.clumpCount)
+                    print('stop repeat!>>>> clumpCount = %d, repeating measure = %s' % (s.clumpCount, s.repeatingMeasure))
+                    if s.repeatingMeasure:
+                        s.repeatingMeasure.attr += 'so far so good!'
                     s.clumpSize = 0
 
         toct = e.findtext ('transpose/octave-change', '')
@@ -1273,6 +1275,7 @@ class Parser:
                         if s.clumpCount == 0:
                         # this is the bar that needs to be annotated with [I:repeat...
                             print("need to include [I:repeat...] in maat %d" % s.msr.ixm)
+                            s.msr.attr = "[I:repeat %d ?]" % (s.clumpSize)
                     print('continuing repeat, clumpCount = %d' % s.clumpCount)
 
                 s.msc.addBar (lbrk, s.msr)
