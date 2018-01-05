@@ -70,6 +70,20 @@ dynamics_map = {    # for direction/direction-type/dynamics/
 
 def info (s, warn=1): sys.stderr.write ((warn and '-- ' or '') + s + '\n')
 
+
+class DeferredStr:
+    """
+    A deferred string can be used instead of an ordinary string when the content of the string is not yet known.
+    It is essential that the object in question is accessed as 'str(o)' not just 'o' when outputting. This is
+    effectively a no-op for ordinary strings.
+    """
+    def __init__(self, str_, *values_):
+        self.str_ = str_        # this initial 'stand-in' value will usually be overwritten later
+        self.values_ = values_  # These are typically values known when the object is created and used later to
+                                # modify the content of self.str_.
+    def __str__(self):
+        return self.str_
+
 #-------------------
 # data abstractions
 #-------------------
@@ -221,7 +235,7 @@ class Music:
                 p = s.getLastRec (v)    # get the previous barline record
                 if p: p.str += lbrk     # insert linebreak char after the barlines+volta
             if m.attr:                  # insert signatures at front of buffer
-                s.insertElem (v, '%s' % m.attr)
+                s.insertElem (v,  m.attr)
             s.appendElem (v, ' %s' % m.rline)   # insert current barline record at time maxtime
             s.voices[v] = sortMeasure (s.voices[v], m)  # make all times consistent
             lyrs = s.lyrics[v]          # [{number: sylabe}, .. for all notes]
@@ -539,7 +553,7 @@ def outVoice (measure, divs, im, ip, unitL):    # note/elem objects of one measu
             s += nx.after
             nospace = nx.beam
         else:
-            s = nx.str
+            s = str(nx.str)  # cater for ordinary strings and deferred strings.
             nospace = 1
         if nospace: vs.append (s)
         else: vs.append (' ' + s)
@@ -743,8 +757,7 @@ class Parser:
         s.dirtov1 = options.v1  # all directions to first voice of staff
         s.ped = options.ped     # render pedal directions
         s.pedVce = None   # voice for pedal directions
-        s.repeatingMeasure = None
-        s.clumpSize = 0 # no repeating [clumps of] bar[s] in force
+        s.repeat_str = None
 
     def matchSlur (s, type2, n, v2, note2, grace, stopgrace): # match slur number n in voice v2, add abc code to before/after
         if type2 not in ['start', 'stop']: return   # slur type continue has no abc equivalent
@@ -914,17 +927,19 @@ class Parser:
             for mr in ms.findall('measure-repeat'):
                 ty = mr.get('type')
                 if ty == 'start':
-                    s.clumpSize = int(mr.text or '1')
-                    print('<<<<<start repeat! clumpSize=%d' % s.clumpSize)
-                    s.repeatBarCount = 0
-                    # count from -1 becauseit is the second clump that needs to be annotated in .abc.
-                    s.clumpCount = -1
+                    s.repeat_str = DeferredStr('broken repeat?!', s.msr.ixm, mr.text)
+                    print('start repeat at %d! text=%s' % s.repeat_str.values_)
+                    s.msr.attr = s.repeat_str
                 elif ty == 'stop':
-                    print('stop repeat!>>>> clumpCount = %d, repeating measure = %s' % (s.clumpCount, s.repeatingMeasure))
-                    if s.repeatingMeasure:
-                        s.repeatingMeasure.attr += 'so far so good!'
-                    s.clumpSize = 0
-
+                    print('stop repeat at %d!' % s.msr.ixm)
+                    start_ix, text_ = s.repeat_str.values_
+                    repeat_count = s.msr.ixm - start_ix
+                    if text_:
+                        mid_str =  "%s " % text_
+                        repeat_count /= int(text_)
+                    else:
+                        mid_str = ""
+                    s.repeat_str.str_ = '[I:repeat %s%d]' %(mid_str, repeat_count)
         toct = e.findtext ('transpose/octave-change', '')
         if toct: steps += 12 * int (toct)       # extra transposition of toct octaves
         for clef in e.findall ('clef'):         # a part can have multiple staves
@@ -1266,17 +1281,6 @@ class Parser:
                         dt = int (e.findtext ('duration'))
                         s.msc.incTime (dt)
                     elif e.tag == 'print': lbrk = s.doPrint(e)
-                # we must deal with repeated measures here (except for start and stop which we pick up during doAttr)
-                if s.clumpSize:
-                    s.repeatBarCount +=1
-                    if s.repeatBarCount == s.clumpSize:
-                        s.repeatBarCount = 0
-                        s.clumpCount += 1
-                        if s.clumpCount == 0:
-                        # this is the bar that needs to be annotated with [I:repeat...
-                            print("need to include [I:repeat...] in maat %d" % s.msr.ixm)
-                            s.msr.attr = "[I:repeat %d ?]" % (s.clumpSize)
-                    print('continuing repeat, clumpCount = %d' % s.clumpCount)
 
                 s.msc.addBar (lbrk, s.msr)
                 if   herhaal == 1:
@@ -1337,8 +1341,8 @@ if __name__ == '__main__':
     if not fnmext_list: parser.error ('none of the input files exist')
     for X, fnmext in enumerate (fnmext_list):
         fnm, ext = os.path.splitext (fnmext)
-        if ext.lower () not in ('.xml','.mxl'):
-            info ('skipped input file %s, it should have extension .xml or .mxl' % fnmext)
+        if ext.lower () not in ('.xml','.mxl', '.musicxml'):
+            info ('skipped input file %s, it should have extension .xml .musicxml or .mxl' % fnmext)
             continue
         if os.path.isdir (fnmext):
             info ('skipped directory %s. Only files are accepted' % fnmext)
