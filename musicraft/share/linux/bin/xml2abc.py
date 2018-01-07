@@ -23,9 +23,11 @@ python3 = sys.version_info.major > 2
 if python3:
     tupletype = tuple
     max_int = sys.maxsize
+    stringify = str
 else:
     tupletype = types.TupleType
     max_int = sys.maxint
+    stringify = unicode
 
 note_ornamentation_map = {        # for notations/, modified from EasyABC
     'ornaments/trill-mark':       'T',
@@ -553,7 +555,7 @@ def outVoice (measure, divs, im, ip, unitL):    # note/elem objects of one measu
             s += nx.after
             nospace = nx.beam
         else:
-            s = str(nx.str)  # cater for ordinary strings and deferred strings.
+            s = stringify(nx.str)  # cater for ordinary strings and deferred strings.
             nospace = 1
         if nospace: vs.append (s)
         else: vs.append (' ' + s)
@@ -928,10 +930,10 @@ class Parser:
                 ty = mr.get('type')
                 if ty == 'start':
                     s.repeat_str = DeferredStr('broken repeat?!', s.msr.ixm, mr.text)
-                    print('start repeat at %d! text=%s' % s.repeat_str.values_)
+                    # print('start repeat at %d! text=%s' % s.repeat_str.values_)
                     s.msr.attr = s.repeat_str
                 elif ty == 'stop':
-                    print('stop repeat at %d!' % s.msr.ixm)
+                    # print('stop repeat at %d!' % s.msr.ixm)
                     start_ix, text_ = s.repeat_str.values_
                     repeat_count = s.msr.ixm - start_ix
                     if text_:
