@@ -394,7 +394,8 @@ class ABCoutput:
             s.outfile.write (str.encode ('utf-8'))  # always utf-8 in javascript version
         else:
             try:    s.outfile.write (str.encode ('latin-1'))    # prefer latin-1
-            except: s.outfile.write (str.encode ('utf-8'))      # fall back to utf if really needed
+            except:
+                s.outfile.write (str.encode ('utf-8'))      # fall back to utf if really needed
         if s.pad: s.outfile.close ()                # close each file with -o option
         else: s.outfile.write ('\n')                # add empty line between tunes on stdout
         info ('%s written with %d voices' % (s.fnmext, len (s.clefs)), warn=0)
