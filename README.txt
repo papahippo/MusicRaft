@@ -11,6 +11,8 @@ MusicRaft
  Musicraft is now built around PyQt (or alternatively PySide). It is in fact a very lightweight (and very limited!) IDE
  implemented as 'the raft' on top of which the plugin 'abcraft' is created.
 
+![Alt text](screenshots/Musicraft_017.png?raw=true "Editing ABCplus music source while viewing graphical ouput")
+
 A separate plugin 'pyraft' supports editing of python3 source files. When a python script writes output with an HTML header,
 pyraft dsiplays the HTML in a special 'Html' tab within  the display notebook.
 
