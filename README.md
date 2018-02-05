@@ -16,5 +16,3 @@ A separate plugin 'pyraft' supports editing of python3 source files. When a pyth
 pyraft dsiplays the HTML in a special 'Html' tab within  the display notebook.
 
 ![Alt text](./screenshots/Musicraft_017.png?raw=true "Editing python progam source while viewing HTML ouput")
-
-
