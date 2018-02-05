@@ -52,6 +52,8 @@ class Abcm2svg(External):
         dbg_print (svgList)
         if svgList:
             Share.abcRaft.score.useFiles(svgList)
+            Share.raft.displayBook.setCurrentWidget(Share.abcRaft.score)
+
         return output, error
 
 class Abc2midi(External):

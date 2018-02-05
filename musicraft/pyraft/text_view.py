@@ -5,6 +5,7 @@ Copyright 2015 Hippos Technical Systems BV.
 (but borrows somme code from the painting/svgviewer example of PyQt v4.x)
 
 @author: larry
+n.b. text_view.py is defunct... for now! just use normal stdout window! why not?  
 """
 
 import sys, re

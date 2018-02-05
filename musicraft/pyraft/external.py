@@ -6,8 +6,6 @@ Module 'external' within package 'abcraft' relates to the various
 command processors (abc2midi etc.) which are executed by abccraft, and to
 their assocated widgets and methods.
 """
-from __future__ import print_function
-import os, re
 from ..share import (Share, dbg_print)
 from ..raft.external import External
 
@@ -31,6 +29,6 @@ class Python -
     def fixup(self, output, error):
         if output.startswith(HTML_PREAMBLE):
             Share.pyRaft.htmlView.showOutput(output[output.index('<html'):])
-        else:
-            Share.pyRaft.textView.showOutput(output)
-        return '', error
+            Share.raft.displayBook.setCurrentWidget(Share.pyRaft.htmlView)
+            output = ''
+        return output, error

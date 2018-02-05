@@ -18,10 +18,11 @@ class PyRaft(object):
     def __init__(self):
         Share.pyRaft = self
         self.htmlView = HtmlView()
-        self.textView = TextView()
-        self.python = Python()
         Share.raft.displayBook.addTab(self.htmlView, "Html")
-        Share.raft.displayBook.addTab(self.textView, "Text")
+        # defunct!?
+        # self.textView = TextView()
+        # Share.raft.displayBook.addTab(self.textView, "Text")
+        self.python = Python()
         Share.raft.editBook.fileLoaded.connect(self.checkLoadedFile)
 
     def checkLoadedFile(self, editor, filename):
