@@ -14,7 +14,7 @@ setup(name = 'MusicRaft',
     url='http://larry.myerscough.nl/terpsichore/musicraft.py',
     license='LICENSE.txt',
     description='GUI for abcplus music notation.',
-    long_description=open('README.txt').read(),
+    long_description='GUI for abcplus music notation.', # open('README.txt').read(),
     install_requires=[
         "mido == 1.1.14",
         "pyqtgraph >= 0.10.0",

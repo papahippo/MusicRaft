@@ -1,0 +1,14 @@
+sudo apt-get install libportmidi0
+
+   59  sudo apt install abcm2ps
+   60  sudo apt install abcmidi
+   61  run_musicraft.py
+   62  sudo apt-get install python3-pyside
+   63  run_musicraft.py
+   64  sudo apt-get install python3-lxml
+   65  run_musicraft.py
+   66  sudo apt-get install python3-pyaudio
+   67  run_musicraft.py
+   68  history
+(installed timidity via "Discover" - stated frist time via systemctl)
+sudo apt-get install libportmidi-dev
