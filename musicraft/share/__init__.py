@@ -10,18 +10,24 @@ class Share:
 image_dir = os.path.normpath(os.path.split(__file__)[0] + '/..') + '/images/'
 temp_dir = tempfile.gettempdir()
 
-qt_module_name = os.getenv('ABCRAFT_QT', 'PySide')
+qt_module_name = os.getenv('ABCRAFT_QT', 'PySide2')
 if qt_module_name == 'PySide':
     from PySide import (QtCore, QtGui, QtSvg, QtWebKit)
     Signal = QtCore.Signal
     dbg_print ("using PySide!")
     name_from_dialog = lambda x:x[0]
+elif qt_module_name == 'PySide2':
+    from PySide2 import (QtCore, QtGui, QtSvg, QtWebKit)
+
+    Signal = QtCore.pyqtSignal
+    dbg_print("using PySide2!")
+    name_from_dialog = lambda x: x
 elif qt_module_name == 'PyQt4':
     from PyQt4 import (QtCore, QtGui, QtSvg, QtWebKit)
 
     Signal = QtCore.pyqtSignal
     dbg_print("using Pyqt4!")
-    name_from_dialog = lambda x:x
+    name_from_dialog = lambda x: x
 elif qt_module_name == 'PyQt5':
     from PyQt5 import (QtCore, QtGui, QtSvg, QtWebKit)
 
