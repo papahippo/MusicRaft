@@ -45,7 +45,7 @@ class EditBook(QtGui.QTabWidget):
         self.timer = QtCore.QTimer()
         self.timer.timeout.connect(self.countDown)
         self.timer.start(self.interval)
-        self.filenamesDropped.connect(self.openThemAll)
+        self.filenamesDropped.connect(self.pickUpFiles)
         self.currentChanged.connect(self.activateCurrent)
         #self.fileLoaded.connect(self.fixTabName)
 
@@ -65,34 +65,11 @@ class EditBook(QtGui.QTabWidget):
     def newFile(self):
         self.openThemAll(force=True)
 
-    def openThemAll(self, filenames=(), force=False):
-        if not self.editors:
-            force=True
-        if force and not filenames:
-            filenames = os.path.join(os.getcwd(),'new.abc'),
-        dbg_print('openThemAll', filenames)
-        if not filenames:
-            return
-        for fn in filenames:
-            #ed = RaftEditor(book=self)
-            ed = Editor(book=self)
-            self.editors.append(ed)
-            self.addTab(ed, os.path.split(fn)[1])
-            ed.loadFile(fn)
-        self.setActiveEdit(ed)
-
     def setActiveEdit(self, ed):
         self.activeEdit = ed
         self.setCurrentWidget(ed)
         ed.editBecomesActive.emit()
 
-    def loadAnyFile(self):
-        fileName = QtGui.QFileDialog.getOpenFileName(self,
-                                                         "Choose a data file",
-                                                         '.', '*.*')[0]
-#                                                         '.', '*.abc')[0]
-        dbg_print ("loadAnyFile 2", fileName)
-        self.openThemAll((fileName,))
 
 
     def activateCurrent(self, ix):
@@ -109,6 +86,17 @@ class EditBook(QtGui.QTabWidget):
 
     def transpose(self):
         self.activeEdit.transpose()
+
+    def openThemAll(self, *filenames, force=False):
+        for fn in filenames:
+            ed = Editor(book=self)
+            self.editors.append(ed)
+            self.addTab(ed, os.path.split(fn)[1])
+            ed.loadFile(fn)
+            self.setActiveEdit(ed)
+
+    def pickUpFiles(self, fnList):
+        return self.openThemAll(*fnList)
 
     def reloadFile(self):
         self.activeEdit.reloadFile()

@@ -4,7 +4,7 @@ Copyright 2016 Hippos Technical Systems BV.
 
 @author: larry
 """
-import sys
+import sys, os
 from .editbook import EditBook
 from ..share import (Share, Signal, dbg_print, QtCore, QtGui, QtSvg, WithMenu)
 from .external import (StdOut, StdErr)
@@ -57,7 +57,7 @@ class Raft(QtGui.QMainWindow, WithMenu):
 
     def start(self):
         self.show()
-        self.editBook.openThemAll(sys.argv[1:])
+        self.editBook.openThemAll(*(sys.argv[1:]))
 
     def about(self):
         QtGui.QMessageBox.about(self, "About 'Raft'",
@@ -75,10 +75,31 @@ class Raft(QtGui.QMainWindow, WithMenu):
     def closeEvent(self, e):
         self.editBook.exit_etc()
 
+    def loadAnyFile(self):
+        fileName = QtGui.QFileDialog.getOpenFileName(self,
+                                                     "Choose a data file",
+                                                     '.', '*.*')[0]
+        #                                                         '.', '*.abc')[0]
+        dbg_print("loadAnyFile 2", fileName)
+        self.openThemAll(fileName)
+
+    def openThemAll(self, *filenames, force=False):
+        if not self.editors:
+            force=True
+        if force and not filenames:
+            filenames = os.path.join(os.getcwd(),'new.abc'),
+        dbg_print('openThemAll', filenames)
+        if not filenames:
+            return
+        for fn in filenames:
+            #ed = RaftEditor(book=self)
+            stem, ext = os.path.splitext(fn)
+            self.editbook.openThemAll(fn)
+
     def menuItems(self):
         return [
                     ('&New',           'Ctrl+N', self.editBook.newFile,),
-                    ('&Open',          'Ctrl+O', self.editBook.loadAnyFile,),
+                    ('&Open',          'Ctrl+O', self.loadAnyFile,),
                     ('&Close',         'Ctrl+C', self.editBook.closeFile,),
                     #('Open in new &Instance', 'Ctrl+I', self.editor.cloneAnyFile,),
                     ('&Reload',        'Ctrl+R', self.editBook.reloadFile,),
